@@ -17,7 +17,7 @@ public class IdentityEmailSender : IEmailSender
         await _email
             .To(email)
             .Subject(subject)
-            .Body(htmlMessage)
+            .Body(htmlMessage, isHtml: true)
             .SendAsync();
     }
 }
