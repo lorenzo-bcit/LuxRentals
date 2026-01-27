@@ -27,7 +27,7 @@ var emailOptions = builder.Configuration
     .Get<EmailOptions>() ?? throw new InvalidOperationException("Email configuration missing");
 
 builder.Services
-    .AddFluentEmail(emailOptions.From)
+    .AddFluentEmail(emailOptions.From, emailOptions.Name)
     .AddSmtpSender(() => new SmtpClient(emailOptions.Host)
     {
         Port = emailOptions.Port,
