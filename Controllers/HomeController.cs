@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using ssdp_2600.Models;
+using LuxRentals.Models;
 
-namespace ssdp_2600.Controllers;
+namespace LuxRentals.Controllers;
 
 public class HomeController : Controller
 {

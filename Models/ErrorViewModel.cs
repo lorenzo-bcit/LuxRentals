@@ -1,4 +1,4 @@
-namespace ssdp_2600.Models;
+namespace LuxRentals.Models;
 
 public class ErrorViewModel
 {

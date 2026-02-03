@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ssdp_2600.Data;
+using LuxRentals.Data;
 
 #nullable disable
 
-namespace ssdp_2600.Data.Migrations
+namespace LuxRentals.Data.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(LuxRentalsDbContext))]
     [Migration("20260130212407_AddIdentityTables")]
     partial class AddIdentityTables
     {
