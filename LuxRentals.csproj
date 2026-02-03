@@ -4,8 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <UserSecretsId>aspnet-ssdp_2600-d60581f8-d7e8-4bc7-a05b-9d32dc94803a</UserSecretsId>
-        <RootNamespace>ssdp_2600</RootNamespace>
+        <UserSecretsId>aspnet-LuxRentals-d60581f8-d7e8-4bc7-a05b-9d32dc94803a</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>

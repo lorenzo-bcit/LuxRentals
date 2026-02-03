@@ -1,7 +1,7 @@
 using FluentEmail.Core;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
-namespace ssdp_2600.Services;
+namespace LuxRentals.Services;
 
 public class IdentityEmailSender : IEmailSender
 {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ssdp_2600.Data.Migrations
+namespace LuxRentals.Data.Migrations
 {
     /// <inheritdoc />
     public partial class AddIdentityTables : Migration

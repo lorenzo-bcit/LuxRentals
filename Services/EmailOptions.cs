@@ -1,4 +1,4 @@
-namespace ssdp_2600.Services;
+namespace LuxRentals.Services;
 
 public class EmailOptions
 {

@@ -4,8 +4,8 @@ using DotNetEnv.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using ssdp_2600.Data;
-using ssdp_2600.Services;
+using LuxRentals.Data;
+using LuxRentals.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,12 +13,12 @@ builder.Configuration.AddDotNetEnv();
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<LuxRentalsDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<LuxRentalsDbContext>();
 builder.Services.AddControllersWithViews();
 
 // Configure email
