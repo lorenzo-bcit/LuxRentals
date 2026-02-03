@@ -785,3 +785,6 @@ coverage*[.json, .xml, .info]
 
 # Ionide (cross platform F# VS Code tools) working folder
 
+.DS_Store
+**/ .DS_Store
+.config/

@@ -9,6 +9,11 @@
             "command": "cmd",
             "args": ["/c", "echo Husky.Net is awesome!" ]
          }
+      },
+      {
+         "name": "commit-lint",
+         "command": "dotnet-script",
+         "args": [ ".husky/csx/commit-lint.csx", "--", "${args}" ]
       }
    ]
 }
