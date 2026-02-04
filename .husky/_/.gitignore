@@ -1,0 +1,9 @@
+# Ignore Husky generated files
+_/
+*.sh
+
+# Keep our configuration
+!commit-msg
+!task-runner.json
+!csx/
+!.gitignore
