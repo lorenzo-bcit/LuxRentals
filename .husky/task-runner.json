@@ -12,8 +12,8 @@
       },
       {
          "name": "commit-lint",
-         "command": "dotnet-script",
-         "args": [ ".husky/csx/commit-lint.csx", "--", "${args}" ]
+         "command": "dotnet",
+         "args": ["dotnet-script", ".husky/csx/commit-lint.csx", "--", ",${args}"]
       }
    ]
 }

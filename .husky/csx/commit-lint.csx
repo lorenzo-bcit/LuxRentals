@@ -2,7 +2,7 @@
 
 using System.Text.RegularExpressions;
 
-var commitMsgFile = Args[0];
+var commitMsgFile = Args[0].Trim(',');
 var commitMessage = File.ReadAllText(commitMsgFile);
 
 //conventional commits format
