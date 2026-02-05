@@ -13,7 +13,6 @@ public class HomeController : Controller
 
     public IActionResult Privacy()
     {
-        console.log("Testing 123");
         return View();
     }
 
