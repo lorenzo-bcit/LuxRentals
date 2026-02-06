@@ -1,3 +1,5 @@
+USE LuxCarRental;
+
 DROP TABLE IF EXISTS [Transaction];
 DROP TABLE IF EXISTS Booking;
 DROP TABLE IF EXISTS Car;
@@ -79,19 +81,19 @@ CREATE TABLE Model (
 CREATE TABLE Car (
     pkCarId INT IDENTITY(1,1) PRIMARY KEY,
     colour VARCHAR(40),
-    transmissionType TINYINT CHECK (transmissionType IN (0,1)), -- 0=Manual, 1=Auto
-    year INT,
+    transmissionType TINYINT CHECK (transmissionType IN (0,1)) NOT NULL, -- 0=Manual, 1=Auto
+    year INT NOT NULL,
     carThumbnail VARCHAR(255),
-    vinNumber VARCHAR(17) UNIQUE,
-    licencePlate VARCHAR(10) UNIQUE,
-    personCap INT,
-    luggageCap INT,
-    dailyRate DECIMAL(19,2),
+    vinNumber VARCHAR(17) UNIQUE NOT NULL,
+    licencePlate VARCHAR(10) UNIQUE NOT NULL,
+    personCap INT NOT NULL,
+    luggageCap INT NOT NULL,
+    dailyRate DECIMAL(19,2) NOT NULL,
 
-    fkVehicleClassId INT,
-    fkCarStatusId INT,
-    fkModelId INT,
-    fkFuelTypeId INT,
+    fkVehicleClassId INT NOT NULL,
+    fkCarStatusId INT NOT NULL,
+    fkModelId INT NOT NULL,
+    fkFuelTypeId INT NOT NULL,
 
     CONSTRAINT FK_Car_VehicleClass FOREIGN KEY (fkVehicleClassId)
         REFERENCES VehicleClass(pkVehicleClassId),
