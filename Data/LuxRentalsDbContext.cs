@@ -35,9 +35,6 @@ public class LuxRentalsDbContext : IdentityDbContext
 
     public DbSet<VehicleClass> VehicleClasses { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Name=DefaultConnection");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
