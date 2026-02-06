@@ -41,12 +41,24 @@ builder.Services.AddTransient<IEmailSender, IdentityEmailSender>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Apply any pending migrations in dev mode
 if (app.Environment.IsDevelopment())
 {
-    app.UseMigrationsEndPoint();
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<LuxRentalsDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    var pending = db.Database.GetPendingMigrations().ToList();
+
+    if (pending.Count > 0)
+    {
+        logger.LogInformation("Applying {Count} pending migrations...", pending.Count);
+        db.Database.Migrate();
+        logger.LogInformation("Migrations applied.");
+    }
 }
-else
+
+if (app.Environment.IsProduction())
 {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
