@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Data;
 
-public partial class LuxRentalsDbContext : IdentityDbContext
+public class LuxRentalsDbContext : IdentityDbContext
 {
     public LuxRentalsDbContext()
     {
@@ -15,25 +15,25 @@ public partial class LuxRentalsDbContext : IdentityDbContext
     {
     }
 
-    public virtual DbSet<Booking> Bookings { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
 
-    public virtual DbSet<BookingStatus> BookingStatuses { get; set; }
+    public DbSet<BookingStatus> BookingStatuses { get; set; }
 
-    public virtual DbSet<Car> Cars { get; set; }
+    public DbSet<Car> Cars { get; set; }
 
-    public virtual DbSet<CarStatus> CarStatuses { get; set; }
+    public DbSet<CarStatus> CarStatuses { get; set; }
 
-    public virtual DbSet<Customer> Customers { get; set; }
+    public DbSet<Customer> Customers { get; set; }
 
-    public virtual DbSet<FuelType> FuelTypes { get; set; }
+    public DbSet<FuelType> FuelTypes { get; set; }
 
-    public virtual DbSet<Make> Makes { get; set; }
+    public DbSet<Make> Makes { get; set; }
 
-    public virtual DbSet<Model> Models { get; set; }
+    public DbSet<Model> Models { get; set; }
 
-    public virtual DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
 
-    public virtual DbSet<VehicleClass> VehicleClasses { get; set; }
+    public DbSet<VehicleClass> VehicleClasses { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=DefaultConnection");
@@ -269,9 +269,5 @@ public partial class LuxRentalsDbContext : IdentityDbContext
                 .IsUnicode(false)
                 .HasColumnName("vehicleClass");
         });
-
-        OnModelCreatingPartial(modelBuilder);
     }
-
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

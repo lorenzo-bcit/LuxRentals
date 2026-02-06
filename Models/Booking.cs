@@ -18,11 +18,11 @@ public class Booking
 
     public int FkCustomerId { get; set; }
 
-    public virtual BookingStatus FkBookingStatus { get; set; } = null!;
+    public BookingStatus FkBookingStatus { get; set; } = null!;
 
-    public virtual Car FkCar { get; set; } = null!;
+    public Car FkCar { get; set; } = null!;
 
-    public virtual Customer FkCustomer { get; set; } = null!;
+    public Customer FkCustomer { get; set; } = null!;
 
-    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

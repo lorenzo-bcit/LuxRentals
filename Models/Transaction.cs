@@ -10,5 +10,5 @@ public class Transaction
 
     public int FkBookingId { get; set; }
 
-    public virtual Booking FkBooking { get; set; } = null!;
+    public Booking FkBooking { get; set; } = null!;
 }

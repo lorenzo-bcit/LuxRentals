@@ -8,7 +8,7 @@ public class Model
 
     public int FkMakeId { get; set; }
 
-    public virtual ICollection<Car> Cars { get; set; } = new List<Car>();
+    public ICollection<Car> Cars { get; set; } = new List<Car>();
 
-    public virtual Make FkMake { get; set; } = null!;
+    public Make FkMake { get; set; } = null!;
 }

@@ -30,13 +30,13 @@ public class Car
 
     public int FkFuelTypeId { get; set; }
 
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public virtual CarStatus FkCarStatus { get; set; } = null!;
+    public CarStatus FkCarStatus { get; set; } = null!;
 
-    public virtual FuelType FkFuelType { get; set; } = null!;
+    public FuelType FkFuelType { get; set; } = null!;
 
-    public virtual Model FkModel { get; set; } = null!;
+    public Model FkModel { get; set; } = null!;
 
-    public virtual VehicleClass FkVehicleClass { get; set; } = null!;
+    public VehicleClass FkVehicleClass { get; set; } = null!;
 }

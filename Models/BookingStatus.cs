@@ -6,5 +6,5 @@ public class BookingStatus
 
     public string BookingStatus1 { get; set; } = null!;
 
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }
