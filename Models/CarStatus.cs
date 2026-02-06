@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace LuxRentals.Models;
 
-namespace LuxRentals.Models;
-
-public partial class CarStatus
+public class CarStatus
 {
     public int PkCarStatusId { get; set; }
 

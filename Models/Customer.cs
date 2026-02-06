@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace LuxRentals.Models;
 
-namespace LuxRentals.Models;
-
-public partial class Customer
+public class Customer
 {
     public int PkCustomerId { get; set; }
 
