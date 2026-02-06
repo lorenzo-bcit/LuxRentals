@@ -19,5 +19,5 @@ public partial class Customer
 
     public bool? LicenceVerified { get; set; }
 
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }

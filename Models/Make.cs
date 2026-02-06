@@ -9,5 +9,5 @@ public partial class Make
 
     public string MakeName { get; set; } = null!;
 
-    public virtual ICollection<Model> Models { get; set; } = new List<Model>();
+    public ICollection<Model> Models { get; set; } = new List<Model>();
 }

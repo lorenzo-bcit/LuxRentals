@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using LuxRentals.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+namespace LuxRentals.Data;
 
-namespace LuxRentals.Models;
-
-public partial class LuxRentalExperimentalContext : DbContext
+public class LuxRentalExperimentalContext : IdentityDbContext
 {
     public LuxRentalExperimentalContext()
     {
@@ -15,30 +14,26 @@ public partial class LuxRentalExperimentalContext : DbContext
     {
     }
 
-    public virtual DbSet<Booking> Bookings { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
+    
+    public DbSet<BookingStatus> BookingStatuses { get; set; }
 
-    public virtual DbSet<BookingStatus> BookingStatuses { get; set; }
+    public DbSet<Car> Cars { get; set; }
 
-    public virtual DbSet<Car> Cars { get; set; }
+    public DbSet<CarStatus> CarStatuses { get; set; }
 
-    public virtual DbSet<CarStatus> CarStatuses { get; set; }
+    public DbSet<Customer> Customers { get; set; }
 
-    public virtual DbSet<Customer> Customers { get; set; }
+    public DbSet<FuelType> FuelTypes { get; set; }
 
-    public virtual DbSet<FuelType> FuelTypes { get; set; }
+    public DbSet<Make> Makes { get; set; }
 
-    public virtual DbSet<Make> Makes { get; set; }
+    public DbSet<Model> Models { get; set; }
 
-    public virtual DbSet<Model> Models { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
 
-    public virtual DbSet<Transaction> Transactions { get; set; }
-
-    public virtual DbSet<VehicleClass> VehicleClasses { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost,1433;Initial Catalog=LuxRental_experimental;User Id=sa;Password=86e2yCCe15nZe7lG;TrustServerCertificate=true");
-
+    public DbSet<VehicleClass> VehicleClasses { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Booking>(entity =>
@@ -269,8 +264,6 @@ public partial class LuxRentalExperimentalContext : DbContext
                 .HasColumnName("vehicleClass");
         });
 
-        OnModelCreatingPartial(modelBuilder);
     }
-
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    
 }

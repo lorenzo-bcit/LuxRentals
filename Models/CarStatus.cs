@@ -9,5 +9,5 @@ public partial class CarStatus
 
     public string StatusFlag { get; set; } = null!;
 
-    public virtual ICollection<Car> Cars { get; set; } = new List<Car>();
+    public ICollection<Car> Cars { get; set; } = new List<Car>();
 }

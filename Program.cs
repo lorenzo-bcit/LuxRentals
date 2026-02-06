@@ -13,12 +13,12 @@ builder.Configuration.AddDotNetEnv();
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<LuxRentalsDbContext>(options =>
+builder.Services.AddDbContext<LuxRentalExperimentalContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<LuxRentalsDbContext>();
+    .AddEntityFrameworkStores<LuxRentalExperimentalContext>();
 builder.Services.AddControllersWithViews();
 
 // Configure email

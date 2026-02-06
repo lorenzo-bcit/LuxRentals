@@ -9,5 +9,5 @@ public partial class FuelType
 
     public string FuelType1 { get; set; } = null!;
 
-    public virtual ICollection<Car> Cars { get; set; } = new List<Car>();
+    public ICollection<Car> Cars { get; set; } = new List<Car>();
 }

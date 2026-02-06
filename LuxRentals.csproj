@@ -16,9 +16,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Data\Migrations\" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include=".github\CODEOWNERS" />
   </ItemGroup>
   <Target Name="HuskySetup" BeforeTargets="Restore;Build" 
