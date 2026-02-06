@@ -1,0 +1,36 @@
+root = true
+
+[*]
+
+# Formatting
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.cs]
+
+# Explicit accessibility modifiers (public/private/etc.)
+dotnet_style_require_accessibility_modifiers = always:warning
+
+# PascalCase for types, methods, and properties
+dotnet_naming_symbols.pascal_symbols.applicable_kinds = class, struct, interface, enum, method, property
+dotnet_naming_style.pascal.capitalization = pascal_case
+dotnet_naming_rule.require_pascal_case.symbols = pascal_symbols
+dotnet_naming_rule.require_pascal_case.style = pascal
+dotnet_naming_rule.require_pascal_case.severity = error
+
+# camelCase for local variables
+dotnet_naming_symbols.locals.applicable_kinds = local
+dotnet_naming_style.camel.capitalization = camel_case
+dotnet_naming_rule.require_camel_case.symbols = locals
+dotnet_naming_rule.require_camel_case.style = camel
+dotnet_naming_rule.require_camel_case.severity = error
+
+# ALL_UPPER_CASE naming for const fields
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+dotnet_naming_style.upper.capitalization = all_upper
+dotnet_naming_style.upper.word_separator = _
+dotnet_naming_rule.require_upper_case.symbols = constants
+dotnet_naming_rule.require_upper_case.style = upper
+dotnet_naming_rule.require_upper_case.severity = error
