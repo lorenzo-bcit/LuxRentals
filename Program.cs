@@ -45,17 +45,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<LuxRentalsDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-
-    var pending = db.Database.GetPendingMigrations().ToList();
-
-    if (pending.Count > 0)
-    {
-        logger.LogInformation("Applying {Count} pending migrations...", pending.Count);
-        db.Database.Migrate();
-        logger.LogInformation("Migrations applied.");
-    }
+    await DatabaseMigrator.ApplyPendingMigrationsAsync(scope.ServiceProvider);
 }
 
 if (app.Environment.IsProduction())
