@@ -36,6 +36,8 @@ public class LuxRentalExperimentalContext : IdentityDbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        
         modelBuilder.Entity<Booking>(entity =>
         {
             entity.HasKey(e => e.PkBookingId).HasName("PK__Booking__8A399DE04656770F");
