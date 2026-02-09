@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using LuxRentals.Data;
+using LuxRentals.Extensions;
 using LuxRentals.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,8 +45,7 @@ var app = builder.Build();
 // Apply any pending migrations in dev mode
 if (app.Environment.IsDevelopment())
 {
-    using var scope = app.Services.CreateScope();
-    await DatabaseMigrator.ApplyPendingMigrationsAsync(scope.ServiceProvider);
+    await app.ApplyPendingMigrationsAsync();
 }
 
 if (app.Environment.IsProduction())

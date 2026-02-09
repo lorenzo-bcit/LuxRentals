@@ -1,16 +1,20 @@
+using LuxRentals.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace LuxRentals.Data;
+namespace LuxRentals.Extensions;
 
-public static class DatabaseMigrator
+public static class DatabaseExtensions
 {
-    public static async Task ApplyPendingMigrationsAsync(IServiceProvider services)
+    public static async Task ApplyPendingMigrationsAsync(this WebApplication app)
     {
+        using var scope = app.Services.CreateScope();
+        var services = scope.ServiceProvider;
+
         var db = services.GetRequiredService<LuxRentalsDbContext>();
         var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-        var logger = loggerFactory.CreateLogger(typeof(DatabaseMigrator));
-        var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+        var logger = loggerFactory.CreateLogger(typeof(DatabaseExtensions));
 
+        var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
         if (pending.Count == 0)
         {
             return;
