@@ -7,4 +7,6 @@ public interface ICarReadRepository
 {
     public Task<List<Car>> SearchAsync(CarSearchVm vm);
     public Task<Car?> GetByIdAsync(int id);
+    public Task<bool> VinExistsAsync(string vin, int? excludeCarId);
+    public Task<bool> PlateExistsAsync(string plate, int? excludeCarId);
 }
