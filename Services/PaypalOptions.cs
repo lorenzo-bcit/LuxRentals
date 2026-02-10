@@ -1,4 +1,4 @@
-﻿namespace LuxRentals.Models
+﻿namespace LuxRentals.Services
 {
     public class PaypalOptions
     {
