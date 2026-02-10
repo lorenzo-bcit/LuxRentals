@@ -19,7 +19,9 @@ builder.Services.AddDbContext<LuxRentalsDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
+
 builder.Services.AddControllersWithViews();
 
 // Configure email
@@ -42,10 +44,11 @@ builder.Services.AddTransient<IEmailSender, IdentityEmailSender>();
 
 var app = builder.Build();
 
-// Apply any pending migrations in dev mode
+// Apply any pending migrations and seeding in dev mode
 if (app.Environment.IsDevelopment())
 {
     await app.ApplyPendingMigrationsAsync();
+    await app.EnsureAdminSeededAsync();
 }
 
 if (app.Environment.IsProduction())
