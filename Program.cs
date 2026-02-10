@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using LuxRentals.Data;
 using LuxRentals.Extensions;
 using LuxRentals.Services;
+using LuxRentals.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,13 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
+
+builder.Services.Configure<PaypalOptions>(options =>
+{
+    options.ClientId = Environment.GetEnvironmentVariable("PAYPAL_CLIENT_ID")!;
+    options.ClientSecret = Environment.GetEnvironmentVariable("PAYPAL_CLIENT_SECRET")!;
+    options.BaseUrl = Environment.GetEnvironmentVariable("PAYPAL_BASE_URL")!;
+});
 
 builder.Services.AddControllersWithViews();
 
