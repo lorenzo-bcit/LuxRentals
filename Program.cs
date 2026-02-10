@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using LuxRentals.Data;
 using LuxRentals.Extensions;
 using LuxRentals.Services;
+using LuxRentals.Areas.Identity.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
