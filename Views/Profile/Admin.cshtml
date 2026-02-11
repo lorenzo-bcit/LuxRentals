@@ -1,0 +1,9 @@
+﻿@model LuxRentals.ViewModels.Profile.AdminProfileViewModel
+@{
+    ViewData["Title"] = "Admin Profile";
+}
+
+<h1>Admin Profile</h1>
+<p><strong>Username:</strong> @Model.UserName</p>
+<p><strong>Email:</strong> @Model.Email</p>
+<p><strong>Roles:</strong> @string.Join(", ", Model.Roles)</p>
