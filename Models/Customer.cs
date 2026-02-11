@@ -1,8 +1,13 @@
-﻿namespace LuxRentals.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace LuxRentals.Models;
 
 public class Customer
 {
+    [Key]
     public int PkCustomerId { get; set; }
+
+    public string UserId { get; set; } // Reference to the AspNetUser table.
 
     public string FirstName { get; set; } = null!;
 

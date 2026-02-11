@@ -10,6 +10,8 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using LuxRentals.Data;
+using LuxRentals.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -29,13 +31,15 @@ namespace LuxRentals.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly LuxRentalsDbContext _db;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            LuxRentalsDbContext db)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -43,6 +47,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _db = db;
         }
 
         /// <summary>
@@ -70,6 +75,31 @@ namespace LuxRentals.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
+
+            [Required]
+            [StringLength(40, MinimumLength = 2, ErrorMessage = "First name must be between 2 and 40 characters.")]
+            [RegularExpression(@"^[a-zA-Z\s'-]+$", ErrorMessage = "First name can only contain letters, spaces, hyphens, and apostrophes.")]
+            [Display(Name = "First Name")]
+            public string FirstName { get; set; }
+
+            [Required]
+            [StringLength(40, MinimumLength = 2, ErrorMessage = "Last name must be between 2 and 40 characters.")]
+            [RegularExpression(@"^[a-zA-Z\s'-]+$", ErrorMessage = "Last name can only contain letters, spaces, hyphens, and apostrophes.")]
+            [Display(Name = "Last Name")]
+            public string LastName { get; set; }
+
+            [Required]
+            [StringLength(20, MinimumLength = 7, ErrorMessage = "Driver's license number must be between 7 and 20 characters.")]
+            [Display(Name = "Driver's License Number")]
+            public string DriversLicenseNumber { get; set; }
+
+            [Required]
+            [Phone] //phone regex accepts formats like: (604) 555-1234, 604-555-1234, 6045551234, or +1-604-555-1234.
+            [RegularExpression(@"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$", ErrorMessage = "Please enter a valid Canadian phone number.")]
+            [Display(Name = "Phone Number")]
+            public string PhoneNumber { get; set; }
+
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -120,6 +150,22 @@ namespace LuxRentals.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+                    // Creating a new customer
+                    var newCustomer = new Customer()
+                    {
+                        UserId = user.Id,
+                        FirstName = Input.FirstName,
+                        LastName = Input.LastName,
+                        Email =  Input.Email,
+                        DriverLicenceNo =  Input.DriversLicenseNumber,
+                        PhoneNumber =  Input.PhoneNumber,
+                        LicenceVerified =  false,
+                    };
+
+                    _db.Customers.Add(newCustomer);
+                    await _db.SaveChangesAsync();
+
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
