@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Register";
 }
+<script src='https://www.google.com/recaptcha/api.js'></script>
 
 <div class="container">
     <div class="row justify-content-center mt-5">
@@ -51,7 +52,7 @@
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <input asp-for="Input.DriversLicenseNumber" class="form-control" aria-required="true"  placeholder="" />
-                                    <label asp-for="Input.DriversLicenseNumber">Driver's License Number</label>
+                                    <label asp-for="Input.DriversLicenseNumber">Driver's License</label>
                                     <span asp-validation-for="Input.DriversLicenseNumber" class="text-danger small"></span>
                                 </div>
                             </div>
@@ -68,6 +69,8 @@
                             <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                             <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
                         </div>
+
+                        <div class="g-recaptcha" data-sitekey='@ViewData["SiteKey"]'></div><br />
 
                         <div class="d-grid mb-3">
                             <button id="registerSubmit" type="submit" class="btn btn-primary btn-lg">Register</button>

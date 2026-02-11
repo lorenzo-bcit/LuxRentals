@@ -1,25 +1,18 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
-
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
 using LuxRentals.Data;
 using LuxRentals.Models;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
+using LuxRentals.Services;
 
 namespace LuxRentals.Areas.Identity.Pages.Account
 {
@@ -32,6 +25,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly LuxRentalsDbContext _db;
+        private readonly IConfiguration _config;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
@@ -39,7 +33,8 @@ namespace LuxRentals.Areas.Identity.Pages.Account
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
-            LuxRentalsDbContext db)
+            LuxRentalsDbContext db,
+            IConfiguration config)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -48,6 +43,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
             _logger = logger;
             _emailSender = emailSender;
             _db = db;
+            _config = config;
         }
 
         /// <summary>
@@ -134,6 +130,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
+            ViewData["SiteKey"] = _config["RECAPTCHA_SITEKEY"];
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
@@ -142,6 +139,22 @@ namespace LuxRentals.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            // Read the reCAPTCHA response posted from the form
+            string captchaResponse = Request.Form["g-Recaptcha-Response"];
+            string secret = _config["RECAPTCHA_SITEKEY"];
+
+            ReCaptcha.ReCaptchaValidationResult resultCaptcha = ReCaptcha.ReCaptchaValidator.IsValid(secret, captchaResponse);
+
+             // Invalidate the form if the captcha is invalid.
+            if (!resultCaptcha.Success)
+            {
+                ViewData["SiteKey"] = _config["RECAPTCHA_SITEKEY"];
+                ModelState.AddModelError(string.Empty,
+                    "The ReCaptcha is invalid.");
+                return Page();
+            }
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
