@@ -169,7 +169,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
                 if (existingLicense != null)
                 {
                     ViewData["SiteKey"] = _config["RECAPTCHA_SITEKEY"];
-                    ModelState.AddModelError(nameof(Input.DriversLicenseNumber),
+                    ModelState.AddModelError("",
                         "This driver's license number is already registered.");
                     return Page();
                 }
