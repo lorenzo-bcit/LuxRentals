@@ -11,7 +11,7 @@ public class CarRepository : ICarReadRepository, ICarWriteRepository
     public CarRepository(LuxRentalsDbContext db) => _db = db;
 
     // READ
-    public Task<List<Car>> SearchAsync(CarSearchVm vm)
+    public Task<PagedList<Car>> SearchAsync(CarSearchVm vm)
     {
         var q = _db.Cars
             .AsNoTracking()
@@ -28,16 +28,20 @@ public class CarRepository : ICarReadRepository, ICarWriteRepository
         if (vm.MinSeats != null) q = q.Where(c => c.PersonCap >= vm.MinSeats);
         if (vm.MinLuggage != null) q = q.Where(c => c.LuggageCap >= vm.MinLuggage);
 
-        return q.ToListAsync();
+        q = q.OrderBy(c => c.PkCarId);
+
+        return PagedList<Car>.CreateAsync(q, vm.Page, vm.PageSize);
     }
 
-    public Task<Car?> GetByIdAsync(int id) =>
-        _db.Cars
+    public Task<Car?> GetByIdAsync(int id)
+    {
+        return _db.Cars
             .Include(c => c.FkModel).ThenInclude(m => m.FkMake)
             .Include(c => c.FkFuelType)
             .Include(c => c.FkVehicleClass)
             .Include(c => c.FkCarStatus)
             .FirstOrDefaultAsync(c => c.PkCarId == id);
+    }
 
     public Task<bool> VinExistsAsync(string vin, int? excludeCarId) =>
         _db.Cars.AnyAsync(c => c.VinNumber == vin && (excludeCarId == null || c.PkCarId != excludeCarId));
