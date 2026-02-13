@@ -1,5 +1,4 @@
 using LuxRentals.Models;
-using LuxRentals.ViewModels.Cars;
 
 namespace LuxRentals.Repositories.Cars;
 
