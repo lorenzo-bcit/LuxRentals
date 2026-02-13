@@ -6,11 +6,11 @@ namespace LuxRentals.ViewModels.BookingViewModels
     {
         [Required]
         [Display(Name = "Pickup Date")]
-        private DateTime StartDateTime { get; set; }
+        public DateTime StartDateTime { get; set; }
 
         [Required]
         [Display(Name = "Return Date")]
-        private DateTime EndDateTime { get; set; }
+        public DateTime EndDateTime { get; set; }
 
 
     }

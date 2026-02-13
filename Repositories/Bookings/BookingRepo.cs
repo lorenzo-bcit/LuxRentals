@@ -134,7 +134,7 @@ namespace LuxRentals.Repos
         // Helper Methods
 
         // Can booking be cancelled?
-        private bool CanCancelBooking(Booking booking, bool isAdminOrEmployee)
+        public bool CanCancelBooking(Booking booking, bool isAdminOrEmployee)
         {
             if (booking.CancelledAt != null)
             {
@@ -153,6 +153,7 @@ namespace LuxRentals.Repos
         // Check if car is available for date range
         private bool IsCarAvailable(int carId, DateTime startDate, DateTime endDate)
         {
+            // TODO: Check if Car if is in service
             return !_context.Bookings.Any(b =>
                 b.FkCarId == carId &&
                 b.CancelledAt == null &&
