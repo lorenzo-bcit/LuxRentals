@@ -19,9 +19,11 @@ namespace LuxRentals.Services.PaymentService
 
         public PayPalPaymentService(
             HttpClient httpClient,
-            IOptions<PaypalOptions> options)
+            IOptions<PaypalOptions> options,
+            ILogger<PayPalPaymentService> logger)
         {
             _httpClient = httpClient;
+            _logger = logger;
             _options = options.Value;
         }
 
