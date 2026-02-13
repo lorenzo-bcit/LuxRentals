@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using LuxRentals.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace LuxRentals.Areas.Identity.Pages.Account
 {
@@ -28,6 +29,8 @@ namespace LuxRentals.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
         private readonly LuxRentalsDbContext _db;
         private readonly IConfiguration _config;
+        private readonly IReCaptchaService _reCaptchaService;
+        private readonly ReCaptchaOptions _reCaptchaOptions;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
@@ -36,7 +39,9 @@ namespace LuxRentals.Areas.Identity.Pages.Account
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
             LuxRentalsDbContext db,
-            IConfiguration config)
+            IConfiguration config,
+            IReCaptchaService reCaptchaService,
+            IOptions<ReCaptchaOptions> reCaptchaOptions)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -46,6 +51,8 @@ namespace LuxRentals.Areas.Identity.Pages.Account
             _emailSender = emailSender;
             _db = db;
             _config = config;
+            _reCaptchaService = reCaptchaService;
+            _reCaptchaOptions = reCaptchaOptions.Value;
         }
 
         /// <summary>
@@ -147,15 +154,12 @@ namespace LuxRentals.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             // reCAPTCHA validation
-            string captchaResponse = Request.Form["g-Recaptcha-Response"];
-            string secret = _config["RECAPTCHA_SECRETKEY"];
+            string captchaResponse = Request.Form["g-recaptcha-response"];
+            var captchaResult = await _reCaptchaService.ValidateAsync(captchaResponse);
 
-            ReCaptcha.ReCaptchaValidationResult resultCaptcha =
-                ReCaptcha.ReCaptchaValidator.IsValid(secret, captchaResponse);
-
-            if (!resultCaptcha.Success)
+            if (!captchaResult.Success)
             {
-                ViewData["SiteKey"] = _config["RECAPTCHA_SITEKEY"];
+                ViewData["SiteKey"] = _reCaptchaOptions.SiteKey;
                 ModelState.AddModelError(string.Empty, "The ReCaptcha is invalid.");
                 return Page();
             }
@@ -168,7 +172,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
 
                 if (existingLicense != null)
                 {
-                    ViewData["SiteKey"] = _config["RECAPTCHA_SITEKEY"];
+                    ViewData["SiteKey"] = _reCaptchaOptions.SiteKey;
                     ModelState.AddModelError("",
                         "This driver's license number is already registered.");
                     return Page();
@@ -188,7 +192,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
 
                     if (existingCustomer != null)
                     {
-                        ViewData["SiteKey"] = _config["RECAPTCHA_SITEKEY"];
+                        ViewData["SiteKey"] = _reCaptchaOptions.SiteKey;
 
                         // Rollback: delete the Identity user we just created
                         await _userManager.DeleteAsync(user);

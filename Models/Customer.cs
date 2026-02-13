@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace LuxRentals.Models;
-
+﻿namespace LuxRentals.Models;
 public class Customer
 {
     public int PkCustomerId { get; set; }
