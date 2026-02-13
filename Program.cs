@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using LuxRentals.Data;
 using LuxRentals.Extensions;
+using LuxRentals.Repositories.Cars;
 using LuxRentals.Services;
+using LuxRentals.Services.Cars;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,13 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
 
 builder.Services.AddControllersWithViews();
+
+// Repositories
+builder.Services.AddScoped<ICarReadRepository, CarRepository>();
+builder.Services.AddScoped<ICarWriteRepository, CarRepository>();
+
+// Services
+builder.Services.AddScoped<ICarInventoryService, CarInventoryService>();
 
 // Configure email
 var emailOptions = builder.Configuration
