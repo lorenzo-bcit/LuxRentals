@@ -8,5 +8,6 @@ public class CarSearchVm
     public int? MinSeats { get; set; }
     public int? MinLuggage { get; set; }
     public bool AvailableOnly { get; set; } = true;
-
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
 }
