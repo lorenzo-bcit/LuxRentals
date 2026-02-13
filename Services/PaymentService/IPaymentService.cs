@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using Microsoft.Extensions.Options;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace LuxRentals.Services
@@ -12,10 +13,10 @@ namespace LuxRentals.Services
     public interface PayPalPaymentService : IPaymentService
     {
         private readonly HttpClient _httpClient;
-        private readonly PayPalOptions _options;
+        private readonly PaypalOptions _options;
 
         // Need to fix this
-        public PayPalPaymentService(IOptions<PayPalOptions> options)
+        public PayPalPaymentService(IOptions<PaypalOptions> options)
         {
             this.options = options.Value;
             httpClient = new HttpClient();

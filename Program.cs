@@ -30,6 +30,16 @@ builder.Services.Configure<PaypalOptions>(options =>
     options.BaseUrl = Environment.GetEnvironmentVariable("PAYPAL_BASE_URL")!;
 });
 
+builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>(client =>
+{
+    var paypalOptions = builder.Configuration.GetSection("Paypal").Get<PaypalOptions>() ?? throw new InvalidOperationException("PayPal configuration missing");
+    client.BaseAddress = new Uri(paypalOptions.BaseUrl);
+});
+
+builder.Services.AddScoped<IPaymentService, PayPalPaymentService>();
+
+
+
 builder.Services.AddControllersWithViews();
 
 // Configure email
