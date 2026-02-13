@@ -15,7 +15,7 @@ public class CarRepository : ICarReadRepository, ICarWriteRepository
         var cars = BuildBaseQuery();
         cars = ApplyAttributeFilters(cars, criteria);
         cars = ApplyAvailabilityFilter(cars, criteria);
-        cars = cars.OrderBy(c => c.PkCarId);
+        cars = ApplySorting(cars, criteria);
 
         return PagedList<Car>.CreateAsync(cars, criteria.Page, criteria.PageSize);
     }
@@ -28,9 +28,7 @@ public class CarRepository : ICarReadRepository, ICarWriteRepository
             .Include(c => c.FkVehicleClass)
             .Include(c => c.FkCarStatus);
 
-    private static IQueryable<Car> ApplyAttributeFilters(
-        IQueryable<Car> cars,
-        CarSearchCriteria criteria)
+    private static IQueryable<Car> ApplyAttributeFilters(IQueryable<Car> cars, CarSearchCriteria criteria)
     {
         if (criteria.FuelTypeId != null)
             cars = cars.Where(c => c.FkFuelTypeId == criteria.FuelTypeId);
@@ -50,9 +48,7 @@ public class CarRepository : ICarReadRepository, ICarWriteRepository
         return cars;
     }
 
-    private IQueryable<Car> ApplyAvailabilityFilter(
-        IQueryable<Car> cars,
-        CarSearchCriteria criteria)
+    private IQueryable<Car> ApplyAvailabilityFilter(IQueryable<Car> cars, CarSearchCriteria criteria)
     {
         if (criteria.StartDate is null || criteria.EndDate is null)
             return cars;
@@ -69,6 +65,21 @@ public class CarRepository : ICarReadRepository, ICarWriteRepository
                 b.CancelledAt == null &&
                 b.StartDateTime < end &&
                 b.EndDateTime > start));
+    }
+
+    private static IQueryable<Car> ApplySorting(IQueryable<Car> cars, CarSearchCriteria criteria)
+    {
+        var sortBy = criteria.SortBy?.ToLower();
+        var descending = criteria.SortDescending;
+
+        return sortBy switch
+        {
+            "rate" => descending
+                ? cars.OrderByDescending(c => c.DailyRate)
+                : cars.OrderBy(c => c.DailyRate),
+
+            _ => cars.OrderBy(c => c.PkCarId)
+        };
     }
 
     public Task<Car?> GetByIdAsync(int id)
