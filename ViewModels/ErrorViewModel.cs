@@ -1,4 +1,4 @@
-namespace LuxRentals.Models;
+namespace LuxRentals.ViewModels;
 
 public class ErrorViewModel
 {
