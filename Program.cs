@@ -8,6 +8,7 @@ using LuxRentals.Data;
 using LuxRentals.Extensions;
 using LuxRentals.Services;
 using LuxRentals.Models;
+using LuxRentals.Services.PaymentService;
 
 var builder = WebApplication.CreateBuilder(args);
 

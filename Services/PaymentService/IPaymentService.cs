@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace LuxRentals.Services
+namespace LuxRentals.Services.PaymentService
 {
     public interface IPaymentService
     {
@@ -10,16 +10,17 @@ namespace LuxRentals.Services
         Task CaptureOrderAsync(string orderId);
     }
 
-    public interface PayPalPaymentService : IPaymentService
+    public class PayPalPaymentService : IPaymentService
     {
         private readonly HttpClient _httpClient;
         private readonly PaypalOptions _options;
 
-        // Need to fix this
-        public PayPalPaymentService(IOptions<PaypalOptions> options)
+        public PayPalPaymentService(
+            HttpClient httpClient,
+            IOptions<PaypalOptions> options)
         {
-            this.options = options.Value;
-            httpClient = new HttpClient();
+            _httpClient = httpClient;
+            _options = options.Value;
         }
 
         public async Task<string> CreateOrderAsync(decimal amount, string currency)
@@ -38,15 +39,15 @@ namespace LuxRentals.Services
                 intent = "CAPTURE",
                 purchase_units = new[]
                 {
-                new
-                {
-                    amount = new
+                    new
                     {
-                        currency_code = currency,
-                        value = amount.ToString("F2")
+                        amount = new
+                        {
+                            currency_code = currency,
+                            value = amount.ToString("F2")
+                        }
                     }
                 }
-            }
             });
 
             var response = await _httpClient.SendAsync(request);
@@ -77,7 +78,8 @@ namespace LuxRentals.Services
         private async Task<string> GetAccessTokenAsync()
         {
             var authToken = Convert.ToBase64String(
-                System.Text.Encoding.UTF8.GetBytes($"{_options.ClientId}:{_options.ClientSecret}"));
+                System.Text.Encoding.UTF8.GetBytes(
+                    $"{_options.ClientId}:{_options.ClientSecret}"));
 
             var request = new HttpRequestMessage(
                 HttpMethod.Post,
@@ -100,7 +102,5 @@ namespace LuxRentals.Services
                 .RootElement.GetProperty("access_token")
                 .GetString()!;
         }
-    };
-
-    
+    }
 }
