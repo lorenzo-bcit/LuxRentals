@@ -4,5 +4,6 @@ namespace LuxRentals.Services.Cars;
 
 public interface ICarInventoryService
 {
-    public Task<SaveResult> UpsertAsync(CarUpsertVm vm);
+    public Task<SaveResult> CreateAsync(CarUpsertVm vm);
+    public Task<SaveResult> UpdateAsync(int id, CarUpsertVm vm);
 }
