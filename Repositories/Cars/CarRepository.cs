@@ -1,6 +1,5 @@
 using LuxRentals.Data;
 using LuxRentals.Models;
-using LuxRentals.ViewModels.Cars;
 using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Repositories.Cars;
@@ -11,26 +10,65 @@ public class CarRepository : ICarReadRepository, ICarWriteRepository
     public CarRepository(LuxRentalsDbContext db) => _db = db;
 
     // READ
-    public Task<PagedList<Car>> SearchAsync(CarSearchVm vm)
+    public Task<PagedList<Car>> SearchAsync(CarSearchCriteria criteria)
     {
-        var q = _db.Cars
+        var cars = BuildBaseQuery();
+        cars = ApplyAttributeFilters(cars, criteria);
+        cars = ApplyAvailabilityFilter(cars, criteria);
+        cars = cars.OrderBy(c => c.PkCarId);
+
+        return PagedList<Car>.CreateAsync(cars, criteria.Page, criteria.PageSize);
+    }
+
+    private IQueryable<Car> BuildBaseQuery() =>
+        _db.Cars
             .AsNoTracking()
             .Include(c => c.FkModel).ThenInclude(m => m.FkMake)
             .Include(c => c.FkFuelType)
             .Include(c => c.FkVehicleClass)
-            .Include(c => c.FkCarStatus)
-            .AsQueryable();
+            .Include(c => c.FkCarStatus);
 
-        if (vm.AvailableOnly) q = q.Where(c => c.FkCarStatus.StatusFlag == "Available");
-        if (vm.FuelTypeId != null) q = q.Where(c => c.FkFuelTypeId == vm.FuelTypeId);
-        if (vm.VehicleClassId != null) q = q.Where(c => c.FkVehicleClassId == vm.VehicleClassId);
-        if (vm.TransmissionType != null) q = q.Where(c => c.TransmissionType == vm.TransmissionType);
-        if (vm.MinSeats != null) q = q.Where(c => c.PersonCap >= vm.MinSeats);
-        if (vm.MinLuggage != null) q = q.Where(c => c.LuggageCap >= vm.MinLuggage);
+    private static IQueryable<Car> ApplyAttributeFilters(
+        IQueryable<Car> cars,
+        CarSearchCriteria criteria)
+    {
+        if (criteria.FuelTypeId != null)
+            cars = cars.Where(c => c.FkFuelTypeId == criteria.FuelTypeId);
 
-        q = q.OrderBy(c => c.PkCarId);
+        if (criteria.VehicleClassId != null)
+            cars = cars.Where(c => c.FkVehicleClassId == criteria.VehicleClassId);
 
-        return PagedList<Car>.CreateAsync(q, vm.Page, vm.PageSize);
+        if (criteria.TransmissionType != null)
+            cars = cars.Where(c => c.TransmissionType == criteria.TransmissionType);
+
+        if (criteria.MinSeats != null)
+            cars = cars.Where(c => c.PersonCap >= criteria.MinSeats);
+
+        if (criteria.MinLuggage != null)
+            cars = cars.Where(c => c.LuggageCap >= criteria.MinLuggage);
+
+        return cars;
+    }
+
+    private IQueryable<Car> ApplyAvailabilityFilter(
+        IQueryable<Car> cars,
+        CarSearchCriteria criteria)
+    {
+        if (criteria.StartDate is null || criteria.EndDate is null)
+            return cars;
+
+        var start = criteria.StartDate.Value;
+        var end = criteria.EndDate.Value;
+
+        // Only operational cars when searching by dates
+        cars = cars.Where(c => c.FkCarStatus.StatusFlag == "Available");
+
+        return cars.Where(c =>
+            !_db.Bookings.Any(b =>
+                b.FkCarId == c.PkCarId &&
+                b.CancelledAt == null &&
+                b.StartDateTime < end &&
+                b.EndDateTime > start));
     }
 
     public Task<Car?> GetByIdAsync(int id)
