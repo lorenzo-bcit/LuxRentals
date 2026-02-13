@@ -143,7 +143,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            ViewData["SiteKey"] = _config["RECAPTCHA_SITEKEY"];
+            ViewData["SiteKey"] = _reCaptchaOptions.SiteKey;
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
@@ -212,7 +212,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
                         LicenceVerified = false,
                     };
 
-                    using var transaction = await _db.Database.BeginTransactionAsync();
+                    await using var transaction = await _db.Database.BeginTransactionAsync();
                     try
                     {
                         _db.Customers.Add(newCustomer);

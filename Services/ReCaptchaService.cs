@@ -7,17 +7,21 @@ namespace LuxRentals.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ReCaptchaOptions _options;
+        private readonly ILogger<ReCaptchaService> _logger;
 
-        public ReCaptchaService(HttpClient httpClient, IOptions<ReCaptchaOptions> options)
+        public ReCaptchaService(HttpClient httpClient, IOptions<ReCaptchaOptions> options, ILogger<ReCaptchaService> logger)
         {
             _httpClient = httpClient;
             _options = options.Value;
+            _logger = logger;
+
         }
 
         public async Task<ReCaptchaValidationResult> ValidateAsync(string token)
         {
             if (string.IsNullOrWhiteSpace(token))
             {
+                _logger.LogError("reCAPTCHA validation failed: empty or null token provided");
                 return new ReCaptchaValidationResult { Success = false };
             }
 
@@ -35,6 +39,7 @@ namespace LuxRentals.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
+                    _logger.LogError("reCAPTCHA validation failed: {StatusCode}", response.StatusCode);
                     return new ReCaptchaValidationResult { Success = false };
                 }
 
@@ -46,6 +51,7 @@ namespace LuxRentals.Services
             catch
             {
                 // Network failure, timeout, or deserialization error
+                _logger.LogError("reCAPTCHA validation failed");
                 return new ReCaptchaValidationResult { Success = false };
             }
         }
