@@ -7,6 +7,11 @@ using LuxRentals.Services.PaymentService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using LuxRentals.Data;
+using LuxRentals.Extensions;
+using LuxRentals.Repositories.Cars;
+using LuxRentals.Services;
+using LuxRentals.Services.Cars;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Mail;
@@ -39,6 +44,13 @@ builder.Services.AddScoped<IPaymentService, PayPalPaymentService>();
 
 
 builder.Services.AddControllersWithViews();
+
+// Repositories
+builder.Services.AddScoped<ICarReadRepository, CarRepository>();
+builder.Services.AddScoped<ICarWriteRepository, CarRepository>();
+
+// Services
+builder.Services.AddScoped<ICarInventoryService, CarInventoryService>();
 
 builder.Configuration.AddDotNetEnv();
 
@@ -83,7 +95,6 @@ if (app.Environment.IsProduction())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
 
 app.UseHttpsRedirection();
 app.UseRouting();
