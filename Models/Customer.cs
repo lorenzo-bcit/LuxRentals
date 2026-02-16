@@ -1,9 +1,8 @@
 ﻿namespace LuxRentals.Models;
+
 public class Customer
 {
     public int PkCustomerId { get; set; }
-
-    public string UserId { get; set; } = null!;
 
     public string FirstName { get; set; } = null!;
 

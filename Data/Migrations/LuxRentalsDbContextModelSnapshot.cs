@@ -255,10 +255,6 @@ namespace LuxRentals.Data.Migrations
                         .HasColumnType("varchar(20)")
                         .HasColumnName("phoneNumber");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("PkCustomerId")
                         .HasName("PK__Customer__1FD9D5A2DFB315FE");
 
