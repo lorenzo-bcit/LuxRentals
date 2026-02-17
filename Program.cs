@@ -1,12 +1,15 @@
-using System.Net;
-using System.Net.Mail;
 using DotNetEnv.Configuration;
+using LuxRentals.Data;
+using LuxRentals.Extensions;
+using LuxRentals.Models;
+using LuxRentals.Services;
+using LuxRentals.Services.PaymentService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using LuxRentals.Data;
-using LuxRentals.Extensions;
-using LuxRentals.Services;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +24,19 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
+
+builder.Services.Configure<PaypalOptions>(
+builder.Configuration.GetSection("Paypal"));
+
+builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>(client =>
+{
+    var paypalOptions = builder.Configuration.GetSection("Paypal").Get<PaypalOptions>() ?? throw new InvalidOperationException("PayPal configuration missing");
+    client.BaseAddress = new Uri(paypalOptions.BaseUrl);
+});
+
+builder.Services.AddScoped<IPaymentService, PayPalPaymentService>();
+
+
 
 builder.Services.AddControllersWithViews();
 
