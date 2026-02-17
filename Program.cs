@@ -1,14 +1,15 @@
-using System.Net;
-using System.Net.Mail;
 using DotNetEnv.Configuration;
+using LuxRentals.Data;
+using LuxRentals.Extensions;
+using LuxRentals.Models;
+using LuxRentals.Services;
+using LuxRentals.Services.PaymentService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using LuxRentals.Data;
-using LuxRentals.Extensions;
-using LuxRentals.Services;
-using LuxRentals.Models;
-using LuxRentals.Services.PaymentService;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,12 +25,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
 
-builder.Services.Configure<PaypalOptions>(options =>
-{
-    options.ClientId = Environment.GetEnvironmentVariable("PAYPAL_CLIENT_ID")!;
-    options.ClientSecret = Environment.GetEnvironmentVariable("PAYPAL_CLIENT_SECRET")!;
-    options.BaseUrl = Environment.GetEnvironmentVariable("PAYPAL_BASE_URL")!;
-});
+builder.Services.Configure<PaypalOptions>(
+builder.Configuration.GetSection("Paypal"));
 
 builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>(client =>
 {

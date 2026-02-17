@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace LuxRentals.Services.PaymentService
+namespace LuxRentals.Services.Payment
 {
     public interface IPaymentService
     {
@@ -50,7 +51,7 @@ namespace LuxRentals.Services.PaymentService
                                         amount = new
                                         {
                                             currency_code = currency,
-                                            value = amount.ToString("F2")
+                                            value = amount.ToString("F2", CultureInfo.InvariantCulture)
                                         }
                                     }
                                 }
@@ -145,11 +146,6 @@ namespace LuxRentals.Services.PaymentService
             catch (HttpRequestException ex)
             {
                 _logger.LogError(ex, "Failed to obtain PayPal access token");
-                throw;
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogError(ex, "Failed to parse PayPal access token response");
                 throw;
             }
             catch (Exception ex)
