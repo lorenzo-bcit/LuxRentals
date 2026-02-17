@@ -40,6 +40,16 @@ builder.Services.AddScoped<IPaymentService, PayPalPaymentService>();
 
 builder.Services.AddControllersWithViews();
 
+builder.Configuration.AddDotNetEnv();
+
+builder.Services.Configure<ReCaptchaOptions>(
+    builder.Configuration.GetSection("ReCaptcha"));
+
+builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>(client =>
+{
+    client.BaseAddress = new Uri("https://www.google.com");
+});
+
 // Configure email
 var emailOptions = builder.Configuration
     .GetSection("Email")
@@ -73,6 +83,7 @@ if (app.Environment.IsProduction())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 
 app.UseHttpsRedirection();
 app.UseRouting();
