@@ -78,5 +78,36 @@ namespace LuxRentals.Repositories.Roles
                 return false;
             }
         }
+
+        // Delete a role
+        public bool DeleteRole(string roleId)
+        {
+            try
+            {
+                var role = _db.Roles.Find(roleId);
+                if (role == null)
+                {
+                    return false;
+                }
+
+                // Check if role is in use
+                bool roleInUse = _db.UserRoles.Any(ur => ur.RoleId == roleId);
+                if (roleInUse)
+                {
+                    _logger.LogInformation("DeleteRole: role {RoleId} is in use and cannot be deleted", roleId);
+                    return false;
+                }
+
+                _db.Roles.Remove(role);
+                _db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting role {RoleId}", roleId);
+                return false;
+            }
+        }
+
     }
 }
