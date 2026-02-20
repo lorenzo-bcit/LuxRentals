@@ -1,6 +1,8 @@
+using System.Net;
+using System.Net.Mail;
 using DotNetEnv.Configuration;
 using LuxRentals.Data;
-using LuxRentals.Extensions;
+using LuxRentals.Data.Seeders;
 using LuxRentals.Repositories.Cars;
 using LuxRentals.Services;
 using LuxRentals.Services.Cars;
@@ -8,8 +10,6 @@ using LuxRentals.Services.Payment;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +41,7 @@ builder.Services.AddControllersWithViews();
 // Repositories
 builder.Services.AddScoped<ICarReadRepository, CarRepository>();
 builder.Services.AddScoped<ICarWriteRepository, CarRepository>();
+builder.Services.AddScoped<ICarLookupRepository, CarLookupRepository>();
 
 // Services
 builder.Services.AddScoped<ICarInventoryService, CarInventoryService>();
@@ -78,6 +79,7 @@ if (app.Environment.IsDevelopment())
 {
     await app.ApplyPendingMigrationsAsync();
     await app.EnsureAdminSeededAsync();
+    await app.EnsureCarCatalogSeededAsync();
 }
 
 if (app.Environment.IsProduction())
