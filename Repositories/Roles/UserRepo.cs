@@ -1,5 +1,6 @@
 ﻿using LuxRentals.Data;
 using LuxRentals.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Repositories.Roles
 {
@@ -12,27 +13,24 @@ namespace LuxRentals.Repositories.Roles
             _db = context;
         }
 
-        public List<UserVm> GetAllUsers()
+        public async Task<List<UserVm>> GetAllUsersAsync()
         {
-            return _db.Users
+            return  await _db.Users
                 .Select(u => new UserVm
                 {
                     Email = u.Email
-                })
-                .ToList();
+                }).ToListAsync();
         }
 
-        public UserVm? GetUserByEmail(string userName)
+        public async Task<UserVm?> GetUserByEmailAsync(string userName)
         {
-            var user = _db.Users
+             return await _db.Users
                 .Where(u => u.Email == userName)
                 .Select(u => new UserVm
-                {
-                    Email = u.Email
-                })
-                .FirstOrDefault();
-
-            return user;
+                    {
+                        Email = u.Email
+                    }
+                ).FirstOrDefaultAsync();
         }
     }
 }
