@@ -8,17 +8,11 @@ namespace LuxRentals.Repositories.Roles
     public class UserRoleRepo
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly LuxRentalsDbContext _context;
-        private readonly ILogger<UserRoleRepo> _logger;
 
         public UserRoleRepo(
-            UserManager<IdentityUser> userManager,
-            LuxRentalsDbContext context,
-            ILogger<UserRoleRepo> logger)
+            UserManager<IdentityUser> userManager)
         {
             _userManager = userManager;
-            _context = context;
-            _logger = logger;
         }
 
         // Assign a role to a user.
