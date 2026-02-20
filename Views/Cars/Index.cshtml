@@ -4,11 +4,9 @@
     ViewData["Title"] = "Cars";
 }
 
-<link rel="stylesheet" href="~/css/cars.css" />
-
-<section class="cars-page">
+<section class="container py-4">
     <form method="get" asp-action="Index">
-        <div class="cars-toolbar">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 p-3 bg-light border rounded">
             <h1 class="cars-toolbar-title">Choose your options below</h1>
             <div class="cars-sort">
                 <label asp-for="SortBy" class="form-label">Sort by</label>
@@ -20,12 +18,12 @@
             </div>
         </div>
 
-        <div class="cars-dates">
-            <div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
                 <label asp-for="StartDate" class="form-label">From</label>
                 <input asp-for="StartDate" type="date" class="form-control" />
             </div>
-            <div>
+            <div class="col-md-6">
                 <label asp-for="EndDate" class="form-label">To</label>
                 <input asp-for="EndDate" type="date" class="form-control" />
             </div>
@@ -35,50 +33,52 @@
 
         <span asp-validation-for="EndDate" class="text-danger"></span>
 
-        <div class="cars-layout">
-            <aside class="cars-filters">
-                <h2>Filters</h2>
+        <div class="row g-3">
+            <aside class="col-lg-3">
+                <div class="card p-3">
+                    <h2>Filters</h2>
 
-                <div class="cars-filter-block">
-                    <label asp-for="MinSeats" class="form-label">Capacity (minimum seats)</label>
-                    <input asp-for="MinSeats" class="form-control" min="1" max="20" />
-                </div>
+                    <div class="cars-filter-block">
+                        <label asp-for="MinSeats" class="form-label">Capacity (minimum seats)</label>
+                        <input asp-for="MinSeats" class="form-control" min="1" max="20" />
+                    </div>
 
-                <div class="cars-filter-block">
-                    <label asp-for="MinLuggage" class="form-label">Luggage (minimum bags)</label>
-                    <input asp-for="MinLuggage" class="form-control" min="0" max="50" />
-                </div>
+                    <div class="cars-filter-block">
+                        <label asp-for="MinLuggage" class="form-label">Luggage (minimum bags)</label>
+                        <input asp-for="MinLuggage" class="form-control" min="0" max="50" />
+                    </div>
 
-                <div class="cars-filter-block">
-                    <label asp-for="VehicleClassId" class="form-label">Vehicle Type</label>
-                    <select asp-for="VehicleClassId" class="form-select" asp-items="Model.VehicleClassOptions">
-                        <option value="">Any</option>
-                    </select>
-                </div>
+                    <div class="cars-filter-block">
+                        <label asp-for="VehicleClassId" class="form-label">Vehicle Type</label>
+                        <select asp-for="VehicleClassId" class="form-select" asp-items="Model.VehicleClassOptions">
+                            <option value="">Any</option>
+                        </select>
+                    </div>
 
-                <div class="cars-filter-block">
-                    <label asp-for="FuelTypeId" class="form-label">Fuel Type</label>
-                    <select asp-for="FuelTypeId" class="form-select" asp-items="Model.FuelTypeOptions">
-                        <option value="">Any</option>
-                    </select>
-                </div>
+                    <div class="cars-filter-block">
+                        <label asp-for="FuelTypeId" class="form-label">Fuel Type</label>
+                        <select asp-for="FuelTypeId" class="form-select" asp-items="Model.FuelTypeOptions">
+                            <option value="">Any</option>
+                        </select>
+                    </div>
 
-                <div class="cars-filter-block">
-                    <label asp-for="TransmissionType" class="form-label">Transmission</label>
-                    <select asp-for="TransmissionType" class="form-select">
-                        <option value="">Any</option>
-                        <option value="1">Automatic</option>
-                        <option value="0">Manual</option>
-                    </select>
-                </div>
+                    <div class="cars-filter-block">
+                        <label asp-for="TransmissionType" class="form-label">Transmission</label>
+                        <select asp-for="TransmissionType" class="form-select">
+                            <option value="">Any</option>
+                            <option value="1">Automatic</option>
+                            <option value="0">Manual</option>
+                        </select>
+                    </div>
 
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-dark">Apply</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-dark">Apply</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+                    </div>
                 </div>
             </aside>
 
-            <div class="cars-results">
+            <div class="col-lg-9 d-flex flex-column gap-3">
                 @if (Model.Cars.Count == 0)
                 {
                     <div class="alert alert-secondary">No cars match your filters.</div>
@@ -87,32 +87,38 @@
                 {
                     @foreach (var car in Model.Cars)
                     {
-                        <article class="car-card">
-                            <div class="car-thumb">
-                                @if (!string.IsNullOrWhiteSpace(car.Thumbnail))
-                                {
-                                    <img src="@car.Thumbnail" alt="@car.Subtitle" />
-                                }
-                                else
-                                {
-                                    <span>No image</span>
-                                }
-                            </div>
+                        <div class="card p-3">
+                            <div class="row align-items-center g-3">
+                                <div class="col-auto">
+                                    <div class="bg-light border d-flex justify-content-center align-items-center" style="width:90px;height:90px;">
+                                        @if (!string.IsNullOrWhiteSpace(car.Thumbnail))
+                                        {
+                                            <img src="@car.Thumbnail" alt="@car.Subtitle" class="img-fluid" style="width:90px;height:90px;object-fit:cover;" />
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">No image</span>
+                                        }
+                                    </div>
+                                </div>
 
-                            <div class="car-main">
-                                <h3>@car.Title</h3>
-                                <p class="car-subtitle">@car.Subtitle</p>
-                                <p class="car-meta">@car.Transmission • @car.Seats person • @car.Luggage bags • @car.FuelType</p>
-                                <span class="car-more-info">Show more info</span>
-                            </div>
+                                <div class="col">
+                                    <h3 class="mb-1">@car.Title</h3>
+                                    <p class="mb-1 fw-semibold">@car.Subtitle</p>
+                                    <p class="mb-1 text-muted">
+                                        @car.Transmission • @car.Seats person • @car.Luggage bags • @car.FuelType
+                                    </p>
+                                    <span class="fw-semibold">Show more info</span>
+                                </div>
 
-                            <div class="car-price">
-                                <span class="car-price-label">Price</span>
-                                <span class="car-currency">CAD</span>
-                                <strong>@car.DailyRate.ToString("0.00")</strong>
-                                <button type="button" class="btn btn-secondary btn-sm">Book</button>
+                                <div class="col-auto text-end">
+                                    <div class="fw-semibold">Price</div>
+                                    <div class="text-muted small">CAD</div>
+                                    <div class="fs-3 fw-bold">@car.DailyRate.ToString("0.00")</div>
+                                    <button type="button" class="btn btn-secondary btn-sm mt-1">Book</button>
+                                </div>
                             </div>
-                        </article>
+                        </div>
                     }
                 }
 
