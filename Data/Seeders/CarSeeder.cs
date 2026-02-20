@@ -224,7 +224,23 @@ public static class CarSeeder
         new("Economy", "Toyota", "Corolla", "Gasoline", "Available", 0, 2021, "Blue", "1HGBH41JXMN100005", "LUX-1005", 5, 2, 44.90m, null),
         new("Compact SUV", "Nissan", "Rogue", "Gasoline", "Available", 1, 2022, "Red", "1HGBH41JXMN100006", "LUX-1006", 5, 3, 64.90m, null),
         new("Midsize SUV AWD", "Ford", "Escape", "Hybrid", "Maintenance", 1, 2023, "White", "1HGBH41JXMN100007", "LUX-1007", 5, 4, 74.90m, null),
-        new("Full Size", "Chevrolet", "Malibu", "Gasoline", "Available", 1, 2020, "Graphite", "1HGBH41JXMN100008", "LUX-1008", 5, 4, 79.90m, null)
+        new("Full Size", "Chevrolet", "Malibu", "Gasoline", "Available", 1, 2020, "Graphite", "1HGBH41JXMN100008", "LUX-1008", 5, 4, 79.90m, null),
+
+        new("Economy", "Toyota", "Corolla", "Hybrid", "Available", 1, 2023, "Silver", "1HGBH41JXMN100009", "LUX-1009", 5, 2, 47.90m, null),
+        new("Economy", "Hyundai", "Elantra", "Gasoline", "Available", 0, 2022, "Grey", "1HGBH41JXMN100010", "LUX-1010", 5, 2, 42.90m, null),
+        new("Compact SUV", "Kia", "Seltos", "Hybrid", "Available", 1, 2024, "Blue", "1HGBH41JXMN100011", "LUX-1011", 5, 3, 62.90m, null),
+        new("Compact SUV", "Nissan", "Rogue", "Hybrid", "Available", 1, 2023, "White", "1HGBH41JXMN100012", "LUX-1012", 5, 3, 66.90m, null),
+        new("Midsize SUV AWD", "Ford", "Escape", "Gasoline", "Available", 1, 2022, "Black", "1HGBH41JXMN100013", "LUX-1013", 5, 4, 71.90m, null),
+        new("Midsize SUV AWD", "Ford", "Escape", "Hybrid", "Available", 1, 2021, "Red", "1HGBH41JXMN100014", "LUX-1014", 5, 4, 68.90m, null),
+        new("Full Size", "Chevrolet", "Malibu", "Hybrid", "Available", 1, 2023, "White", "1HGBH41JXMN100015", "LUX-1015", 5, 4, 92.90m, null),
+        new("Full Size", "Chevrolet", "Malibu", "Gasoline", "Maintenance", 1, 2021, "Silver", "1HGBH41JXMN100016", "LUX-1016", 5, 4, 84.90m, null),
+
+        new("Economy", "Toyota", "Corolla", "Gasoline", "Available", 1, 2020, "White", "1HGBH41JXMN100017", "LUX-1017", 5, 2, 39.90m, null),
+        new("Economy", "Hyundai", "Elantra", "Hybrid", "Available", 1, 2021, "Blue", "1HGBH41JXMN100018", "LUX-1018", 5, 2, 45.90m, null),
+        new("Compact SUV", "Kia", "Seltos", "Gasoline", "Out of Service", 1, 2022, "Black", "1HGBH41JXMN100019", "LUX-1019", 5, 3, 58.90m, null),
+        new("Compact SUV", "Nissan", "Rogue", "Gasoline", "Available", 0, 2020, "Grey", "1HGBH41JXMN100020", "LUX-1020", 5, 3, 54.90m, null),
+        new("Midsize SUV AWD", "Ford", "Escape", "Gasoline", "Available", 1, 2024, "Silver", "1HGBH41JXMN100021", "LUX-1021", 5, 4, 76.90m, null),
+        new("Full Size", "Chevrolet", "Malibu", "Gasoline", "Available", 1, 2019, "Blue", "1HGBH41JXMN100022", "LUX-1022", 5, 4, 69.90m, null)
     ];
 
     private sealed record DemoCarSeed(
