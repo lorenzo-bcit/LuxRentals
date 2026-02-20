@@ -18,9 +18,9 @@ namespace LuxRentals.Controllers
         }
 
         // GET: /Role
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var rolesVm = _roleRepo.GetAllRoles();
+            var rolesVm = await _roleRepo.GetAllRolesAsync();
             return View(rolesVm);
         }
 
@@ -34,14 +34,14 @@ namespace LuxRentals.Controllers
         // POST: /Role/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(RoleVm roleVm)
+        public async Task<IActionResult> Create(RoleVm roleVm)
         {
             if (!ModelState.IsValid)
             {
                 return View(roleVm);
             }
 
-            bool isSuccess = _roleRepo.CreateRole(roleVm.RoleName);
+            bool isSuccess = await _roleRepo.CreateRoleAsync(roleVm.RoleName);
 
             if (isSuccess)
             {
@@ -56,7 +56,7 @@ namespace LuxRentals.Controllers
 
         // GET: /Role/Delete/{id}
         [HttpGet]
-        public IActionResult Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -64,7 +64,7 @@ namespace LuxRentals.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var roleVm= _roleRepo.GetRole(id);
+            var roleVm = await _roleRepo.GetRoleAsync(id);
             if (roleVm == null)
             {
                 TempData["ErrorMessage"] = "Role not found.";
@@ -78,9 +78,9 @@ namespace LuxRentals.Controllers
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            bool success = _roleRepo.DeleteRole(id);
+            bool success = await _roleRepo.DeleteRoleAsync(id);
 
             if (success)
             {
