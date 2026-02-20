@@ -5,16 +5,16 @@ namespace LuxRentals.Repositories.Roles
 {
     public class UserRepo
     {
-        private readonly LuxRentalsDbContext _context;
+        private readonly LuxRentalsDbContext _db;
 
         public UserRepo(LuxRentalsDbContext context)
         {
-            _context = context;
+            _db = context;
         }
 
         public List<UserVm> GetAllUsers()
         {
-            return _context.Users
+            return _db.Users
                 .Select(u => new UserVm
                 {
                     Email = u.Email
@@ -24,7 +24,7 @@ namespace LuxRentals.Repositories.Roles
 
         public UserVm? GetUserByEmail(string userName)
         {
-            var user = _context.Users
+            var user = _db.Users
                 .Where(u => u.Email == userName)
                 .Select(u => new UserVm
                 {
