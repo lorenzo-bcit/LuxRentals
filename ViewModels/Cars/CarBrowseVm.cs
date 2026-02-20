@@ -1,3 +1,5 @@
+using LuxRentals.Models;
+using LuxRentals.Repositories;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LuxRentals.ViewModels.Cars;
@@ -37,4 +39,14 @@ public class CarBrowseVm
     public bool HasPreviousPage { get; set; }
 
     public bool HasNextPage { get; set; }
+
+    public void ApplyPagedResult(PagedList<Car> pagedCars)
+    {
+        Cars = pagedCars.Items.Select(CarCardVm.FromEntity).ToList();
+        Page = pagedCars.Page;
+        TotalCount = pagedCars.TotalCount;
+        TotalPages = pagedCars.TotalPages;
+        HasNextPage = pagedCars.HasNextPage;
+        HasPreviousPage = pagedCars.HasPreviousPage;
+    }
 }

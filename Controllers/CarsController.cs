@@ -34,12 +34,7 @@ public class CarsController : Controller
         var criteria = ToCriteria(vm, hasInvalidDateRange);
         var pagedCars = await _carReadRepository.SearchAsync(criteria);
 
-        vm.Cars = pagedCars.Items.Select(CarCardVm.FromEntity).ToList();
-        vm.Page = pagedCars.Page;
-        vm.TotalCount = pagedCars.TotalCount;
-        vm.TotalPages = pagedCars.TotalPages;
-        vm.HasNextPage = pagedCars.HasNextPage;
-        vm.HasPreviousPage = pagedCars.HasPreviousPage;
+        vm.ApplyPagedResult(pagedCars);
 
         await PopulateLookupOptionsAsync(vm);
 
