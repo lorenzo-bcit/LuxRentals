@@ -49,26 +49,55 @@
                     </div>
 
                     <div class="cars-filter-block">
-                        <label asp-for="VehicleClassId" class="form-label">Vehicle Type</label>
-                        <select asp-for="VehicleClassId" class="form-select" asp-items="Model.VehicleClassOptions">
-                            <option value="">Any</option>
-                        </select>
+                        <label class="form-label fw-semibold">Vehicle Type</label>
+                        <div class="d-flex flex-column gap-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="VehicleClassId" value="" id="vehicle-any" />
+                                <label class="form-check-label" for="vehicle-any">Any</label>
+                            </div>
+                            @foreach (var option in Model.VehicleClassOptions)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="VehicleClassId" value="@option.Value" id="vehicle-@option.Value" />
+                                    <label class="form-check-label" for="vehicle-@option.Value">@option.Text</label>
+                                </div>
+                            }
+                        </div>
                     </div>
 
                     <div class="cars-filter-block">
-                        <label asp-for="FuelTypeId" class="form-label">Fuel Type</label>
-                        <select asp-for="FuelTypeId" class="form-select" asp-items="Model.FuelTypeOptions">
-                            <option value="">Any</option>
-                        </select>
+                        <label class="form-label fw-semibold">Fuel Type</label>
+                        <div class="d-flex flex-column gap-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="FuelTypeId" value="" id="fuel-any" />
+                                <label class="form-check-label" for="fuel-any">Any</label>
+                            </div>
+                            @foreach (var option in Model.FuelTypeOptions)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="FuelTypeId" value="@option.Value" id="fuel-@option.Value" />
+                                    <label class="form-check-label" for="fuel-@option.Value">@option.Text</label>
+                                </div>
+                            }
+                        </div>
                     </div>
 
                     <div class="cars-filter-block">
-                        <label asp-for="TransmissionType" class="form-label">Transmission</label>
-                        <select asp-for="TransmissionType" class="form-select">
-                            <option value="">Any</option>
-                            <option value="1">Automatic</option>
-                            <option value="0">Manual</option>
-                        </select>
+                        <label class="form-label fw-semibold">Transmission</label>
+                        <div class="d-flex flex-column gap-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="" id="trans-any" />
+                                <label class="form-check-label" for="trans-any">Any</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="1" id="trans-auto" />
+                                <label class="form-check-label" for="trans-auto">Automatic</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="0" id="trans-manual" />
+                                <label class="form-check-label" for="trans-manual">Manual</label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="d-grid gap-2">
