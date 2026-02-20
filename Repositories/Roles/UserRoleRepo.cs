@@ -1,0 +1,64 @@
+using LuxRentals.Data;
+using LuxRentals.ViewModels.Roles;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+
+namespace LuxRentals.Repositories.Roles
+{
+    public class UserRoleRepo
+    {
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly LuxRentalsDbContext _context;
+        private readonly ILogger<UserRoleRepo> _logger;
+
+        public UserRoleRepo(
+            UserManager<IdentityUser> userManager,
+            LuxRentalsDbContext context,
+            ILogger<UserRoleRepo> logger)
+        {
+            _userManager = userManager;
+            _context = context;
+            _logger = logger;
+        }
+
+        // Assign a role to a user.
+        public async Task<bool> AddUserRoleAsync(string email, string roleName)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var result = await _userManager.AddToRoleAsync(user, roleName);
+                return result.Succeeded;
+            }
+
+            return false;
+        }
+
+        // Remove role from a user.
+        public async Task<bool> RemoveUserRoleAsync(string email, string roleName)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+                return result.Succeeded;
+            }
+
+            return false;
+        }
+
+        // Get all roles of a specific user.
+        public async Task<IEnumerable<RoleVm>> GetUserRolesAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                return roles.Select(roleName => new RoleVm { RoleName = roleName });
+            }
+
+            return Enumerable.Empty<RoleVm>();
+        }
+
+    }
+}
