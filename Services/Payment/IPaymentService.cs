@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using LuxRentals.Data;
+using LuxRentals.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Data.Common;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -17,15 +20,18 @@ namespace LuxRentals.Services.Payment
         private readonly HttpClient _httpClient;
         private readonly PaypalOptions _options;
         private readonly ILogger<PayPalPaymentService> _logger;
+        private readonly LuxRentalsDbContext _db;
 
         public PayPalPaymentService(
             HttpClient httpClient,
             IOptions<PaypalOptions> options,
-            ILogger<PayPalPaymentService> logger)
+            ILogger<PayPalPaymentService> logger,
+            LuxRentalsDbContext db)
         {
             _httpClient = httpClient;
             _logger = logger;
             _options = options.Value;
+            _db = db;
         }
 
         public async Task<string> CreateOrderAsync(decimal amount, string currency)
@@ -154,5 +160,77 @@ namespace LuxRentals.Services.Payment
                 throw;
             }
         }
+        public async Task CaptureOrderAndStorePayment(int bookingId, string orderId)
+        {
+            var token = await GetAccessTokenAsync();
+
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"/v2/checkout/orders/{orderId}/capture");
+
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await _httpClient.SendAsync(request);
+
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+
+            var captureId = doc.RootElement
+                    .GetProperty("payments")
+                    .GetProperty("captures")[0]
+                    .GetProperty("id")
+                    .GetString()!;
+
+            var amount = decimal.Parse(doc.RootElement
+                .GetProperty("payments")
+                .GetProperty("captures")[0]
+                .GetProperty("amount")
+                .GetProperty("value")
+                .GetString()!);
+
+            var currency = doc.RootElement
+                .GetProperty("payments")
+                .GetProperty("captures")[0]
+                .GetProperty("amount")
+                .GetProperty("currency_code")
+                .GetString()!;
+
+            try
+            {
+                var transaction = new Models.Transaction
+                {
+                    AmountPaid = amount,
+                    PaymentDate = DateTime.UtcNow,
+                    FkBookingId = bookingId,
+                    Payment = new Models.Payment
+                    {
+                        PaymentProvider = "PayPal",
+                        PaymentProviderOrderId = orderId,
+                        PaymentProviderCaptureId = captureId,
+                        RecivedAt = DateTime.UtcNow,
+                        RawWebHookJson = json
+                    }
+                };
+                await using var dbTransaction = await _db.Database.BeginTransactionAsync();
+                await dbTransaction.CommitAsync();
+            }
+            catch
+            {
+                await dbTransaction.RollbackAsync();
+                throw;
+            }
+
+            //_db.ProviderPayment.Add(transaction.ProviderPayment);
+
+            var booking = await _db.Bookings.FindAsync(bookingId);
+            if (booking != null)
+            {
+                booking.Transactions.Add(transaction);
+                await _db.SaveChangesAsync();
+            }
+
+        }
+
     }
 }
