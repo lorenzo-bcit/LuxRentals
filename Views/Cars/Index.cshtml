@@ -1,0 +1,165 @@
+@model LuxRentals.ViewModels.Cars.CarBrowseVm
+
+@{
+    ViewData["Title"] = "Cars";
+}
+
+<link rel="stylesheet" href="~/css/cars.css" />
+
+<section class="cars-page">
+    <form method="get" asp-action="Index">
+        <div class="cars-toolbar">
+            <h1 class="cars-toolbar-title">Choose your options below</h1>
+            <div class="cars-sort">
+                <label asp-for="SortBy" class="form-label">Sort by</label>
+                <select asp-for="SortBy" class="form-select">
+                    <option value="featured">Featured</option>
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="cars-dates">
+            <div>
+                <label asp-for="StartDate" class="form-label">From</label>
+                <input asp-for="StartDate" type="date" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="EndDate" class="form-label">To</label>
+                <input asp-for="EndDate" type="date" class="form-control" />
+            </div>
+            <input asp-for="PageSize" type="hidden" />
+            <input type="hidden" asp-for="Page" value="1" />
+        </div>
+
+        <span asp-validation-for="EndDate" class="text-danger"></span>
+
+        <div class="cars-layout">
+            <aside class="cars-filters">
+                <h2>Filters</h2>
+
+                <div class="cars-filter-block">
+                    <label asp-for="MinSeats" class="form-label">Capacity (minimum seats)</label>
+                    <input asp-for="MinSeats" class="form-control" min="1" max="20" />
+                </div>
+
+                <div class="cars-filter-block">
+                    <label asp-for="MinLuggage" class="form-label">Luggage (minimum bags)</label>
+                    <input asp-for="MinLuggage" class="form-control" min="0" max="50" />
+                </div>
+
+                <div class="cars-filter-block">
+                    <label asp-for="VehicleClassId" class="form-label">Vehicle Type</label>
+                    <select asp-for="VehicleClassId" class="form-select" asp-items="Model.VehicleClassOptions">
+                        <option value="">Any</option>
+                    </select>
+                </div>
+
+                <div class="cars-filter-block">
+                    <label asp-for="FuelTypeId" class="form-label">Fuel Type</label>
+                    <select asp-for="FuelTypeId" class="form-select" asp-items="Model.FuelTypeOptions">
+                        <option value="">Any</option>
+                    </select>
+                </div>
+
+                <div class="cars-filter-block">
+                    <label asp-for="TransmissionType" class="form-label">Transmission</label>
+                    <select asp-for="TransmissionType" class="form-select">
+                        <option value="">Any</option>
+                        <option value="1">Automatic</option>
+                        <option value="0">Manual</option>
+                    </select>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-dark">Apply</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </aside>
+
+            <div class="cars-results">
+                @if (Model.Cars.Count == 0)
+                {
+                    <div class="alert alert-secondary">No cars match your filters.</div>
+                }
+                else
+                {
+                    @foreach (var car in Model.Cars)
+                    {
+                        <article class="car-card">
+                            <div class="car-thumb">
+                                @if (!string.IsNullOrWhiteSpace(car.Thumbnail))
+                                {
+                                    <img src="@car.Thumbnail" alt="@car.Subtitle" />
+                                }
+                                else
+                                {
+                                    <span>No image</span>
+                                }
+                            </div>
+
+                            <div class="car-main">
+                                <h3>@car.Title</h3>
+                                <p class="car-subtitle">@car.Subtitle</p>
+                                <p class="car-meta">@car.Transmission • @car.Seats person • @car.Luggage bags • @car.FuelType</p>
+                                <span class="car-more-info">Show more info</span>
+                            </div>
+
+                            <div class="car-price">
+                                <span class="car-price-label">Price</span>
+                                <span class="car-currency">CAD</span>
+                                <strong>@car.DailyRate.ToString("0.00")</strong>
+                                <button type="button" class="btn btn-secondary btn-sm">Book</button>
+                            </div>
+                        </article>
+                    }
+                }
+
+                <nav aria-label="Cars pages" class="cars-pagination">
+                    <a class="btn btn-outline-dark rounded-circle @(Model.HasPreviousPage ? "" : "disabled")"
+                       asp-action="Index"
+                       asp-route-Page="@(Model.Page - 1)"
+                       asp-route-PageSize="@Model.PageSize"
+                       asp-route-SortBy="@Model.SortBy"
+                       asp-route-StartDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+                       asp-route-EndDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+                       asp-route-FuelTypeId="@Model.FuelTypeId"
+                       asp-route-VehicleClassId="@Model.VehicleClassId"
+                       asp-route-TransmissionType="@Model.TransmissionType"
+                       asp-route-MinSeats="@Model.MinSeats"
+                       asp-route-MinLuggage="@Model.MinLuggage"
+                       asp-route-AvailableOnly="@Model.AvailableOnly"
+                       aria-disabled="@(!Model.HasPreviousPage)"
+                       tabindex="@(Model.HasPreviousPage ? "0" : "-1")">
+                        &lt;
+                    </a>
+
+                    <span class="cars-page-label">Page @Model.Page of @Model.TotalPages</span>
+
+                    <a class="btn btn-outline-dark rounded-circle @(Model.HasNextPage ? "" : "disabled")"
+                       asp-action="Index"
+                       asp-route-Page="@(Model.Page + 1)"
+                       asp-route-PageSize="@Model.PageSize"
+                       asp-route-SortBy="@Model.SortBy"
+                       asp-route-StartDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+                       asp-route-EndDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+                       asp-route-FuelTypeId="@Model.FuelTypeId"
+                       asp-route-VehicleClassId="@Model.VehicleClassId"
+                       asp-route-TransmissionType="@Model.TransmissionType"
+                       asp-route-MinSeats="@Model.MinSeats"
+                       asp-route-MinLuggage="@Model.MinLuggage"
+                       asp-route-AvailableOnly="@Model.AvailableOnly"
+                       aria-disabled="@(!Model.HasNextPage)"
+                       tabindex="@(Model.HasNextPage ? "0" : "-1")">
+                        &gt;
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
