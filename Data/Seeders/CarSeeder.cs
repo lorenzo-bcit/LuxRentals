@@ -1,8 +1,7 @@
-using LuxRentals.Extensions;
 using LuxRentals.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace LuxRentals.Data;
+namespace LuxRentals.Data.Seeders;
 
 public static class CarSeeder
 {
@@ -12,7 +11,7 @@ public static class CarSeeder
         var services = scope.ServiceProvider;
 
         var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-        var logger = loggerFactory.CreateLogger(typeof(DatabaseExtensions));
+        var logger = loggerFactory.CreateLogger(typeof(CarSeeder));
 
         var db = services.GetRequiredService<LuxRentalsDbContext>();
 

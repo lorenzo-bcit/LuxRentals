@@ -1,10 +1,8 @@
-using LuxRentals.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
-namespace LuxRentals.Extensions;
+namespace LuxRentals.Data.Seeders;
 
-public static class DatabaseExtensions
+public static class AdminSeeder
 {
     private const string ADMIN_EMAIL = "admin@example.com";
     private const string ADMIN_PASSWORD = "Admin123!";
@@ -16,7 +14,7 @@ public static class DatabaseExtensions
         var services = scope.ServiceProvider;
 
         var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-        var logger = loggerFactory.CreateLogger(typeof(DatabaseExtensions));
+        var logger = loggerFactory.CreateLogger(typeof(AdminSeeder));
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
@@ -63,26 +61,5 @@ public static class DatabaseExtensions
         }
 
         logger.LogInformation("Default admin user added to Admin role.");
-    }
-
-    public static async Task ApplyPendingMigrationsAsync(this WebApplication app)
-    {
-        using var scope = app.Services.CreateScope();
-        var services = scope.ServiceProvider;
-
-        var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-        var logger = loggerFactory.CreateLogger(typeof(DatabaseExtensions));
-
-        var db = services.GetRequiredService<LuxRentalsDbContext>();
-
-        var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
-        if (pending.Count == 0)
-        {
-            return;
-        }
-
-        logger.LogInformation("Applying {Count} pending migrations...", pending.Count);
-        await db.Database.MigrateAsync();
-        logger.LogInformation("Migrations applied.");
     }
 }
