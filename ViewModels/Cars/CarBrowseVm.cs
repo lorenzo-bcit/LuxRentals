@@ -34,7 +34,7 @@ public class CarBrowseVm
 
     public int TotalPages { get; set; }
 
-    public bool HasPreviousPage => Page > 1;
+    public bool HasPreviousPage { get; set; }
 
-    public bool HasNextPage => Page < TotalPages;
+    public bool HasNextPage { get; set; }
 }
