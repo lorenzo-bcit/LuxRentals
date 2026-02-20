@@ -7,7 +7,7 @@ namespace LuxRentals.Controllers;
 
 public class CarsController : Controller
 {
-    private const int PAGE_SIZE = 10;
+    private const int PAGE_SIZE = 5;
 
     private readonly ICarReadRepository _carReadRepository;
     private readonly ICarLookupRepository _carLookupRepository;
@@ -37,7 +37,9 @@ public class CarsController : Controller
         vm.Cars = pagedCars.Items.Select(CarCardVm.FromEntity).ToList();
         vm.Page = pagedCars.Page;
         vm.TotalCount = pagedCars.TotalCount;
-        vm.TotalPages = pagedCars.TotalPages == 0 ? 1 : pagedCars.TotalPages;
+        vm.TotalPages = pagedCars.TotalPages;
+        vm.HasNextPage = pagedCars.HasNextPage;
+        vm.HasPreviousPage = pagedCars.HasPreviousPage;
 
         await PopulateLookupOptionsAsync(vm);
 
