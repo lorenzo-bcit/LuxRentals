@@ -1,7 +1,5 @@
 ﻿using LuxRentals.Repositories.Bookings;
 using LuxRentals.ViewModels.Bookings;
-using LuxRentals.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LuxRentals.Controllers.Booking
@@ -17,7 +15,7 @@ namespace LuxRentals.Controllers.Booking
 
 
         // Shows booking creation form
-        [Authorize(Roles = "Customer")]
+        //[Authorize(Roles = "Customer")]    -----------REMOVE FOR PRODUCTION------
         [HttpGet]
         public IActionResult Create(int carId)
         {
@@ -27,7 +25,7 @@ namespace LuxRentals.Controllers.Booking
         }
 
         // Creates the booking
-        [Authorize(Roles = "Customer")]
+        //[Authorize(Roles = "Customer")] -----------REMOVE FOR PRODUCTION------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(int carId, BookingCreateViewModel model)
@@ -40,7 +38,7 @@ namespace LuxRentals.Controllers.Booking
 
             try
             {
-                
+
                 int customerId = GetCustomerId();
 
                 // TODO: May remove this later?
@@ -52,7 +50,7 @@ namespace LuxRentals.Controllers.Booking
 
                 _bookingRepo.CreateBooking(carId, customerId,
                     model.StartDateTime, model.EndDateTime);
-                
+
                 TempData["Success"] = "Booking created successfully!";
 
                 return RedirectToAction("MyBookings");
@@ -92,7 +90,7 @@ namespace LuxRentals.Controllers.Booking
         }
 
         // Admin/Employee can view any customer's booking history
-        [Authorize(Roles = "Admin,Employee")]
+        //[Authorize(Roles = "Admin,Employee")] -----------REMOVE FOR PRODUCTION------
         public IActionResult ViewCustomerBookings(int customerId)
         {
             try
