@@ -87,13 +87,21 @@ public class CarsController : Controller
     private async Task PopulateLookupOptionsAsync(CarBrowseVm vm)
     {
         var fuelTypes = await _carLookupRepository.GetFuelTypesAsync();
-        vm.FuelTypeOptions = fuelTypes
-            .Select(x => new SelectListItem(x.FuelType1, x.PkFuelTypeId.ToString(), x.PkFuelTypeId == vm.FuelTypeId))
-            .ToList();
+        vm.FuelTypeOptions = new List<SelectListItem>
+        {
+            new SelectListItem("Any", "", vm.FuelTypeId == null)
+        }
+        .Concat(fuelTypes
+            .Select(x => new SelectListItem(x.FuelType1, x.PkFuelTypeId.ToString(), x.PkFuelTypeId == vm.FuelTypeId)))
+        .ToList();
 
         var classes = await _carLookupRepository.GetVehicleClassesAsync();
-        vm.VehicleClassOptions = classes
-            .Select(x => new SelectListItem(x.VehicleClass1, x.PkVehicleClassId.ToString(), x.PkVehicleClassId == vm.VehicleClassId))
-            .ToList();
+        vm.VehicleClassOptions = new List<SelectListItem>
+        {
+            new SelectListItem("Any", "", vm.VehicleClassId == null)
+        }
+        .Concat(classes
+            .Select(x => new SelectListItem(x.VehicleClass1, x.PkVehicleClassId.ToString(), x.PkVehicleClassId == vm.VehicleClassId)))
+        .ToList();
     }
 }
