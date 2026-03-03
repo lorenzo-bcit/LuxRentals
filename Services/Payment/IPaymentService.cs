@@ -1,5 +1,6 @@
 ﻿using LuxRentals.Data;
 using LuxRentals.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Data.Common;
@@ -162,75 +163,90 @@ namespace LuxRentals.Services.Payment
         }
         public async Task CaptureOrderAndStorePayment(int bookingId, string orderId)
         {
-            var token = await GetAccessTokenAsync();
-
-            var request = new HttpRequestMessage(
-                HttpMethod.Post,
-                $"/v2/checkout/orders/{orderId}/capture");
-
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
-
-            var response = await _httpClient.SendAsync(request);
-
-            var json = await response.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(json);
-
-            var captureId = doc.RootElement
-                    .GetProperty("payments")
-                    .GetProperty("captures")[0]
-                    .GetProperty("id")
-                    .GetString()!;
-
-            var amount = decimal.Parse(doc.RootElement
-                .GetProperty("payments")
-                .GetProperty("captures")[0]
-                .GetProperty("amount")
-                .GetProperty("value")
-                .GetString()!);
-
-            var currency = doc.RootElement
-                .GetProperty("payments")
-                .GetProperty("captures")[0]
-                .GetProperty("amount")
-                .GetProperty("currency_code")
-                .GetString()!;
+            using var dbTransaction = await _db.Database.BeginTransactionAsync();
 
             try
             {
-                var transaction = new Models.Transaction
+                var token = await GetAccessTokenAsync();
+
+                var request = new HttpRequestMessage(
+                    HttpMethod.Post,
+                    $"/v2/checkout/orders/{orderId}/capture");
+
+                request.Headers.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+
+                var capture = doc.RootElement
+                    .GetProperty("purchase_units")[0]
+                    .GetProperty("payments")
+                    .GetProperty("captures")[0];
+
+                var captureId = capture
+                    .GetProperty("id")
+                    .GetString()!;
+
+                var amount = decimal.Parse(
+                    capture.GetProperty("amount")
+                           .GetProperty("value")
+                           .GetString()!,
+                    CultureInfo.InvariantCulture);
+
+                var currency = capture
+                    .GetProperty("amount")
+                    .GetProperty("currency_code")
+                    .GetString()!;
+
+                var exists = await _db.ProviderPayments
+                    .AnyAsync(p => p.PaymentProviderCaptureId == captureId);
+
+                if (exists)
+                {
+                    _logger.LogInformation("Capture already processed: {CaptureId}", captureId);
+                    return;
+                }
+
+                var transaction = new Transaction
                 {
                     AmountPaid = amount,
                     PaymentDate = DateTime.UtcNow,
-                    FkBookingId = bookingId,
-                    Payment = new Models.Payment
-                    {
-                        PaymentProvider = "PayPal",
-                        PaymentProviderOrderId = orderId,
-                        PaymentProviderCaptureId = captureId,
-                        RecivedAt = DateTime.UtcNow,
-                        RawWebHookJson = json
-                    }
+                    FkBookingId = bookingId
                 };
-                await using var dbTransaction = await _db.Database.BeginTransactionAsync();
+
+                _db.Transactions.Add(transaction);
+                await _db.SaveChangesAsync();
+
+                var providerPayment = new ProviderPayment
+                {
+                    FkTransactionId = transaction.PkTransactionId,
+                    PaymentProvider = "PayPal",
+                    PaymentProviderOrderId = orderId,
+                    PaymentProviderCaptureId = captureId,
+                    ReceivedAt = DateTime.UtcNow,
+                    RawWebHookJson = json
+                };
+
+                _db.ProviderPayments.Add(providerPayment);
+                var booking = await _db.Bookings.FindAsync(bookingId);
+                if (booking != null)
+                {
+                    booking.FkBookingStatusId = 2;
+                }
+
+                await _db.SaveChangesAsync();
                 await dbTransaction.CommitAsync();
             }
-            catch
+            catch (Exception ex)
             {
                 await dbTransaction.RollbackAsync();
+                _logger.LogError(ex, "Error storing PayPal payment for order {OrderId}", orderId);
                 throw;
             }
-
-            //_db.ProviderPayment.Add(transaction.ProviderPayment);
-
-            var booking = await _db.Bookings.FindAsync(bookingId);
-            if (booking != null)
-            {
-                booking.Transactions.Add(transaction);
-                await _db.SaveChangesAsync();
-            }
-
         }
-
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace LuxRentals.Models
 {
-    public class Payment
+    public class ProviderPayment
     {
         public int PkPaymentId { get; set; }
         public int FkTransactionId { get; set; }
@@ -8,8 +8,8 @@
         public string PaymentProvider { get; set; } = "PayPal";
         public string PaymentProviderOrderId { get; set; } = null!;
         public string PaymentProviderCaptureId { get; set; } = null!;
-        public PaymentStatus Status { get; set; }
-        public DateTime RecivedAt { get; set; }
+        //public PaymentStatus Status { get; set; }
+        public DateTime ReceivedAt { get; set; }
         public string? RawWebHookJson { get; set; }
     }
 }
