@@ -12,9 +12,9 @@ public class CarBrowseVm
 
     public int? TransmissionType { get; set; }
 
-    public int? MinSeats { get; set; }
+    public int MinSeats { get; set; }
 
-    public int? MinLuggage { get; set; }
+    public int MinLuggage { get; set; }
 
     public bool AvailableOnly { get; set; } = true;
 
