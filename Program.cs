@@ -1,19 +1,23 @@
-using System.Net;
-using System.Net.Mail;
 using DotNetEnv.Configuration;
+using LuxRentals.Data;
+using LuxRentals.Extensions;
+using LuxRentals.Repositories.Cars;
+using LuxRentals.Services;
+using LuxRentals.Services.Cars;
+using LuxRentals.Services.Payment;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using LuxRentals.Data;
-using LuxRentals.Extensions;
-using LuxRentals.Services;
+using System.Net;
+using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddDotNetEnv();
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
 builder.Services.AddDbContext<LuxRentalsDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -22,7 +26,32 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
 
+builder.Services.Configure<PaypalOptions>(builder.Configuration.GetSection("Paypal"));
+
+builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>(client =>
+{
+    var paypalOptions = builder.Configuration.GetSection("Paypal").Get<PaypalOptions>()
+        ?? throw new InvalidOperationException("PayPal configuration missing");
+
+    client.BaseAddress = new Uri(paypalOptions.BaseUrl);
+});
+
 builder.Services.AddControllersWithViews();
+
+// Repositories
+builder.Services.AddScoped<ICarReadRepository, CarRepository>();
+builder.Services.AddScoped<ICarWriteRepository, CarRepository>();
+
+// Services
+builder.Services.AddScoped<ICarInventoryService, CarInventoryService>();
+
+builder.Services.Configure<ReCaptchaOptions>(
+    builder.Configuration.GetSection("ReCaptcha"));
+
+builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>(client =>
+{
+    client.BaseAddress = new Uri("https://www.google.com");
+});
 
 // Configure email
 var emailOptions = builder.Configuration
