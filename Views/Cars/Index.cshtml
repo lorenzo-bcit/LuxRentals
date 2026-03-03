@@ -1,0 +1,224 @@
+@model LuxRentals.ViewModels.Cars.CarBrowseVm
+
+@{
+    ViewData["Title"] = "Cars";
+}
+
+<section class="container py-4">
+    <form method="get" asp-action="Index">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 p-3 bg-light border rounded">
+            <h1 class="cars-toolbar-title">Choose your options below</h1>
+            <div class="cars-sort">
+                <label asp-for="SortBy" class="form-label">Sort by</label>
+                <select asp-for="SortBy" class="form-select" onchange="this.form.submit()">
+                    <option value="featured">Featured</option>
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label asp-for="StartDate" class="form-label">From</label>
+                <input asp-for="StartDate"
+                       type="date"
+                       class="form-control"
+                       onchange="submitIfBothDatesSelected(this.form)" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="EndDate" class="form-label">To</label>
+                <input asp-for="EndDate"
+                       type="date"
+                       class="form-control"
+                       onchange="submitIfBothDatesSelected(this.form)" />
+            </div>
+        </div>
+
+        <span asp-validation-for="EndDate" class="text-danger"></span>
+
+        <div class="row g-3">
+            <aside class="col-lg-3">
+                <div class="card p-3 row-gap-2">
+                    <h2>Filters</h2>
+
+                    <div class="cars-filter-block">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label asp-for="MinSeats" class="form-label mb-0">Minimum seats</label>
+                            <span class="fw-semibold" id="seatsDisplay">@(Model.MinSeats)</span>
+                        </div>
+                        <input asp-for="MinSeats"
+                               type="range"
+                               class="form-range mt-2"
+                               min="0"
+                               max="10"
+                               step="1"
+                               oninput="document.getElementById('seatsDisplay').innerText = this.value"
+                               onchange="this.form.submit()" />
+                    </div>
+
+                    <div class="cars-filter-block">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label asp-for="MinLuggage" class="form-label mb-0">Minimum luggage</label>
+                            <span class="fw-semibold" id="luggageDisplay">@(Model.MinLuggage)</span>
+                        </div>
+                        <input asp-for="MinLuggage"
+                               type="range"
+                               class="form-range mt-2"
+                               min="0"
+                               max="10"
+                               step="1"
+                               oninput="document.getElementById('luggageDisplay').innerText = this.value"
+                               onchange="this.form.submit()" />
+                    </div>
+
+                    <div class="cars-filter-block">
+                        <label class="form-label fw-semibold">Vehicle Type</label>
+                        <div class="d-flex flex-column gap-1">
+                            @foreach (var option in Model.VehicleClassOptions)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           asp-for="VehicleClassId"
+                                           value="@option.Value"
+                                           id="vehicle-@option.Value"
+                                           onchange="this.form.submit()"
+                                           checked="@(option.Selected ? "checked" : null)" />
+                                    <label class="form-check-label" for="vehicle-@option.Value">@option.Text</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="cars-filter-block">
+                        <label class="form-label fw-semibold">Fuel Type</label>
+                        <div class="d-flex flex-column gap-1">
+                            @foreach (var option in Model.FuelTypeOptions)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           asp-for="FuelTypeId"
+                                           value="@option.Value"
+                                           id="fuel-@option.Value"
+                                           onchange="this.form.submit()"
+                                           checked="@(option.Selected ? "checked" : null)" />
+                                    <label class="form-check-label" for="fuel-@option.Value">@option.Text</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="cars-filter-block">
+                        <label class="form-label fw-semibold">Transmission</label>
+                        <div class="d-flex flex-column gap-1">
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       asp-for="TransmissionType"
+                                       value=""
+                                       id="trans-any"
+                                       onchange="this.form.submit()"
+                                       checked="@(Model.TransmissionType == null ? "checked" : null)" />
+                                <label class="form-check-label" for="trans-any">Any</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="1" id="trans-auto" onchange="this.form.submit()" />
+                                <label class="form-check-label" for="trans-auto">Automatic</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="0" id="trans-manual" onchange="this.form.submit()" />
+                                <label class="form-check-label" for="trans-manual">Manual</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="col-lg-9 d-flex flex-column gap-3">
+                @if (Model.Cars.Count == 0)
+                {
+                    <div class="alert alert-secondary">No cars match your filters.</div>
+                }
+                else
+                {
+                    @foreach (var car in Model.Cars)
+                    {
+                        <div class="card p-3">
+                            <div class="row align-items-center g-3">
+                                <div class="col-auto">
+                                    <div class="bg-light border d-flex justify-content-center align-items-center" style="width:90px;height:90px;">
+                                        @if (!string.IsNullOrWhiteSpace(car.Thumbnail))
+                                        {
+                                            <img src="@car.Thumbnail" alt="@car.Subtitle" class="img-fluid" style="width:90px;height:90px;object-fit:cover;" />
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">No image</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="col">
+                                    <h3 class="mb-1">@car.Title</h3>
+                                    <p class="mb-1 fw-semibold">@car.Subtitle</p>
+                                    <p class="mb-1 text-muted">
+                                        @car.Transmission • @car.Seats person • @car.Luggage bags • @car.FuelType
+                                    </p>
+                                </div>
+
+                                <div class="col-auto text-end">
+                                    <div class="fw-semibold">Daily Rate</div>
+                                    <div class="text-muted small">CAD</div>
+                                    <div class="fs-3 fw-bold">@car.DailyRate.ToString("0.00")</div>
+                                    <button type="button" class="btn btn-secondary btn-sm mt-1">Book</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                <nav aria-label="Cars pages" class="cars-pagination align-self-center">
+                    <button type="submit"
+                            name="Page"
+                            value="@(Model.Page - 1)"
+                            class="btn btn-outline-dark rounded-circle @(Model.HasPreviousPage ? "" : "disabled")"
+                            aria-disabled="@(!Model.HasPreviousPage)"
+                            @(Model.HasPreviousPage ? null : "disabled")>
+                        &lt;
+                    </button>
+
+                    <span class="cars-page-label mx-lg-2">Page @Model.Page of @Model.TotalPages</span>
+
+                    <button type="submit"
+                            name="Page"
+                            value="@(Model.Page + 1)"
+                            class="btn btn-outline-dark rounded-circle @(Model.HasNextPage ? "" : "disabled")"
+                            aria-disabled="@(!Model.HasNextPage)"
+                            @(Model.HasNextPage ? null : "disabled")>
+                        &gt;
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function submitIfBothDatesSelected(form) {
+            const start = form.querySelector('[name=StartDate]').value;
+            const end = form.querySelector('[name=EndDate]').value;
+
+            if (start && end) {
+                form.submit();
+            }
+        }
+    </script>
+}
