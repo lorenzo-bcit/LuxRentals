@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace LuxRentals.Controllers
+namespace LuxRentals.Controllers.TestControllers
 {
     //TODO: Remove this Controller later.
     public class CarController : Controller

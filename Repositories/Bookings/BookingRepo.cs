@@ -2,7 +2,7 @@
 using LuxRentals.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace LuxRentals.Repos
+namespace LuxRentals.Repositories.Bookings
 {
     public class BookingRepo
     {

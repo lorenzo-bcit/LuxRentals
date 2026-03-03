@@ -1,10 +1,10 @@
-﻿using LuxRentals.Models;
-using LuxRentals.Repos;
-using LuxRentals.ViewModels.BookingViewModels;
+﻿using LuxRentals.Repositories.Bookings;
+using LuxRentals.ViewModels.Bookings;
+using LuxRentals.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LuxRentals.Controllers.BookingFeatureControllers
+namespace LuxRentals.Controllers.Booking
 {
     public class BookingController : Controller
     {
@@ -75,11 +75,11 @@ namespace LuxRentals.Controllers.BookingFeatureControllers
                 int customerId = GetCustomerId();
 
                 // TODO: May remove this later?
-                if (customerId == 0)
+/*                if (customerId == 0)
                 {
                     TempData["Error"] = "You must be logged in to view bookings.";
                     return RedirectToAction("Login", "Account");
-                }
+                }*/
 
                 var bookings = _bookingRepo.GetBookingsForCustomer(customerId);
                 return View(bookings);
@@ -87,7 +87,7 @@ namespace LuxRentals.Controllers.BookingFeatureControllers
             catch (Exception ex)
             {
                 TempData["Error"] = "Unable to load your bookings.";
-                return View(new List<Booking>());
+                return View(new List<Models.Booking>());
             }
         }
 
@@ -104,7 +104,7 @@ namespace LuxRentals.Controllers.BookingFeatureControllers
             } catch (Exception ex) {
 
                 TempData["Error"] = "Unable to load customer bookings.";
-                return View("MyBookings", new List<Booking>());
+                return View("MyBookings", new List<Models.Booking>());
             }
         }
 

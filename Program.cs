@@ -2,6 +2,9 @@
 using LuxRentals.Data;
 using LuxRentals.Data.Seeders;
 using LuxRentals.Repositories.Cars;
+using LuxRentals.Extensions;
+using LuxRentals.Models;
+using LuxRentals.Repositories.Bookings;
 using LuxRentals.Services;
 using LuxRentals.Services.Cars;
 using LuxRentals.Services.Payment;
