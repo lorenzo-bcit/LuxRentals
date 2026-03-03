@@ -55,7 +55,7 @@ public class CarsController : Controller
             TransmissionType = vm.TransmissionType.HasValue ? (byte)vm.TransmissionType.Value : null,
             MinSeats = vm.MinSeats,
             MinLuggage = vm.MinLuggage,
-            AvailableOnly = vm.AvailableOnly,
+            AvailableOnly = true, // this controller is public-facing, we only want to show available
             StartDate = hasInvalidDateRange ? null : vm.StartDate,
             EndDate = hasInvalidDateRange ? null : vm.EndDate,
             Page = vm.Page,
