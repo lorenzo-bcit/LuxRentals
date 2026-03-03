@@ -10,7 +10,7 @@
             <h1 class="cars-toolbar-title">Choose your options below</h1>
             <div class="cars-sort">
                 <label asp-for="SortBy" class="form-label">Sort by</label>
-                <select asp-for="SortBy" class="form-select">
+                <select asp-for="SortBy" class="form-select" onchange="this.form.submit()">
                     <option value="featured">Featured</option>
                     <option value="price_asc">Price: Low to High</option>
                     <option value="price_desc">Price: High to Low</option>
@@ -21,11 +21,17 @@
         <div class="row g-3 mb-3">
             <div class="col-md-6">
                 <label asp-for="StartDate" class="form-label">From</label>
-                <input asp-for="StartDate" type="date" class="form-control" />
+                <input asp-for="StartDate"
+                       type="date"
+                       class="form-control"
+                       onchange="submitIfBothDatesSelected(this.form)" />
             </div>
             <div class="col-md-6">
                 <label asp-for="EndDate" class="form-label">To</label>
-                <input asp-for="EndDate" type="date" class="form-control" />
+                <input asp-for="EndDate"
+                       type="date"
+                       class="form-control"
+                       onchange="submitIfBothDatesSelected(this.form)" />
             </div>
         </div>
 
@@ -37,26 +43,48 @@
                     <h2>Filters</h2>
 
                     <div class="cars-filter-block">
-                        <label asp-for="MinSeats" class="form-label">Capacity (minimum seats)</label>
-                        <input asp-for="MinSeats" class="form-control" min="1" max="20" />
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label asp-for="MinSeats" class="form-label mb-0">Minimum seats</label>
+                            <span class="fw-semibold" id="seatsDisplay">@(Model.MinSeats)</span>
+                        </div>
+                        <input asp-for="MinSeats"
+                               type="range"
+                               class="form-range mt-2"
+                               min="0"
+                               max="10"
+                               step="1"
+                               oninput="document.getElementById('seatsDisplay').innerText = this.value"
+                               onchange="this.form.submit()" />
                     </div>
 
                     <div class="cars-filter-block">
-                        <label asp-for="MinLuggage" class="form-label">Luggage (minimum bags)</label>
-                        <input asp-for="MinLuggage" class="form-control" min="0" max="50" />
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label asp-for="MinLuggage" class="form-label mb-0">Minimum luggage</label>
+                            <span class="fw-semibold" id="luggageDisplay">@(Model.MinLuggage)</span>
+                        </div>
+                        <input asp-for="MinLuggage"
+                               type="range"
+                               class="form-range mt-2"
+                               min="0"
+                               max="10"
+                               step="1"
+                               oninput="document.getElementById('luggageDisplay').innerText = this.value"
+                               onchange="this.form.submit()" />
                     </div>
 
                     <div class="cars-filter-block">
                         <label class="form-label fw-semibold">Vehicle Type</label>
                         <div class="d-flex flex-column gap-1">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" asp-for="VehicleClassId" value="" id="vehicle-any" />
-                                <label class="form-check-label" for="vehicle-any">Any</label>
-                            </div>
                             @foreach (var option in Model.VehicleClassOptions)
                             {
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" asp-for="VehicleClassId" value="@option.Value" id="vehicle-@option.Value" />
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           asp-for="VehicleClassId"
+                                           value="@option.Value"
+                                           id="vehicle-@option.Value"
+                                           onchange="this.form.submit()"
+                                           checked="@(option.Selected ? "checked" : null)" />
                                     <label class="form-check-label" for="vehicle-@option.Value">@option.Text</label>
                                 </div>
                             }
@@ -66,14 +94,16 @@
                     <div class="cars-filter-block">
                         <label class="form-label fw-semibold">Fuel Type</label>
                         <div class="d-flex flex-column gap-1">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" asp-for="FuelTypeId" value="" id="fuel-any" />
-                                <label class="form-check-label" for="fuel-any">Any</label>
-                            </div>
                             @foreach (var option in Model.FuelTypeOptions)
                             {
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" asp-for="FuelTypeId" value="@option.Value" id="fuel-@option.Value" />
+                                    <input class="form-check-input"
+                                           type="radio"
+                                           asp-for="FuelTypeId"
+                                           value="@option.Value"
+                                           id="fuel-@option.Value"
+                                           onchange="this.form.submit()"
+                                           checked="@(option.Selected ? "checked" : null)" />
                                     <label class="form-check-label" for="fuel-@option.Value">@option.Text</label>
                                 </div>
                             }
@@ -84,22 +114,27 @@
                         <label class="form-label fw-semibold">Transmission</label>
                         <div class="d-flex flex-column gap-1">
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="" id="trans-any" />
+                                <input class="form-check-input"
+                                       type="radio"
+                                       asp-for="TransmissionType"
+                                       value=""
+                                       id="trans-any"
+                                       onchange="this.form.submit()"
+                                       checked="@(Model.TransmissionType == null ? "checked" : null)" />
                                 <label class="form-check-label" for="trans-any">Any</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="1" id="trans-auto" />
+                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="1" id="trans-auto" onchange="this.form.submit()" />
                                 <label class="form-check-label" for="trans-auto">Automatic</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="0" id="trans-manual" />
+                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="0" id="trans-manual" onchange="this.form.submit()" />
                                 <label class="form-check-label" for="trans-manual">Manual</label>
                             </div>
                         </div>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-dark">Apply</button>
                         <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
                     </div>
                 </div>
@@ -176,4 +211,14 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function submitIfBothDatesSelected(form) {
+            const start = form.querySelector('[name=StartDate]').value;
+            const end = form.querySelector('[name=EndDate]').value;
+
+            if (start && end) {
+                form.submit();
+            }
+        }
+    </script>
 }
