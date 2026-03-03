@@ -11,7 +11,7 @@
 
             <!-- Cancellation Card -->
             <div class="card shadow-lg">
-                
+
                 <!-- Card Header -->
                 <div class="card-header text-white @(Model.CanCancel ? "bg-warning" : "bg-danger")">
                     <h3 class="mb-0">
@@ -21,7 +21,7 @@
                 </div>
 
                 <div class="card-body p-4">
-                    
+
                     <!-- Error Messages from TempData -->
                     @if (TempData["Error"] != null)
                     {
@@ -39,3 +39,10 @@
                                 <i class="bi bi-hash text-primary"></i>
                                 <strong>Booking ID: @Model.PkBookingId</strong>
                             </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
