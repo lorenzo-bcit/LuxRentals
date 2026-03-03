@@ -1,0 +1,117 @@
+﻿@model LuxRentals.ViewModels.BookingViewModels.BookingCreateViewModel
+
+@{
+    ViewData["Title"] = "Book Your Vehicle";
+    var carId = ViewBag.CarId;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <!-- Breadcrumb Navigation -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Car" asp-action="Index">Shop</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Car" asp-action="Details" asp-route-id="@carId">Vehicle Details</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Reserve</li>
+                </ol>
+            </nav>
+
+            <!-- Booking Form Card -->
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Complete Your Reservation</h3>
+                </div>
+                <div class="card-body">
+
+                    <!-- Show validation summary if errors exist -->
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <form asp-action="Create" asp-route-carId="@carId" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Pickup Date & Time -->
+                        <div class="mb-4">
+                            <label asp-for="StartDateTime" class="form-label fw-bold">Pickup Date & Time</label>
+                            <input asp-for="StartDateTime"
+                                   type="datetime-local"
+                                   class="form-control form-control-lg"
+                                   required />
+                            <span asp-validation-for="StartDateTime" class="text-danger"></span>
+                            <small class="form-text text-muted">Select when you want to pick up the vehicle</small>
+                        </div>
+
+                        <!-- Return Date & Time -->
+                        <div class="mb-4">
+                            <label asp-for="EndDateTime" class="form-label fw-bold">Return Date & Time</label>
+                            <input asp-for="EndDateTime"
+                                   type="datetime-local"
+                                   class="form-control form-control-lg"
+                                   required />
+                            <span asp-validation-for="EndDateTime" class="text-danger"></span>
+                            <small class="form-text text-muted">Select when you will return the vehicle</small>
+                        </div>
+
+                        <!-- Information Box -->
+                        <div class="alert alert-info" role="alert">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <strong>Important:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Rental must start in the future</li>
+                                <li>Return date must be after pickup date</li>
+                                <li>You cannot have overlapping bookings</li>
+                                <li>Cancellations must be made at least 48 hours before pickup</li>
+                            </ul>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-controller="Car" asp-action="Details" asp-route-id="@carId"
+                               class="btn btn-secondary btn-lg">
+                                <i class="bi bi-arrow-left"></i> Back to Vehicle
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Confirm Booking
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Set minimum date to now for both date pickers
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const dateTimeLocalValue = now.toISOString().slice(0, 16);
+
+            const startInput = document.querySelector('input[name="StartDateTime"]');
+            const endInput = document.querySelector('input[name="EndDateTime"]');
+
+            if (startInput) {
+                startInput.min = dateTimeLocalValue;
+            }
+
+            if (endInput) {
+                endInput.min = dateTimeLocalValue;
+            }
+
+            // When start date changes, update end date minimum
+            startInput?.addEventListener('change', function() {
+                if (endInput && this.value) {
+                    endInput.min = this.value;
+                }
+            });
+        });
+    </script>
+}

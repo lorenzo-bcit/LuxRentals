@@ -32,7 +32,7 @@ namespace LuxRentals.Controllers.BookingFeatureControllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(int carId, BookingCreateViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 ViewBag.CarId = carId;
                 return View(model);
@@ -42,6 +42,14 @@ namespace LuxRentals.Controllers.BookingFeatureControllers
             {
                 
                 int customerId = GetCustomerId();
+
+                // TODO: May remove this later?
+                if (customerId == 0)
+                {
+                    TempData["Error"] = "You must be logged in to make a booking.";
+                    return RedirectToAction("Login", "Account");
+                }
+
                 _bookingRepo.CreateBooking(carId, customerId,
                     model.StartDateTime, model.EndDateTime);
                 
@@ -65,6 +73,13 @@ namespace LuxRentals.Controllers.BookingFeatureControllers
             try
             {
                 int customerId = GetCustomerId();
+
+                // TODO: May remove this later?
+                if (customerId == 0)
+                {
+                    TempData["Error"] = "You must be logged in to view bookings.";
+                    return RedirectToAction("Login", "Account");
+                }
 
                 var bookings = _bookingRepo.GetBookingsForCustomer(customerId);
                 return View(bookings);
@@ -142,6 +157,17 @@ namespace LuxRentals.Controllers.BookingFeatureControllers
                 int customerId = GetCustomerId();
                 bool isAdminOrEmployee = User.IsInRole("Admin") || User.IsInRole("Employee");
 
+                var booking = _bookingRepo.GetBookingById(bookingId);
+
+                if (booking == null)
+                {
+                    TempData["Error"] = "Booking not found.";
+                    return RedirectToAction("MyBookings");
+                }
+
+                int bookingCustomerId = booking.FkCustomerId;
+
+                // Now cancel the booking
                 _bookingRepo.CancelBooking(bookingId, customerId, isAdminOrEmployee);
 
                 TempData["Success"] = "Booking cancelled successfully.";
@@ -169,14 +195,13 @@ namespace LuxRentals.Controllers.BookingFeatureControllers
             var customerIdClaim = User.Claims
                 .FirstOrDefault(c => c.Type == "CustomerId");
 
-            if (customerIdClaim == null)
+            if (customerIdClaim == null || !int.TryParse(customerIdClaim.Value, out int customerId))
             {
                 // TODO: Redirect to login page
                 return 0;
-            } else
-            {
-                return int.Parse(customerIdClaim.Value);
             }
+
+            return customerId;
         }
     }
 }

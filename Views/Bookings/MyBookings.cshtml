@@ -1,0 +1,181 @@
+﻿@model IEnumerable<LuxRentals.Models.Booking>
+
+@{
+    ViewData["Title"] = "My Bookings";
+    var isAdminView = ViewBag.CustomerId != null; // Admin viewing customer's bookings
+    var now = DateTime.UtcNow;
+}
+
+<div class="container mt-4">
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5">
+                @if (isAdminView)
+                {
+                    <text>Customer Bookings</text>
+                }
+                else
+                {
+                    <text>My Bookings</text>
+                }
+            </h1>
+            <p class="text-muted">View and manage your vehicle reservations</p>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Bookings List -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var booking in Model)
+            {
+                var statusClass = booking.CancelledAt != null ? "danger" :
+                booking.StartDateTime > now ? "success" :
+                booking.EndDateTime > now ? "primary" : "secondary";
+
+                var statusText = booking.CancelledAt != null ? "Cancelled" :
+                booking.StartDateTime > now ? "Upcoming" :
+                booking.EndDateTime > now ? "Active" : "Completed";
+
+                var timeUntilStart = booking.StartDateTime - now;
+                var canCancel = booking.CancelledAt == null && timeUntilStart.TotalHours >= 48;
+
+                var totalDays = (booking.EndDateTime - booking.StartDateTime).Days;
+                if (totalDays == 0) totalDays = 1; // Minimum 1 day
+                var totalCost = booking.FkCar.DailyRate * totalDays;
+
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+
+                        <!-- Car Image Placeholder -->
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                            @if (!string.IsNullOrEmpty(booking.FkCar.CarThumbnail))
+                            {
+                                <img src="@booking.FkCar.CarThumbnail" alt="Car" class="img-fluid" style="max-height: 200px;">
+                            }
+                            else
+                            {
+                                <i class="bi bi-car-front-fill text-white" style="font-size: 4rem;"></i>
+                            }
+                        </div>
+
+                        <div class="card-body">
+                            <!-- Car Info -->
+                            <h5 class="card-title">
+                                @booking.FkCar.FkModel.FkMake.MakeName @booking.FkCar.FkModel.ModelName
+                            </h5>
+                            <p class="text-muted mb-2">
+                                <small>@booking.FkCar.Year • @booking.FkCar.Colour • @booking.FkCar.TransmissionType</small>
+                            </p>
+
+                            <!-- Status Badge -->
+                            <span class="badge bg-@statusClass mb-3">@statusText</span>
+
+                            <!-- Booking Details -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted"><i class="bi bi-calendar-check"></i> Pickup:</span>
+                                    <strong>@booking.StartDateTime.ToString("MMM dd, yyyy")</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted"><i class="bi bi-calendar-x"></i> Return:</span>
+                                    <strong>@booking.EndDateTime.ToString("MMM dd, yyyy")</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted"><i class="bi bi-clock"></i> Duration:</span>
+                                    <strong>@totalDays day(s)</strong>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted"><i class="bi bi-currency-dollar"></i> Total Cost:</span>
+                                    <strong class="text-primary">$@totalCost.ToString("N2") CAD</strong>
+                                </div>
+                            </div>
+
+                            @if (booking.CancelledAt != null)
+                            {
+                                <div class="alert alert-danger py-2 mb-2" role="alert">
+                                    <small><i class="bi bi-x-circle"></i> Cancelled on @booking.CancelledAt.Value.ToString("MMM dd, yyyy")</small>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="card-footer bg-white">
+                            @if (canCancel)
+                            {
+                                <a asp-action="Cancel" asp-route-id="@booking.PkBookingId"
+                                   class="btn btn-outline-danger btn-sm w-100">
+                                    <i class="bi bi-x-circle"></i> Cancel Booking
+                                </a>
+                            }
+                            else if (booking.CancelledAt == null && timeUntilStart.TotalHours < 48 && timeUntilStart.TotalHours > 0)
+                            {
+                                <button class="btn btn-secondary btn-sm w-100" disabled>
+                                    <i class="bi bi-lock"></i> Cannot Cancel (Less than 48hrs)
+                                </button>
+                            }
+                            else if (booking.CancelledAt != null)
+                            {
+                                <button class="btn btn-secondary btn-sm w-100" disabled>
+                                    <i class="bi bi-x-circle"></i> Already Cancelled
+                                </button>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-calendar-x" style="font-size: 4rem; color: #ccc;"></i>
+                        <h3 class="mt-3">No Bookings Yet</h3>
+                        <p class="text-muted">You haven't made any vehicle reservations.</p>
+                        <a asp-controller="Car" asp-action="Index" class="btn btn-primary mt-3">
+                            <i class="bi bi-search"></i> Browse Vehicles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+}
