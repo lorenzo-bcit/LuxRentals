@@ -33,7 +33,7 @@
 
         <div class="row g-3">
             <aside class="col-lg-3">
-                <div class="card p-3">
+                <div class="card p-3 row-gap-2">
                     <h2>Filters</h2>
 
                     <div class="cars-filter-block">
@@ -135,11 +135,10 @@
                                     <p class="mb-1 text-muted">
                                         @car.Transmission • @car.Seats person • @car.Luggage bags • @car.FuelType
                                     </p>
-                                    <span class="fw-semibold">Show more info</span>
                                 </div>
 
                                 <div class="col-auto text-end">
-                                    <div class="fw-semibold">Price</div>
+                                    <div class="fw-semibold">Daily Rate</div>
                                     <div class="text-muted small">CAD</div>
                                     <div class="fs-3 fw-bold">@car.DailyRate.ToString("0.00")</div>
                                     <button type="button" class="btn btn-secondary btn-sm mt-1">Book</button>
@@ -149,7 +148,7 @@
                     }
                 }
 
-                <nav aria-label="Cars pages" class="cars-pagination">
+                <nav aria-label="Cars pages" class="cars-pagination align-self-center">
                     <button type="submit"
                             name="Page"
                             value="@(Model.Page - 1)"
@@ -159,7 +158,7 @@
                         &lt;
                     </button>
 
-                    <span class="cars-page-label">Page @Model.Page of @Model.TotalPages</span>
+                    <span class="cars-page-label mx-lg-2">Page @Model.Page of @Model.TotalPages</span>
 
                     <button type="submit"
                             name="Page"
