@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace LuxRentals.ViewModels.BookingViewModels
+namespace LuxRentals.ViewModels.Bookings
 {
     public class BookingCreateViewModel
     {
