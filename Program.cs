@@ -1,6 +1,4 @@
-using System.Net;
-using System.Net.Mail;
-using DotNetEnv.Configuration;
+﻿using DotNetEnv.Configuration;
 using LuxRentals.Data;
 using LuxRentals.Data.Seeders;
 using LuxRentals.Repositories.Cars;
@@ -13,6 +11,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Net.Mail;
 using LuxRentals.Repositories.Roles;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,6 +79,9 @@ builder.Services
     });
 
 builder.Services.AddTransient<IEmailSender, IdentityEmailSender>();
+
+// Register repositories
+builder.Services.AddScoped<BookingRepo>();
 
 var app = builder.Build();
 

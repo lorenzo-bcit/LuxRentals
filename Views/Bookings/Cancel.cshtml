@@ -1,0 +1,40 @@
+﻿@model LuxRentals.ViewModels.BookingViewModels.BookingCancellationViewModel
+
+@{
+    ViewData["Title"] = "Cancel Booking";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <!-- Cancellation Card -->
+            <div class="card shadow-lg">
+                
+                <!-- Card Header -->
+                <div class="card-header text-white @(Model.CanCancel ? "bg-warning" : "bg-danger")">
+                    <h3 class="mb-0">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        @(Model.CanCancel ? "Cancel Booking?" : "Cannot Cancel Booking")
+                    </h3>
+                </div>
+
+                <div class="card-body p-4">
+                    
+                    <!-- Error Messages from TempData -->
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Booking Summary -->
+                    <div class="mb-4">
+                        <h5 class="text-muted mb-3">Booking Details</h5>
+                        <div class="p-3 bg-light rounded">
+                            <p class="mb-2">
+                                <i class="bi bi-hash text-primary"></i>
+                                <strong>Booking ID: @Model.PkBookingId</strong>
+                            </p>
