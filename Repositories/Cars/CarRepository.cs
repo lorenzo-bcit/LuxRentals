@@ -50,14 +50,16 @@ public class CarRepository : ICarReadRepository, ICarWriteRepository
 
     private IQueryable<Car> ApplyAvailabilityFilter(IQueryable<Car> cars, CarSearchCriteria criteria)
     {
+        if (!criteria.AvailableOnly)
+            return cars;
+
+        cars = cars.Where(c => c.FkCarStatus.StatusFlag == "Available");
+
         if (criteria.StartDate is null || criteria.EndDate is null)
             return cars;
 
         var start = criteria.StartDate.Value;
         var end = criteria.EndDate.Value;
-
-        // Only operational cars when searching by dates
-        cars = cars.Where(c => c.FkCarStatus.StatusFlag == "Available");
 
         return cars.Where(c =>
             !_db.Bookings.Any(b =>

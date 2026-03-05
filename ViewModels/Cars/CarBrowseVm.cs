@@ -1,0 +1,52 @@
+using LuxRentals.Models;
+using LuxRentals.Repositories;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace LuxRentals.ViewModels.Cars;
+
+public class CarBrowseVm
+{
+    public int? FuelTypeId { get; set; }
+
+    public int? VehicleClassId { get; set; }
+
+    public int? TransmissionType { get; set; }
+
+    public int MinSeats { get; set; }
+
+    public int MinLuggage { get; set; }
+
+    public bool AvailableOnly { get; set; } = true;
+
+    public int Page { get; set; } = 1;
+
+    public DateTime? StartDate { get; set; }
+
+    public DateTime? EndDate { get; set; }
+
+    public string SortBy { get; set; } = "featured";
+
+    public IReadOnlyList<CarCardVm> Cars { get; set; } = [];
+
+    public IReadOnlyList<SelectListItem> FuelTypeOptions { get; set; } = [];
+
+    public IReadOnlyList<SelectListItem> VehicleClassOptions { get; set; } = [];
+
+    public int TotalCount { get; set; }
+
+    public int TotalPages { get; set; }
+
+    public bool HasPreviousPage { get; set; }
+
+    public bool HasNextPage { get; set; }
+
+    public void ApplyPagedResult(PagedList<Car> pagedCars)
+    {
+        Cars = pagedCars.Items.Select(CarCardVm.FromEntity).ToList();
+        Page = pagedCars.Page;
+        TotalCount = pagedCars.TotalCount;
+        TotalPages = pagedCars.TotalPages;
+        HasNextPage = pagedCars.HasNextPage;
+        HasPreviousPage = pagedCars.HasPreviousPage;
+    }
+}
