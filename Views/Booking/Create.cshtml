@@ -68,13 +68,14 @@
 
                         <!-- Action Buttons -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <a asp-controller="Car" asp-action="Details" asp-route-id="@carId"
+                            <a asp-controller="Cars" asp-action="Index"
                                class="btn btn-secondary btn-lg">
-                                <i class="bi bi-arrow-left"></i> Back to Vehicle
+                                <i class="bi bi-arrow-left"></i> Back to Cars
                             </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-check-circle"></i> Confirm Booking
-                            </button>
+                            <a asp-controller="Booking" asp-action="MyBookings"
+                               class="btn btn-secondary btn-lg">
+                               <i class="bi bi-check-circle"></i> Confirm Booking
+                            </a>
                         </div>
 
                     </form>

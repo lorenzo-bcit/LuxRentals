@@ -192,7 +192,7 @@ namespace LuxRentals.Controllers.Booking
             // TODO: Check if this actually works...
             var customerIdClaim = User.Claims
                 .FirstOrDefault(c => c.Type == "CustomerId");
-
+            
             if (customerIdClaim == null || !int.TryParse(customerIdClaim.Value, out int customerId))
             {
                 // TODO: Redirect to login page

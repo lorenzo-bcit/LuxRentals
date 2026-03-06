@@ -176,7 +176,12 @@
                                     <div class="fw-semibold">Daily Rate</div>
                                     <div class="text-muted small">CAD</div>
                                     <div class="fs-3 fw-bold">@car.DailyRate.ToString("0.00")</div>
-                                    <button type="button" class="btn btn-secondary btn-sm mt-1">Book</button>
+                                    <a asp-controller="Booking"
+                                       asp-action="Create"
+                                       asp-route-carId="@car.CarId"
+                                       class="btn btn-secondary btn-sm mt-1">
+                                        Book
+                                    </a>
                                 </div>
                             </div>
                         </div>
