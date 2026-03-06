@@ -10,6 +10,9 @@ using LuxRentals.Services.Payment;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Net.Mail;
+using LuxRentals.Repositories.Roles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,7 +44,9 @@ builder.Services.AddControllersWithViews();
 // Repositories
 builder.Services.AddScoped<ICarReadRepository, CarRepository>();
 builder.Services.AddScoped<ICarWriteRepository, CarRepository>();
-builder.Services.AddScoped<ICarLookupRepository, CarLookupRepository>();
+builder.Services.AddScoped<RoleRepo>();
+builder.Services.AddScoped<UserRepo>();
+builder.Services.AddScoped<UserRoleRepo>();
 
 // Services
 builder.Services.AddScoped<ICarInventoryService, CarInventoryService>();
