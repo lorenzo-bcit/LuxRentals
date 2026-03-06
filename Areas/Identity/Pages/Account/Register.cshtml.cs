@@ -153,15 +153,30 @@ namespace LuxRentals.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-            // reCAPTCHA validation
-            string captchaResponse = Request.Form["g-recaptcha-response"];
-            var captchaResult = await _reCaptchaService.ValidateAsync(captchaResponse);
+            //// reCAPTCHA validation
+            //string captchaResponse = Request.Form["g-recaptcha-response"];
+            //var captchaResult = await _reCaptchaService.ValidateAsync(captchaResponse);
 
-            if (!captchaResult.Success)
+            //if (!captchaResult.Success)
+            //{
+            //    ViewData["SiteKey"] = _reCaptchaOptions.SiteKey;
+            //    ModelState.AddModelError(string.Empty, "The ReCaptcha is invalid.");
+            //    return Page();
+            //}
+            // reCAPTCHA validation (toggle via config)
+            var captchaEnabled = _config.GetValue<bool>("ReCaptcha:Enabled");
+
+            if (captchaEnabled)
             {
-                ViewData["SiteKey"] = _reCaptchaOptions.SiteKey;
-                ModelState.AddModelError(string.Empty, "The ReCaptcha is invalid.");
-                return Page();
+                string captchaResponse = Request.Form["g-recaptcha-response"];
+                var captchaResult = await _reCaptchaService.ValidateAsync(captchaResponse);
+
+                if (!captchaResult.Success)
+                {
+                    ViewData["SiteKey"] = _reCaptchaOptions.SiteKey;
+                    ModelState.AddModelError(string.Empty, "The ReCaptcha is invalid.");
+                    return Page();
+                }
             }
 
             if (ModelState.IsValid)
@@ -251,8 +266,23 @@ namespace LuxRentals.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    var isDev = string.Equals(
+    System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
+    "Development",
+    StringComparison.OrdinalIgnoreCase);
+
+                    if (!isDev)
+                    {
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    }
+                    else
+                    {
+                        _logger.LogInformation("DEV MODE: Skipping confirmation email for {Email}", Input.Email);
+                    }
+
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
