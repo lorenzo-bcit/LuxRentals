@@ -1,6 +1,8 @@
+using System.Net;
+using System.Net.Mail;
 using DotNetEnv.Configuration;
 using LuxRentals.Data;
-using LuxRentals.Extensions;
+using LuxRentals.Data.Seeders;
 using LuxRentals.Repositories.Cars;
 using LuxRentals.Services;
 using LuxRentals.Services.Cars;
@@ -82,6 +84,7 @@ if (app.Environment.IsDevelopment())
 {
     await app.ApplyPendingMigrationsAsync();
     await app.EnsureAdminSeededAsync();
+    await app.EnsureCarCatalogSeededAsync();
 }
 
 if (app.Environment.IsProduction())
