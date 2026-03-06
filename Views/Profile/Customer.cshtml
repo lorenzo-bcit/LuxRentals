@@ -5,8 +5,15 @@
 
 <h1>Customer Profile</h1>
 
+@if (TempData["ProfileUpdated"] != null)
+{
+    <div class="alert alert-success">@TempData["ProfileUpdated"]</div>
+}
+
 <p><strong>Username:</strong> @Model.UserName</p>
 <p><strong>Email:</strong> @Model.Email</p>
+
+<a asp-controller="Profile" asp-action="EditCustomer" class="btn btn-primary">Edit Profile</a>
 
 <hr />
 

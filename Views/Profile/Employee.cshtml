@@ -2,7 +2,12 @@
 @{
     ViewData["Title"] = "Employee Profile";
 }
+@if (TempData["ProfileUpdated"] != null)
+{
+    <div class="alert alert-success">@TempData["ProfileUpdated"]</div>
+}
 
+<a asp-controller="Profile" asp-action="EditEmployee" class="btn btn-primary">Edit Profile</a>
 <h1>Employee Profile</h1>
 <p><strong>Username:</strong> @Model.UserName</p>
 <p><strong>Email:</strong> @Model.Email</p>
