@@ -44,6 +44,7 @@ builder.Services.AddControllersWithViews();
 // Repositories
 builder.Services.AddScoped<ICarReadRepository, CarRepository>();
 builder.Services.AddScoped<ICarWriteRepository, CarRepository>();
+builder.Services.AddScoped<ICarLookupRepository, CarLookupRepository>();
 builder.Services.AddScoped<RoleRepo>();
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<UserRoleRepo>();
