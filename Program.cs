@@ -13,16 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Net.Mail;
 using LuxRentals.Repositories.Roles;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Net.Mail;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
