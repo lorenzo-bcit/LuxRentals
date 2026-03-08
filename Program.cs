@@ -83,6 +83,17 @@ builder.Services.AddScoped<BookingRepo>();
 
 var app = builder.Build();
 
+// TODO: Remove this once Roles is completed.
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<LuxRentalsDbContext>();
+    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+
+    await SeedSimpleCustomerAsync(context, userManager);
+}
+
+
 // Apply any pending migrations and seeding in dev mode
 if (app.Environment.IsDevelopment())
 {
@@ -116,6 +127,57 @@ app.MapRazorPages()
 app.Run();
 
 
+// TODO: Remove this once Roles is completed.
+static async Task SeedSimpleCustomerAsync(LuxRentalsDbContext context, UserManager<IdentityUser> userManager)
+{
+    var customerEmail = "customer@test.com";
+
+    // 1. Create IdentityUser for login
+    var user = await userManager.FindByEmailAsync(customerEmail);
+    if (user == null)
+    {
+        user = new IdentityUser
+        {
+            UserName = customerEmail,
+            Email = customerEmail,
+            EmailConfirmed = true
+        };
+
+        await userManager.CreateAsync(user, "Customer123!");
+        Console.WriteLine($"✓ Identity user created: {customerEmail}");
+    }
+
+    // 2. Create Customer record (will have PkCustomerId = 1)
+    if (!context.Customers.Any())
+    {
+        context.Customers.Add(new Customer
+        {
+            UserId = user.Id,
+            FirstName = "Test",
+            LastName = "Customer",
+            Email = customerEmail,
+            PhoneNumber = "123-456-7890",
+            DriverLicenceNo = "D1234567",
+            LicenceVerified = true
+        });
+        context.SaveChanges();
+        Console.WriteLine($"✓ Customer record created with ID 1");
+    }
+
+    // 3. Seed BookingStatus
+    if (!context.BookingStatuses.Any())
+    {
+        context.BookingStatuses.AddRange(
+            new BookingStatus { BookingStatus1 = "unbooked" },
+            new BookingStatus { BookingStatus1 = "booked" },
+            new BookingStatus { BookingStatus1 = "cancelled" }
+        );
+        context.SaveChanges();
+        Console.WriteLine("✓ BookingStatuses seeded");
+    }
+
+    Console.WriteLine("✓ Customer seeding completed!");
+}
 // TODO: Remove this for merging
 static void SeedData(LuxRentalsDbContext context)
 {

@@ -7,8 +7,6 @@ namespace LuxRentals.ViewModels.Bookings
 
         public int PkBookingId { get; set; }
 
-        // TODO: Add more details to the view model if needed, such as car details etc
-
         [Display(Name = "Pickup Date")]
         public DateTime StartDateTime { get; set; }
 

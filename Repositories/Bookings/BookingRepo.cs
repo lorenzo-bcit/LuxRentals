@@ -60,12 +60,15 @@ namespace LuxRentals.Repositories.Bookings
                     CancelledAt = null
                 };
 
+                Console.WriteLine($"Creating booking for Car ID {carId} from {startDate} to {endDate} for Customer ID {customerId}.");
+
                 _context.Bookings.Add(booking);
                 _context.SaveChanges();
             }
             catch (Exception ex)
             {
                 Console.WriteLine("An error occurred: " + ex.Message);
+                Console.WriteLine("Exception: ", ex);
             }
         }
 
@@ -84,7 +87,7 @@ namespace LuxRentals.Repositories.Bookings
                 }
 
                 // Check authorization
-                // TODO: Customer should not be able to see other customer bookings.
+                // TODO: Cannot verify this without Roles implementation. Customer should not be able to see other customer bookings (but this may never be the case).
                 if (booking.FkCustomerId != customerId && !isAdminOrEmployee)
                 {
                     throw new UnauthorizedAccessException("You are not authorized to cancel this booking.");
@@ -153,7 +156,7 @@ namespace LuxRentals.Repositories.Bookings
         // Check if car is available for date range
         private bool IsCarAvailable(int carId, DateTime startDate, DateTime endDate)
         {
-            // TODO: Check if Car if is in service
+            // TODO: Do we need to check if the car is in service as well?
             return !_context.Bookings.Any(b =>
                 b.FkCarId == carId &&
                 b.CancelledAt == null &&

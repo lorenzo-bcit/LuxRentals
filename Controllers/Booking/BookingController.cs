@@ -1,5 +1,6 @@
 ﻿using LuxRentals.Repositories.Bookings;
 using LuxRentals.ViewModels.Bookings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LuxRentals.Controllers.Booking
@@ -15,7 +16,7 @@ namespace LuxRentals.Controllers.Booking
 
 
         // Shows booking creation form
-        //[Authorize(Roles = "Customer")]    -----------REMOVE FOR PRODUCTION------
+        [Authorize(Roles = "Customer")]
         [HttpGet]
         public IActionResult Create(int carId)
         {
@@ -25,7 +26,7 @@ namespace LuxRentals.Controllers.Booking
         }
 
         // Creates the booking
-        //[Authorize(Roles = "Customer")] -----------REMOVE FOR PRODUCTION------
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(int carId, BookingCreateViewModel model)
@@ -41,7 +42,6 @@ namespace LuxRentals.Controllers.Booking
 
                 int customerId = GetCustomerId();
 
-                // TODO: May remove this later?
                 if (customerId == 0)
                 {
                     TempData["Error"] = "You must be logged in to make a booking.";
@@ -57,7 +57,6 @@ namespace LuxRentals.Controllers.Booking
             }
             catch (Exception ex)
             {
-                // TODO: Do we need this Model Error?
                 ModelState.AddModelError(string.Empty, ex.Message);
                 ViewBag.CarId = carId;
                 return View(model);
@@ -72,12 +71,12 @@ namespace LuxRentals.Controllers.Booking
             {
                 int customerId = GetCustomerId();
 
-                // TODO: May remove this later?
-/*                if (customerId == 0)
+                
+               if (customerId == 0)
                 {
                     TempData["Error"] = "You must be logged in to view bookings.";
                     return RedirectToAction("Login", "Account");
-                }*/
+                }
 
                 var bookings = _bookingRepo.GetBookingsForCustomer(customerId);
                 return View(bookings);
@@ -89,8 +88,9 @@ namespace LuxRentals.Controllers.Booking
             }
         }
 
+        // TODO: Need to verify this works after roles are implemented
         // Admin/Employee can view any customer's booking history
-        //[Authorize(Roles = "Admin,Employee")] -----------REMOVE FOR PRODUCTION------
+        [Authorize(Roles = "Admin,Employee")]
         public IActionResult ViewCustomerBookings(int customerId)
         {
             try
@@ -125,8 +125,6 @@ namespace LuxRentals.Controllers.Booking
                 var viewModel = new BookingCancellationViewModel
                 {
                     PkBookingId = id,
-                    // TODO: Add BookingSummary if needed?
-                    //BookingSummary = $"{booking.FkCar.FkModel.FkMake.MakeName} {booking.FkCar.FkModel.ModelName}: {booking.StartDateTime:MMM dd, yyyy} - {booking.EndDateTime:MMM dd, yyyy}",
                     StartDateTime = booking.StartDateTime,
                     CanCancel = canCancel,
                     Message = canCancel
@@ -165,7 +163,6 @@ namespace LuxRentals.Controllers.Booking
 
                 int bookingCustomerId = booking.FkCustomerId;
 
-                // Now cancel the booking
                 _bookingRepo.CancelBooking(bookingId, customerId, isAdminOrEmployee);
 
                 TempData["Success"] = "Booking cancelled successfully.";
@@ -189,10 +186,12 @@ namespace LuxRentals.Controllers.Booking
         // Helper Methods
         private int GetCustomerId()
         {
-            // TODO: Check if this actually works...
+            return 2;
+
+            // TODO: Refactor this back in when Customer roles is working again.
             var customerIdClaim = User.Claims
                 .FirstOrDefault(c => c.Type == "CustomerId");
-            
+
             if (customerIdClaim == null || !int.TryParse(customerIdClaim.Value, out int customerId))
             {
                 // TODO: Redirect to login page
