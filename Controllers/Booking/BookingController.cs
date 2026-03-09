@@ -1,4 +1,5 @@
 ﻿using LuxRentals.Repositories.Bookings;
+using LuxRentals.Services.Payment;
 using LuxRentals.ViewModels.Bookings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,10 +9,12 @@ namespace LuxRentals.Controllers.Booking
     public class BookingController : Controller
     {
         private readonly BookingRepo _bookingRepo;
+        private readonly IPaymentService _paymentService;
 
-        public BookingController(BookingRepo bookingRepo)
+        public BookingController(BookingRepo bookingRepo, IPaymentService paymentService)
         {
             _bookingRepo = bookingRepo;
+            _paymentService = paymentService;
         }
 
 
