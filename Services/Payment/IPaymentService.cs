@@ -1,5 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using LuxRentals.Data;
+using LuxRentals.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Data.Common;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -17,15 +21,18 @@ namespace LuxRentals.Services.Payment
         private readonly HttpClient _httpClient;
         private readonly PaypalOptions _options;
         private readonly ILogger<PayPalPaymentService> _logger;
+        private readonly LuxRentalsDbContext _db;
 
         public PayPalPaymentService(
             HttpClient httpClient,
             IOptions<PaypalOptions> options,
-            ILogger<PayPalPaymentService> logger)
+            ILogger<PayPalPaymentService> logger,
+            LuxRentalsDbContext db)
         {
             _httpClient = httpClient;
             _logger = logger;
             _options = options.Value;
+            _db = db;
         }
 
         public async Task<string> CreateOrderAsync(decimal amount, string currency)
@@ -151,6 +158,93 @@ namespace LuxRentals.Services.Payment
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error while obtaining PayPal access token");
+                throw;
+            }
+        }
+        public async Task CaptureOrderAndStorePayment(int bookingId, string orderId)
+        {
+            using var dbTransaction = await _db.Database.BeginTransactionAsync();
+
+            try
+            {
+                var token = await GetAccessTokenAsync();
+
+                var request = new HttpRequestMessage(
+                    HttpMethod.Post,
+                    $"/v2/checkout/orders/{orderId}/capture");
+
+                request.Headers.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+
+                var capture = doc.RootElement
+                    .GetProperty("purchase_units")[0]
+                    .GetProperty("payments")
+                    .GetProperty("captures")[0];
+
+                var captureId = capture
+                    .GetProperty("id")
+                    .GetString()!;
+
+                var amount = decimal.Parse(
+                    capture.GetProperty("amount")
+                           .GetProperty("value")
+                           .GetString()!,
+                    CultureInfo.InvariantCulture);
+
+                var currency = capture
+                    .GetProperty("amount")
+                    .GetProperty("currency_code")
+                    .GetString()!;
+
+                var exists = await _db.ProviderPayments
+                    .AnyAsync(p => p.PaymentProviderCaptureId == captureId);
+
+                if (exists)
+                {
+                    _logger.LogInformation("Capture already processed: {CaptureId}", captureId);
+                    return;
+                }
+
+                var transaction = new Transaction
+                {
+                    AmountPaid = amount,
+                    PaymentDate = DateTime.UtcNow,
+                    FkBookingId = bookingId
+                };
+
+                _db.Transactions.Add(transaction);
+                await _db.SaveChangesAsync();
+
+                var providerPayment = new ProviderPayment
+                {
+                    FkTransactionId = transaction.PkTransactionId,
+                    PaymentProvider = "PayPal",
+                    PaymentProviderOrderId = orderId,
+                    PaymentProviderCaptureId = captureId,
+                    ReceivedAt = DateTime.UtcNow,
+                    RawWebHookJson = json
+                };
+
+                _db.ProviderPayments.Add(providerPayment);
+                var booking = await _db.Bookings.FindAsync(bookingId);
+                if (booking != null)
+                {
+                    booking.FkBookingStatusId = 2;
+                }
+
+                await _db.SaveChangesAsync();
+                await dbTransaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await dbTransaction.RollbackAsync();
+                _logger.LogError(ex, "Error storing PayPal payment for order {OrderId}", orderId);
                 throw;
             }
         }

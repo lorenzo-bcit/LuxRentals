@@ -11,4 +11,5 @@ public class Transaction
     public int FkBookingId { get; set; }
 
     public Booking FkBooking { get; set; } = null!;
+    public ICollection<ProviderPayment> ProviderPayments { get; set; } = new List<ProviderPayment>();
 }

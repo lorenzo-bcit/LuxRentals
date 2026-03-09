@@ -34,11 +34,12 @@ public class LuxRentalsDbContext : IdentityDbContext
     public DbSet<Transaction> Transactions { get; set; }
 
     public DbSet<VehicleClass> VehicleClasses { get; set; }
+    public DbSet<ProviderPayment> ProviderPayments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.Entity<Booking>(entity =>
         {
             entity.HasKey(e => e.PkBookingId).HasName("PK__Booking__8A399DE0B0FB731A");
@@ -265,6 +266,48 @@ public class LuxRentalsDbContext : IdentityDbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("vehicleClass");
+        });
+
+        modelBuilder.Entity<ProviderPayment>(entity =>
+        {
+            entity.HasKey(e => e.PkPaymentId)
+                .HasName("PK_ProviderPayment");
+
+            entity.ToTable("ProviderPayment");
+
+            entity.Property(e => e.PkPaymentId)
+                .HasColumnName("pkPaymentId");
+
+            entity.Property(e => e.FkTransactionId)
+                .HasColumnName("fkTransactionId");
+
+            entity.Property(e => e.PaymentProvider)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("paymentProvider");
+
+            entity.Property(e => e.PaymentProviderOrderId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("paymentProviderOrderId");
+
+            entity.Property(e => e.PaymentProviderCaptureId)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("paymentProviderCaptureId");
+
+            entity.Property(e => e.ReceivedAt)
+                .HasColumnName("receivedAt");
+
+            entity.Property(e => e.RawWebHookJson)
+                .HasColumnType("nvarchar(max)")
+                .HasColumnName("rawWebHookJson");
+
+            entity.HasOne(d => d.Transaction)
+                .WithMany(t => t.ProviderPayments)
+                .HasForeignKey(d => d.FkTransactionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProviderPayment_Transaction");
         });
     }
 }
