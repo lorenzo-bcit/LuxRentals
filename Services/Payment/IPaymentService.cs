@@ -13,7 +13,7 @@ namespace LuxRentals.Services.Payment
     public interface IPaymentService
     {
         Task<string> CreateOrderAsync(decimal amount, string currency);
-        Task CaptureOrderAsync(string orderId);
+        Task CaptureOrderAsync(string orderId, int bookingId);
     }
 
     public class PayPalPaymentService : IPaymentService
