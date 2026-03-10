@@ -29,3 +29,68 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* ── Admin Dashboard ── */
+
+.admin-dashboard {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.admin-header h1 {
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.admin-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.admin-card .card-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.admin-action-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.admin-action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ── Admin Section (Role / UserRole pages) ── */
+
+.admin-section {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.admin-section h2 {
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.admin-table th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  color: #5a5a7a;
+  padding: 0.85rem 1rem;
+}
+
+.admin-table td {
+  padding: 0.85rem 1rem;
+  vertical-align: middle;
+}
