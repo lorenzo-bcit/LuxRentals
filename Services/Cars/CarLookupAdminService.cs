@@ -129,6 +129,13 @@ public class CarLookupAdminService : ICarLookupAdminService
         if (await _repo.ModelNameExistsAsync(makeId.Value, normalized, id))
             return SaveResult.Fail(nameof(AdminModelEditVm.ModelName), "That model already exists for the selected make.");
 
+        if (existing.FkMakeId != makeId.Value && await _repo.ModelHasCarsAsync(id))
+        {
+            return SaveResult.Fail(
+                nameof(AdminModelEditVm.FkMakeId),
+                "Make cannot be changed because this model is already assigned to cars.");
+        }
+
         existing.FkMakeId = makeId.Value;
         existing.ModelName = normalized;
 
