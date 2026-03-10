@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace LuxRentals.Controllers;
 
 [Authorize(Roles = "Admin")]
-[ValidateAntiForgeryToken]
 public class AdminProfileController : Controller
 {
     private readonly UserRepo _userRepo;
