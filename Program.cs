@@ -42,9 +42,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ICarReadRepository, CarRepository>();
 builder.Services.AddScoped<ICarWriteRepository, CarRepository>();
 builder.Services.AddScoped<ICarLookupRepository, CarLookupRepository>();
+builder.Services.AddScoped<ICarLookupAdminRepository, CarLookupAdminRepository>();
 
 // Services
 builder.Services.AddScoped<ICarInventoryService, CarInventoryService>();
+builder.Services.AddScoped<ICarLookupAdminService, CarLookupAdminService>();
 
 builder.Services.Configure<ReCaptchaOptions>(
     builder.Configuration.GetSection("ReCaptcha"));

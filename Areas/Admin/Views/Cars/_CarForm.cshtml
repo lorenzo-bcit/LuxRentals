@@ -1,5 +1,9 @@
 @model LuxRentals.ViewModels.Cars.Admin.AdminCarEditVm
 
+@{
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+}
+
 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
 <div class="row g-3">
@@ -18,6 +22,12 @@
         <label asp-for="Car.FkModelId" class="form-label"></label>
         <select asp-for="Car.FkModelId" asp-items="Model.ModelOptions" class="form-select"></select>
         <span asp-validation-for="Car.FkModelId" class="text-danger"></span>
+        <div class="form-text">
+            Need a new make or model?
+            <a asp-area="Admin" asp-controller="Makes" asp-action="Index" asp-route-returnUrl="@returnUrl">Add make</a>
+            or
+            <a asp-area="Admin" asp-controller="Models" asp-action="Index" asp-route-returnUrl="@returnUrl">add model</a>.
+        </div>
     </div>
     <div class="col-md-6">
         <label asp-for="Car.FkFuelTypeId" class="form-label"></label>
@@ -29,6 +39,10 @@
         <label asp-for="Car.FkVehicleClassId" class="form-label"></label>
         <select asp-for="Car.FkVehicleClassId" asp-items="Model.VehicleClassOptions" class="form-select"></select>
         <span asp-validation-for="Car.FkVehicleClassId" class="text-danger"></span>
+        <div class="form-text">
+            Missing a class?
+            <a asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index" asp-route-returnUrl="@returnUrl">Add vehicle class</a>.
+        </div>
     </div>
     <div class="col-md-6">
         <label asp-for="Car.FkCarStatusId" class="form-label"></label>

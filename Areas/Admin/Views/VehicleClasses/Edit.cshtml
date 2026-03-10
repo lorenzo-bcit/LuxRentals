@@ -1,0 +1,52 @@
+@model LuxRentals.ViewModels.Cars.Admin.AdminVehicleClassEditVm
+
+@{
+    ViewData["Title"] = "Edit Vehicle Class";
+}
+
+<section class="py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">Edit Vehicle Class</h1>
+            <p class="text-muted mb-0">Update a class name used by the car inventory form.</p>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.ReturnUrl))
+        {
+            <a class="btn btn-outline-secondary" href="@Model.ReturnUrl">Back to Car</a>
+        }
+        else
+        {
+            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index">Back to Classes</a>
+        }
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form method="post" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Edit" asp-route-id="@Model.VehicleClassId">
+                <input asp-for="VehicleClassId" type="hidden" />
+                <input asp-for="ReturnUrl" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="VehicleClassName" class="form-label"></label>
+                    <input asp-for="VehicleClassName" class="form-control" />
+                    <span asp-validation-for="VehicleClassName" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a class="btn btn-outline-secondary"
+                       asp-area="Admin"
+                       asp-controller="VehicleClasses"
+                       asp-action="Index"
+                       asp-route-returnUrl="@Model.ReturnUrl">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

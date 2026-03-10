@@ -10,7 +10,12 @@
             <h1 class="mb-1">Fleet Inventory</h1>
             <p class="text-muted mb-0">Manage all cars, including unavailable inventory.</p>
         </div>
-        <a class="btn btn-primary" asp-area="Admin" asp-controller="Cars" asp-action="Create">Add Car</a>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Makes" asp-action="Index">Manage Makes</a>
+            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Models" asp-action="Index">Manage Models</a>
+            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index">Manage Classes</a>
+            <a class="btn btn-primary" asp-area="Admin" asp-controller="Cars" asp-action="Create">Add Car</a>
+        </div>
     </div>
 
     @if (TempData["StatusMessage"] is string statusMessage)
