@@ -37,11 +37,21 @@ public class CarLookupRepository : ICarLookupRepository
     {
         var q = _db.Models
             .AsNoTracking()
+            .Include(m => m.FkMake)
             .AsQueryable();
 
         if (makeId is not null)
             q = q.Where(m => m.FkMakeId == makeId);
 
         return q.OrderBy(m => m.ModelName).ToListAsync();
+    }
+
+    public async Task<int?> GetCarStatusIdByNameAsync(string statusName)
+    {
+        return await _db.CarStatuses
+            .AsNoTracking()
+            .Where(x => x.StatusFlag == statusName)
+            .Select(x => (int?)x.PkCarStatusId)
+            .FirstOrDefaultAsync();
     }
 }

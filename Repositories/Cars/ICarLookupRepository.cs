@@ -9,4 +9,5 @@ public interface ICarLookupRepository
     public Task<List<CarStatus>> GetCarStatusesAsync();
     public Task<List<Make>> GetMakesAsync();
     public Task<List<Model>> GetModelsAsync(int? makeId = null);
+    public Task<int?> GetCarStatusIdByNameAsync(string statusName);
 }

@@ -100,7 +100,11 @@ public class CarRepository : ICarReadRepository, ICarWriteRepository
     public Task<bool> PlateExistsAsync(string plate, int? excludeCarId) =>
         _db.Cars.AnyAsync(c => c.LicencePlate == plate && (excludeCarId == null || c.PkCarId != excludeCarId));
 
+    public Task<bool> HasBookingsAsync(int carId) =>
+        _db.Bookings.AnyAsync(b => b.FkCarId == carId);
+
     // WRITE
     public Task AddAsync(Car car) => _db.Cars.AddAsync(car).AsTask();
+    public void Remove(Car car) => _db.Cars.Remove(car);
     public Task SaveChangesAsync() => _db.SaveChangesAsync();
 }

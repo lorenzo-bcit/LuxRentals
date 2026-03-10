@@ -8,4 +8,5 @@ public interface ICarReadRepository
     public Task<Car?> GetByIdAsync(int id);
     public Task<bool> VinExistsAsync(string vin, int? excludeCarId);
     public Task<bool> PlateExistsAsync(string plate, int? excludeCarId);
+    public Task<bool> HasBookingsAsync(int carId);
 }
