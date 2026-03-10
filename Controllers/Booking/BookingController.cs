@@ -19,7 +19,7 @@ namespace LuxRentals.Controllers.Booking
 
 
         // Shows booking creation form
-        [Authorize(Roles = "Customer")]
+      //  [Authorize(Roles = "Customer")] ToDo Remove comment when roles work
         [HttpGet]
         public IActionResult Create(int carId)
         {
@@ -29,7 +29,7 @@ namespace LuxRentals.Controllers.Booking
         }
 
         // Creates the booking
-        [Authorize(Roles = "Customer")]
+        // [Authorize(Roles = "Customer")] ToDo uncomment this when roles are working again
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(int carId, BookingCreateViewModel model)
@@ -42,7 +42,7 @@ namespace LuxRentals.Controllers.Booking
 
             try
             {
-
+               
                 int customerId = GetCustomerId();
 
                 if (customerId == 0)

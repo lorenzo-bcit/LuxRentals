@@ -17,6 +17,7 @@ namespace LuxRentals.Controllers.Payment
         {
             ViewBag.OrderId = orderId;
             ViewBag.BookingId = bookingId;
+
             return View();
         }
 

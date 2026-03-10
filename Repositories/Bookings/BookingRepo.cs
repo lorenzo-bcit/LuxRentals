@@ -177,5 +177,20 @@ namespace LuxRentals.Repositories.Bookings
                  (endDate > b.StartDateTime && endDate <= b.EndDateTime) ||
                  (startDate <= b.StartDateTime && endDate >= b.EndDateTime)));
         }
+
+        public decimal CalculateBookingPrice(int carId, DateTime start, DateTime end)
+        {
+            var car = _context.Cars.FirstOrDefault(c => c.PkCarId == carId);
+
+            if (car == null)
+                throw new Exception("Car not found.");
+
+            int days = (end.Date - start.Date).Days;
+
+            if (days <= 0)
+                days = 1;
+
+            return car.DailyRate * days;
+        }
     }
 }

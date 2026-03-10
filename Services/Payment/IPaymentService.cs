@@ -88,8 +88,10 @@ namespace LuxRentals.Services.Payment
 
         }
 
-        public async Task CaptureOrderAsync(string orderId)
+        public async Task CaptureOrderAsync(string orderId, int bookingId)
         {
+            using var dbTransaction = await _db.Database.BeginTransactionAsync();
+
             try
             {
                 var token = await GetAccessTokenAsync();
@@ -103,24 +105,69 @@ namespace LuxRentals.Services.Payment
 
                 var response = await _httpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+
+                // Get capture details from PayPal response
+                var capture = doc.RootElement
+                    .GetProperty("payments")
+                    .GetProperty("captures")[0];
+
+                var captureId = capture.GetProperty("id").GetString()!;
+
+                var amount = decimal.Parse(
+                    capture.GetProperty("amount")
+                           .GetProperty("value")
+                           .GetString()!,
+                    CultureInfo.InvariantCulture);
+
+                // Save transaction
+                var transaction = new Transaction
+                {
+                    AmountPaid = amount,
+                    PaymentDate = DateTime.UtcNow,
+                    FkBookingId = bookingId
+                };
+
+                _db.Transactions.Add(transaction);
+                await _db.SaveChangesAsync();
+
+                // Save provider payment
+                var providerPayment = new ProviderPayment
+                {
+                    FkTransactionId = transaction.PkTransactionId,
+                    PaymentProvider = "PayPal",
+                    PaymentProviderOrderId = orderId,
+                    PaymentProviderCaptureId = captureId,
+                    ReceivedAt = DateTime.UtcNow,
+                    RawWebHookJson = json
+                };
+
+                _db.ProviderPayments.Add(providerPayment);
+
+                await _db.SaveChangesAsync();
+                await dbTransaction.CommitAsync();
             }
             catch (HttpRequestException ex)
             {
+                await dbTransaction.RollbackAsync();
                 _logger.LogError(ex, "Failed to capture PayPal order with ID {OrderId}", orderId);
                 throw;
             }
             catch (JsonException ex)
             {
+                await dbTransaction.RollbackAsync();
                 _logger.LogError(ex, "Failed to parse PayPal response for order capture");
                 throw;
             }
             catch (Exception ex)
             {
+                await dbTransaction.RollbackAsync();
                 _logger.LogError(ex, "Unexpected error during PayPal order capture for order ID {OrderId}", orderId);
                 throw;
             }
         }
-
         private async Task<string> GetAccessTokenAsync()
         {
             try
@@ -183,7 +230,6 @@ namespace LuxRentals.Services.Payment
                 using var doc = JsonDocument.Parse(json);
 
                 var capture = doc.RootElement
-                    .GetProperty("purchase_units")[0]
                     .GetProperty("payments")
                     .GetProperty("captures")[0];
 
