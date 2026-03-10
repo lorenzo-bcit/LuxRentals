@@ -19,14 +19,11 @@ public class AdminProfileController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var users = await _userRepo.GetAllUsersAsync();
-        var roles = await _roleRepo.GetAllRolesAsync();
-
         var vm = new AdminDashboardVm
         {
             AdminEmail = User.Identity?.Name ?? "Admin",
-            UserCount = users.Count,
-            RoleCount = roles.Count
+            UserCount = await _userRepo.GetUserCountAsync(),
+            RoleCount = await _roleRepo.GetRoleCountAsync()
         };
 
         return View(vm);
