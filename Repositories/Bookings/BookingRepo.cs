@@ -19,7 +19,7 @@ namespace LuxRentals.Repositories.Bookings
         }
 
         // Create booking
-        public void CreateBooking(int carId, int customerId,
+        public Booking CreateBooking(int carId, int customerId,
             DateTime startDate, DateTime endDate)
         {
             try
@@ -64,11 +64,14 @@ namespace LuxRentals.Repositories.Bookings
 
                 _context.Bookings.Add(booking);
                 _context.SaveChanges();
+
+                return booking;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("An error occurred: " + ex.Message);
                 Console.WriteLine("Exception: ", ex);
+                throw;
             }
         }
 

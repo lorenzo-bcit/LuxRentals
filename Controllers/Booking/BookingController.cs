@@ -51,12 +51,32 @@ namespace LuxRentals.Controllers.Booking
                     return RedirectToAction("Login", "Account");
                 }
 
-                _bookingRepo.CreateBooking(carId, customerId,
-                    model.StartDateTime, model.EndDateTime);
+;
+                var booking = _bookingRepo.CreateBooking(
+                    carId,
+                    customerId,
+                    model.StartDateTime,
+                    model.EndDateTime);
 
-                TempData["Success"] = "Booking created successfully!";
+                var price = _bookingRepo.CalculateBookingPrice(
+                    carId,
+                    model.StartDateTime,
+                    model.EndDateTime);
+                //_bookingRepo.CreateBooking(carId, customerId,
+                //    model.StartDateTime, model.EndDateTime);
 
-                return RedirectToAction("MyBookings");
+                //TempData["Success"] = "Booking created successfully!";
+
+                var orderId = _paymentService.CreateOrderAsync(price, "CAD");
+
+                return RedirectToAction(
+                    "Checkout",
+                    "Payment",
+                    new
+                    {
+                        bookingId = booking.PkBookingId,
+                        orderId = orderId
+                    });
             }
             catch (Exception ex)
             {
