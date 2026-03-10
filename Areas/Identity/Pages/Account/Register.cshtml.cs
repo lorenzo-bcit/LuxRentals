@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using LuxRentals.Services;
+using LuxRentals.Services.ServiceSettings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
