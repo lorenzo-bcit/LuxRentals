@@ -100,6 +100,13 @@ namespace LuxRentals.Repositories.Bookings
                 .FirstOrDefault(b => b.PkBookingId == bookingId);
         }
 
+        // Get customer ID by email
+        public int GetCustomerIdByEmail(string email)
+        {
+            var customer = _context.Customers.FirstOrDefault(c => c.Email == email);
+            return customer?.PkCustomerId ?? 0;
+        }
+
         // Get all bookings for a customer
         public List<Booking> GetBookingsForCustomer(int customerId)
         {

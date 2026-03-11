@@ -249,19 +249,18 @@ namespace LuxRentals.Controllers.Booking
         // Helper Methods
         private int GetCustomerId()
         {
-            return 2;
-
-            // TODO: Refactor this back in when Customer roles is working again.
-            var customerIdClaim = User.Claims
-                .FirstOrDefault(c => c.Type == "CustomerId");
-
-            if (customerIdClaim == null || !int.TryParse(customerIdClaim.Value, out int customerId))
+            // Get email of logged-in user
+            if (User.Identity?.IsAuthenticated == true)
             {
-                // TODO: Redirect to login page
-                return 0;
+                var email = User.Identity.Name; 
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    return _bookingRepo.GetCustomerIdByEmail(email);
+                }
             }
 
-            return customerId;
+            return 0;
         }
     }
 }
