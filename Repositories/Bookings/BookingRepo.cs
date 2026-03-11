@@ -19,94 +19,75 @@ namespace LuxRentals.Repositories.Bookings
         }
 
         // Create booking
-        public void CreateBooking(int carId, int customerId,
-            DateTime startDate, DateTime endDate)
+        public void CreateBooking(int carId, int customerId, DateTime startDate, DateTime endDate)
         {
-            try
+            // NO TRY-CATCH HERE! Let exceptions bubble up to the controller
+
+            // Validation checks
+            if (endDate <= startDate)
             {
-                // Validation checks
-                if (endDate <= startDate)
-                {
-                    throw new ArgumentException("End date must be after start date.");
-                }
-
-                if (startDate <= DateTime.Now)
-                {
-                    throw new ArgumentException("Start date must be in the future.");
-                }
-
-                bool isCarAvailable = IsCarAvailable(carId, startDate, endDate);
-
-                if (!isCarAvailable)
-                {
-                    throw new InvalidOperationException("The car is not available for the selected dates.");
-                }
-
-                bool hasConflictingBooking = HasConflictingBooking(customerId, startDate, endDate);
-
-                if (hasConflictingBooking)
-                {
-                    throw new InvalidOperationException("You have another booking that conflicts with the selected dates.");
-                }
-
-                var booking = new Booking
-                {
-                    FkCarId = carId,
-                    FkCustomerId = customerId,
-                    StartDateTime = startDate,
-                    EndDateTime = endDate,
-                    CreatedAt = DateTime.UtcNow,
-                    FkBookingStatusId = STATUS_BOOKED,
-                    CancelledAt = null
-                };
-
-                Console.WriteLine($"Creating booking for Car ID {carId} from {startDate} to {endDate} for Customer ID {customerId}.");
-
-                _context.Bookings.Add(booking);
-                _context.SaveChanges();
+                throw new ArgumentException("End date must be after start date.");
             }
-            catch (Exception ex)
+
+            if (startDate <= DateTime.Now)
             {
-                Console.WriteLine("An error occurred: " + ex.Message);
-                Console.WriteLine("Exception: ", ex);
+                throw new ArgumentException("Start date must be in the future.");
             }
+
+            bool isCarAvailable = IsCarAvailable(carId, startDate, endDate);
+            if (!isCarAvailable)
+            {
+                throw new InvalidOperationException("The car is not available for the selected dates.");
+            }
+
+            bool hasConflictingBooking = HasConflictingBooking(customerId, startDate, endDate);
+            if (hasConflictingBooking)
+            {
+                throw new InvalidOperationException("You have another booking that conflicts with the selected dates.");
+            }
+
+            var booking = new Booking
+            {
+                FkCarId = carId,
+                FkCustomerId = customerId,
+                StartDateTime = startDate,
+                EndDateTime = endDate,
+                CreatedAt = DateTime.UtcNow,
+                FkBookingStatusId = STATUS_BOOKED,
+                CancelledAt = null
+            };
+
+            Console.WriteLine($"Creating booking for Car ID {carId} from {startDate} to {endDate} for Customer ID {customerId}.");
+
+            _context.Bookings.Add(booking);
+            _context.SaveChanges();
         }
 
         // Cancel Booking
-        public void CancelBooking(
-            int bookingId,
-            int customerId,
-            bool isAdminOrEmployee)
+        public void CancelBooking(int bookingId, int customerId, bool isAdminOrEmployee)
         {
-            try
+            // NO TRY-CATCH HERE EITHER!
+
+            var booking = GetBookingById(bookingId);
+            if (booking == null)
             {
-                var booking = GetBookingById(bookingId);
-                if (booking == null)
-                {
-                    throw new ArgumentException("Booking not found.");
-                }
-
-                // Check authorization
-                // TODO: Cannot verify this without Roles implementation. Customer should not be able to see other customer bookings (but this may never be the case).
-                if (booking.FkCustomerId != customerId && !isAdminOrEmployee)
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to cancel this booking.");
-                }
-
-                if (!CanCancelBooking(booking, isAdminOrEmployee))
-                {
-                    throw new InvalidOperationException("This booking cannot be cancelled. Cancellations must be made at least 48 hours before the start time.");
-                }
-
-                booking.CancelledAt = DateTime.UtcNow;
-                booking.FkBookingStatusId = STATUS_CANCELLED;
-
-                _context.SaveChanges();
+                throw new ArgumentException("Booking not found.");
             }
-            catch (Exception ex)
+
+            if (booking.FkCustomerId != customerId && !isAdminOrEmployee)
             {
-                Console.WriteLine("An error occurred: " + ex.Message);
+                throw new UnauthorizedAccessException("You are not authorized to cancel this booking.");
             }
+
+            if (!CanCancelBooking(booking, isAdminOrEmployee))
+            {
+                throw new InvalidOperationException("This booking cannot be cancelled. Cancellations must be made at least 48 hours before the start time.");
+            }
+
+            booking.CancelledAt = DateTime.UtcNow;
+            booking.FkBookingStatusId = STATUS_CANCELLED;
+
+            _context.SaveChanges();
         }
 
         // Get booking by ID
@@ -156,26 +137,31 @@ namespace LuxRentals.Repositories.Bookings
         // Check if car is available for date range
         private bool IsCarAvailable(int carId, DateTime startDate, DateTime endDate)
         {
-            // TODO: Do we need to check if the car is in service as well?
-            return !_context.Bookings.Any(b =>
+            // Convert incoming dates to UTC to match how they are stored in DB
+            startDate = startDate.ToUniversalTime();
+            endDate = endDate.ToUniversalTime();
+
+            // Check if any booking overlaps this date range
+            var overlappingBookingExists = _context.Bookings.Any(b =>
                 b.FkCarId == carId &&
                 b.CancelledAt == null &&
                 b.FkBookingStatusId == STATUS_BOOKED &&
-                ((startDate >= b.StartDateTime && startDate < b.EndDateTime) ||
-                 (endDate > b.StartDateTime && endDate <= b.EndDateTime) ||
-                 (startDate <= b.StartDateTime && endDate >= b.EndDateTime)));
+                startDate < b.EndDateTime &&    
+                endDate > b.StartDateTime      
+            );
+
+            // Car is available if no overlapping booking exists
+            return !overlappingBookingExists;
         }
 
         // Check if customer has conflicting booking
         private bool HasConflictingBooking(int customerId, DateTime startDate, DateTime endDate)
         {
             return _context.Bookings.Any(b =>
-                b.FkCustomerId == customerId &&
-                b.CancelledAt == null &&
-                b.FkBookingStatusId == STATUS_BOOKED &&
-                ((startDate >= b.StartDateTime && startDate < b.EndDateTime) ||
-                 (endDate > b.StartDateTime && endDate <= b.EndDateTime) ||
-                 (startDate <= b.StartDateTime && endDate >= b.EndDateTime)));
+            b.FkCustomerId == customerId &&
+            b.CancelledAt == null &&
+            b.FkBookingStatusId == STATUS_BOOKED && startDate < b.EndDateTime && endDate > b.StartDateTime
+    );
         }
     }
 }

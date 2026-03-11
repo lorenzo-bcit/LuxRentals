@@ -48,8 +48,12 @@ namespace LuxRentals.Controllers.Booking
                     return RedirectToAction("Login", "Account");
                 }
 
-                _bookingRepo.CreateBooking(carId, customerId,
-                    model.StartDateTime, model.EndDateTime);
+                _bookingRepo.CreateBooking(
+                    carId,
+                    customerId,
+                    model.StartDateTime.ToUniversalTime(),
+                    model.EndDateTime.ToUniversalTime()
+                    );
 
                 TempData["Success"] = "Booking created successfully!";
 
