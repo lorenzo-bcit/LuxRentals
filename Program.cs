@@ -10,9 +10,8 @@ using LuxRentals.Services.Payment;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Net.Mail;
 using LuxRentals.Repositories.Roles;
+using LuxRentals.Services.ServiceSettings;
 
 var builder = WebApplication.CreateBuilder(args);
 

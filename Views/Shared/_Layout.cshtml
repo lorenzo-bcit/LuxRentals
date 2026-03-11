@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - LuxRentals</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/LuxRentals.styles.css" asp-append-version="true"/>
 </head>
@@ -37,6 +38,14 @@
                                 </a>
                             </li>
                         }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="AdminProfile" asp-action="Index">
+                                <i class="bi bi-shield-lock"></i> Admin Panel
+                            </a>
+                        </li>
+                    }
                 </ul>
                 <partial name="_LoginPartial" />
             </div>
