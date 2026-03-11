@@ -19,13 +19,13 @@ public interface ICarService
     public Task<SaveResult> UpdateAsync(int id, CarUpsertVm vm);
     public Task<SaveResult> DeleteAsync(int id);
 
-    public Task<IReadOnlyList<AdminMakeListItemVm>> GetMakesAsync();
+    public Task<IReadOnlyList<MakeListItemVm>> GetMakeListAsync();
     public Task<Make?> GetMakeByIdAsync(int id);
     public Task<SaveResult> CreateMakeAsync(string makeName);
     public Task<SaveResult> UpdateMakeAsync(int id, string makeName);
     public Task<SaveResult> DeleteMakeAsync(int id);
 
-    public Task<IReadOnlyList<AdminModelListItemVm>> GetAdminModelsAsync();
+    public Task<IReadOnlyList<ModelListItemVm>> GetModelListAsync();
     public Task<Model?> GetModelByIdAsync(int id);
     public Task<SaveResult> CreateModelAsync(int? makeId, string modelName);
     public Task<SaveResult> UpdateModelAsync(int id, int? makeId, string modelName);
@@ -33,7 +33,7 @@ public interface ICarService
 
     public Task<IReadOnlyList<Make>> GetMakeOptionsAsync();
 
-    public Task<IReadOnlyList<AdminVehicleClassListItemVm>> GetAdminVehicleClassesAsync();
+    public Task<IReadOnlyList<VehicleClassListItemVm>> GetVehicleClassListAsync();
     public Task<VehicleClass?> GetVehicleClassByIdAsync(int id);
     public Task<SaveResult> CreateVehicleClassAsync(string vehicleClassName);
     public Task<SaveResult> UpdateVehicleClassAsync(int id, string vehicleClassName);

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LuxRentals.ViewModels.Cars.Admin;
 
-public class AdminCarEditVm
+public class CarEditVm
 {
     public CarUpsertVm Car { get; set; } = new();
 

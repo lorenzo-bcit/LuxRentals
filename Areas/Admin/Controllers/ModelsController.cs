@@ -17,7 +17,7 @@ public class ModelsController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(string? returnUrl = null)
     {
-        var vm = new AdminModelIndexVm
+        var vm = new ModelIndexVm
         {
             ReturnUrl = returnUrl
         };
@@ -28,7 +28,7 @@ public class ModelsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(AdminModelIndexVm vm)
+    public async Task<IActionResult> Create(ModelIndexVm vm)
     {
         if (!ModelState.IsValid)
         {
@@ -56,7 +56,7 @@ public class ModelsController : Controller
         if (model is null)
             return NotFound();
 
-        var vm = new AdminModelEditVm
+        var vm = new ModelEditVm
         {
             ModelId = model.PkModelId,
             FkMakeId = model.FkMakeId,
@@ -70,7 +70,7 @@ public class ModelsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, AdminModelEditVm vm)
+    public async Task<IActionResult> Edit(int id, ModelEditVm vm)
     {
         if (id != vm.ModelId)
             return BadRequest();
@@ -103,7 +103,7 @@ public class ModelsController : Controller
         return RedirectToAction(nameof(Index), new { returnUrl });
     }
 
-    private async Task PopulateAsync(AdminModelIndexVm vm)
+    private async Task PopulateAsync(ModelIndexVm vm)
     {
         var makes = await _carService.GetMakeOptionsAsync();
 
@@ -113,10 +113,10 @@ public class ModelsController : Controller
             .. makes.Select(x => new SelectListItem(x.MakeName, x.PkMakeId.ToString(), x.PkMakeId == vm.FkMakeId))
         ];
 
-        vm.Models = await _carService.GetAdminModelsAsync();
+        vm.Models = await _carService.GetModelListAsync();
     }
 
-    private async Task PopulateAsync(AdminModelEditVm vm)
+    private async Task PopulateAsync(ModelEditVm vm)
     {
         var makes = await _carService.GetMakeOptionsAsync();
         vm.MakeOptions =

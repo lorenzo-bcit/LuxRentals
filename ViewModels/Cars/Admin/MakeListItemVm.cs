@@ -1,6 +1,6 @@
 namespace LuxRentals.ViewModels.Cars.Admin;
 
-public class AdminMakeListItemVm
+public class MakeListItemVm
 {
     public int MakeId { get; set; }
 

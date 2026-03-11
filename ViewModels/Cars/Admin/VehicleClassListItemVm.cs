@@ -1,6 +1,6 @@
 namespace LuxRentals.ViewModels.Cars.Admin;
 
-public class AdminVehicleClassListItemVm
+public class VehicleClassListItemVm
 {
     public int VehicleClassId { get; set; }
 

@@ -16,7 +16,7 @@ public class VehicleClassesController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(string? returnUrl = null)
     {
-        var vm = new AdminVehicleClassIndexVm
+        var vm = new VehicleClassIndexVm
         {
             ReturnUrl = returnUrl
         };
@@ -27,7 +27,7 @@ public class VehicleClassesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(AdminVehicleClassIndexVm vm)
+    public async Task<IActionResult> Create(VehicleClassIndexVm vm)
     {
         if (!ModelState.IsValid)
         {
@@ -55,7 +55,7 @@ public class VehicleClassesController : Controller
         if (vehicleClass is null)
             return NotFound();
 
-        return View(new AdminVehicleClassEditVm
+        return View(new VehicleClassEditVm
         {
             VehicleClassId = vehicleClass.PkVehicleClassId,
             VehicleClassName = vehicleClass.VehicleClass1,
@@ -65,7 +65,7 @@ public class VehicleClassesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, AdminVehicleClassEditVm vm)
+    public async Task<IActionResult> Edit(int id, VehicleClassEditVm vm)
     {
         if (id != vm.VehicleClassId)
             return BadRequest();
@@ -94,9 +94,9 @@ public class VehicleClassesController : Controller
         return RedirectToAction(nameof(Index), new { returnUrl });
     }
 
-    private async Task PopulateAsync(AdminVehicleClassIndexVm vm)
+    private async Task PopulateAsync(VehicleClassIndexVm vm)
     {
-        vm.VehicleClasses = await _carService.GetAdminVehicleClassesAsync();
+        vm.VehicleClasses = await _carService.GetVehicleClassListAsync();
     }
 
     private IActionResult RedirectToReturnOrIndex(string? returnUrl)

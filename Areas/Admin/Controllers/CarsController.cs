@@ -29,7 +29,7 @@ public class CarsController : Controller
         };
 
         var pagedCars = await _carService.SearchAsync(criteria);
-        var vm = new AdminCarIndexVm();
+        var vm = new CarIndexVm();
         vm.ApplyPagedResult(pagedCars);
 
         return View(vm);
@@ -38,7 +38,7 @@ public class CarsController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var vm = new AdminCarEditVm();
+        var vm = new CarEditVm();
         await PopulateOptionsAsync(vm);
 
         return View(vm);
@@ -46,7 +46,7 @@ public class CarsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(AdminCarEditVm vm)
+    public async Task<IActionResult> Create(CarEditVm vm)
     {
         if (!ModelState.IsValid)
         {
@@ -73,7 +73,7 @@ public class CarsController : Controller
         if (car is null)
             return NotFound();
 
-        var vm = new AdminCarEditVm
+        var vm = new CarEditVm
         {
             Car = CarUpsertVm.FromEntity(car)
         };
@@ -84,7 +84,7 @@ public class CarsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, AdminCarEditVm vm)
+    public async Task<IActionResult> Edit(int id, CarEditVm vm)
     {
         if (vm.Car.CarId != id)
             return BadRequest();
@@ -126,7 +126,7 @@ public class CarsController : Controller
         }
     }
 
-    private async Task PopulateOptionsAsync(AdminCarEditVm vm)
+    private async Task PopulateOptionsAsync(CarEditVm vm)
     {
         var fuelTypes = await _carService.GetFuelTypesAsync();
         vm.FuelTypeOptions = fuelTypes

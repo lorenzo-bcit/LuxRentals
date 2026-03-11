@@ -2,7 +2,7 @@ using LuxRentals.Models;
 
 namespace LuxRentals.ViewModels.Cars.Admin;
 
-public class AdminCarListItemVm
+public class CarListItemVm
 {
     public int CarId { get; set; }
     public string DisplayName { get; set; } = "";
@@ -14,7 +14,7 @@ public class AdminCarListItemVm
     public string FuelType { get; set; } = "";
     public decimal DailyRate { get; set; }
 
-    public static AdminCarListItemVm FromEntity(Car car) => new()
+    public static CarListItemVm FromEntity(Car car) => new()
     {
         CarId = car.PkCarId,
         DisplayName = $"{car.Year} {car.FkModel.FkMake.MakeName} {car.FkModel.ModelName}",

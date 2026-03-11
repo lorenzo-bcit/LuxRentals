@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LuxRentals.ViewModels.Cars.Admin;
 
-public class AdminModelIndexVm
+public class ModelEditVm
 {
+    public int ModelId { get; set; }
+
     [Display(Name = "Make")]
     [Required(ErrorMessage = "Make is required.")]
     public int? FkMakeId { get; set; }
@@ -15,8 +17,6 @@ public class AdminModelIndexVm
     public string ModelName { get; set; } = string.Empty;
 
     public IReadOnlyList<SelectListItem> MakeOptions { get; set; } = [];
-
-    public IReadOnlyList<AdminModelListItemVm> Models { get; set; } = [];
 
     public string? ReturnUrl { get; set; }
 }

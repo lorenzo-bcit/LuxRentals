@@ -16,7 +16,7 @@ public class MakesController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(string? returnUrl = null)
     {
-        var vm = new AdminMakeIndexVm
+        var vm = new MakeIndexVm
         {
             ReturnUrl = returnUrl
         };
@@ -27,7 +27,7 @@ public class MakesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(AdminMakeIndexVm vm)
+    public async Task<IActionResult> Create(MakeIndexVm vm)
     {
         if (!ModelState.IsValid)
         {
@@ -55,7 +55,7 @@ public class MakesController : Controller
         if (make is null)
             return NotFound();
 
-        return View(new AdminMakeEditVm
+        return View(new MakeEditVm
         {
             MakeId = make.PkMakeId,
             MakeName = make.MakeName,
@@ -65,7 +65,7 @@ public class MakesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, AdminMakeEditVm vm)
+    public async Task<IActionResult> Edit(int id, MakeEditVm vm)
     {
         if (id != vm.MakeId)
             return BadRequest();
@@ -94,9 +94,9 @@ public class MakesController : Controller
         return RedirectToAction(nameof(Index), new { returnUrl });
     }
 
-    private async Task PopulateAsync(AdminMakeIndexVm vm)
+    private async Task PopulateAsync(MakeIndexVm vm)
     {
-        vm.Makes = await _carService.GetMakesAsync();
+        vm.Makes = await _carService.GetMakeListAsync();
     }
 
     private IActionResult RedirectToReturnOrIndex(string? returnUrl)

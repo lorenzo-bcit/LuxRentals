@@ -80,11 +80,11 @@ public class CarService : ICarService
         return await TrySaveAsync("Car deleted.");
     }
 
-    public async Task<IReadOnlyList<AdminMakeListItemVm>> GetMakesAsync()
+    public async Task<IReadOnlyList<MakeListItemVm>> GetMakeListAsync()
     {
         var makes = await _repo.GetMakesAsync();
         return makes
-            .Select(x => new AdminMakeListItemVm
+            .Select(x => new MakeListItemVm
             {
                 MakeId = x.PkMakeId,
                 MakeName = x.MakeName,
@@ -99,10 +99,10 @@ public class CarService : ICarService
     {
         var normalized = NormalizeName(makeName);
         if (string.IsNullOrWhiteSpace(normalized))
-            return SaveResult.Fail(nameof(AdminMakeIndexVm.MakeName), "Make name is required.");
+            return SaveResult.Fail(nameof(MakeIndexVm.MakeName), "Make name is required.");
 
         if (await _repo.MakeNameExistsAsync(normalized))
-            return SaveResult.Fail(nameof(AdminMakeIndexVm.MakeName), "Make already exists.");
+            return SaveResult.Fail(nameof(MakeIndexVm.MakeName), "Make already exists.");
 
         await _repo.AddMakeAsync(new Make { MakeName = normalized });
         return await TrySaveAsync("Make added.");
@@ -116,10 +116,10 @@ public class CarService : ICarService
 
         var normalized = NormalizeName(makeName);
         if (string.IsNullOrWhiteSpace(normalized))
-            return SaveResult.Fail(nameof(AdminMakeEditVm.MakeName), "Make name is required.");
+            return SaveResult.Fail(nameof(MakeEditVm.MakeName), "Make name is required.");
 
         if (await _repo.MakeNameExistsAsync(normalized, id))
-            return SaveResult.Fail(nameof(AdminMakeEditVm.MakeName), "Make already exists.");
+            return SaveResult.Fail(nameof(MakeEditVm.MakeName), "Make already exists.");
 
         existing.MakeName = normalized;
         return await TrySaveAsync("Make updated.");
@@ -138,11 +138,11 @@ public class CarService : ICarService
         return await TrySaveAsync("Make deleted.");
     }
 
-    public async Task<IReadOnlyList<AdminModelListItemVm>> GetAdminModelsAsync()
+    public async Task<IReadOnlyList<ModelListItemVm>> GetModelListAsync()
     {
         var models = await _repo.GetModelsAsync();
         return models
-            .Select(x => new AdminModelListItemVm
+            .Select(x => new ModelListItemVm
             {
                 ModelId = x.PkModelId,
                 MakeId = x.FkMakeId,
@@ -158,17 +158,17 @@ public class CarService : ICarService
     public async Task<SaveResult> CreateModelAsync(int? makeId, string modelName)
     {
         if (makeId is null)
-            return SaveResult.Fail(nameof(AdminModelIndexVm.FkMakeId), "Make is required.");
+            return SaveResult.Fail(nameof(ModelIndexVm.FkMakeId), "Make is required.");
 
         if (!await _repo.MakeExistsAsync(makeId.Value))
-            return SaveResult.Fail(nameof(AdminModelIndexVm.FkMakeId), "Selected make was not found.");
+            return SaveResult.Fail(nameof(ModelIndexVm.FkMakeId), "Selected make was not found.");
 
         var normalized = NormalizeName(modelName);
         if (string.IsNullOrWhiteSpace(normalized))
-            return SaveResult.Fail(nameof(AdminModelIndexVm.ModelName), "Model name is required.");
+            return SaveResult.Fail(nameof(ModelIndexVm.ModelName), "Model name is required.");
 
         if (await _repo.ModelNameExistsAsync(makeId.Value, normalized))
-            return SaveResult.Fail(nameof(AdminModelIndexVm.ModelName), "That model already exists for the selected make.");
+            return SaveResult.Fail(nameof(ModelIndexVm.ModelName), "That model already exists for the selected make.");
 
         await _repo.AddModelAsync(new Model
         {
@@ -186,22 +186,22 @@ public class CarService : ICarService
             return SaveResult.Fail(string.Empty, "Model not found.");
 
         if (makeId is null)
-            return SaveResult.Fail(nameof(AdminModelEditVm.FkMakeId), "Make is required.");
+            return SaveResult.Fail(nameof(ModelEditVm.FkMakeId), "Make is required.");
 
         if (!await _repo.MakeExistsAsync(makeId.Value))
-            return SaveResult.Fail(nameof(AdminModelEditVm.FkMakeId), "Selected make was not found.");
+            return SaveResult.Fail(nameof(ModelEditVm.FkMakeId), "Selected make was not found.");
 
         var normalized = NormalizeName(modelName);
         if (string.IsNullOrWhiteSpace(normalized))
-            return SaveResult.Fail(nameof(AdminModelEditVm.ModelName), "Model name is required.");
+            return SaveResult.Fail(nameof(ModelEditVm.ModelName), "Model name is required.");
 
         if (await _repo.ModelNameExistsAsync(makeId.Value, normalized, id))
-            return SaveResult.Fail(nameof(AdminModelEditVm.ModelName), "That model already exists for the selected make.");
+            return SaveResult.Fail(nameof(ModelEditVm.ModelName), "That model already exists for the selected make.");
 
         if (existing.FkMakeId != makeId.Value && await _repo.ModelHasCarsAsync(id))
         {
             return SaveResult.Fail(
-                nameof(AdminModelEditVm.FkMakeId),
+                nameof(ModelEditVm.FkMakeId),
                 "Make cannot be changed because this model is already assigned to cars.");
         }
 
@@ -234,11 +234,11 @@ public class CarService : ICarService
         }).ToList();
     }
 
-    public async Task<IReadOnlyList<AdminVehicleClassListItemVm>> GetAdminVehicleClassesAsync()
+    public async Task<IReadOnlyList<VehicleClassListItemVm>> GetVehicleClassListAsync()
     {
         var vehicleClasses = await _repo.GetVehicleClassesAsync();
         return vehicleClasses
-            .Select(x => new AdminVehicleClassListItemVm
+            .Select(x => new VehicleClassListItemVm
             {
                 VehicleClassId = x.PkVehicleClassId,
                 VehicleClassName = x.VehicleClass1,
@@ -253,10 +253,10 @@ public class CarService : ICarService
     {
         var normalized = NormalizeName(vehicleClassName);
         if (string.IsNullOrWhiteSpace(normalized))
-            return SaveResult.Fail(nameof(AdminVehicleClassIndexVm.VehicleClassName), "Vehicle class is required.");
+            return SaveResult.Fail(nameof(VehicleClassIndexVm.VehicleClassName), "Vehicle class is required.");
 
         if (await _repo.VehicleClassNameExistsAsync(normalized))
-            return SaveResult.Fail(nameof(AdminVehicleClassIndexVm.VehicleClassName), "Vehicle class already exists.");
+            return SaveResult.Fail(nameof(VehicleClassIndexVm.VehicleClassName), "Vehicle class already exists.");
 
         await _repo.AddVehicleClassAsync(new VehicleClass { VehicleClass1 = normalized });
         return await TrySaveAsync("Vehicle class added.");
@@ -270,10 +270,10 @@ public class CarService : ICarService
 
         var normalized = NormalizeName(vehicleClassName);
         if (string.IsNullOrWhiteSpace(normalized))
-            return SaveResult.Fail(nameof(AdminVehicleClassEditVm.VehicleClassName), "Vehicle class is required.");
+            return SaveResult.Fail(nameof(VehicleClassEditVm.VehicleClassName), "Vehicle class is required.");
 
         if (await _repo.VehicleClassNameExistsAsync(normalized, id))
-            return SaveResult.Fail(nameof(AdminVehicleClassEditVm.VehicleClassName), "Vehicle class already exists.");
+            return SaveResult.Fail(nameof(VehicleClassEditVm.VehicleClassName), "Vehicle class already exists.");
 
         existing.VehicleClass1 = normalized;
         return await TrySaveAsync("Vehicle class updated.");

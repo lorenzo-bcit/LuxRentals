@@ -1,6 +1,6 @@
 namespace LuxRentals.ViewModels.Cars.Admin;
 
-public class AdminModelListItemVm
+public class ModelListItemVm
 {
     public int ModelId { get; set; }
 
