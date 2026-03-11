@@ -48,8 +48,12 @@ namespace LuxRentals.Controllers.Booking
                     return RedirectToAction("Login", "Account");
                 }
 
-                _bookingRepo.CreateBooking(carId, customerId,
-                    model.StartDateTime, model.EndDateTime);
+                _bookingRepo.CreateBooking(
+                    carId,
+                    customerId,
+                    model.StartDateTime.ToUniversalTime(),
+                    model.EndDateTime.ToUniversalTime()
+                    );
 
                 TempData["Success"] = "Booking created successfully!";
 
@@ -88,6 +92,37 @@ namespace LuxRentals.Controllers.Booking
             }
         }
 
+        // Admin/Employee can see list of all customers with bookings
+        [Authorize(Roles = "Admin,Employee")]
+        [HttpGet]
+        public IActionResult CustomerList()
+        {
+            try
+            {
+                var customers = _bookingRepo.GetAllCustomersWithBookings();
+
+                var viewModel = customers.Select(c => new CustomerListViewModel
+                {
+                    CustomerId = c.PkCustomerId,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    TotalBookings = c.Bookings.Count,
+                    ActiveBookings = c.Bookings.Count(b =>
+                        b.CancelledAt == null &&
+                        b.StartDateTime <= DateTime.UtcNow &&
+                        b.EndDateTime > DateTime.UtcNow)
+                }).ToList();
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Unable to load customer list.";
+                return View(new List<CustomerListViewModel>());
+            }
+        }
+
         // TODO: Need to verify this works after roles are implemented
         // Admin/Employee can view any customer's booking history
         [Authorize(Roles = "Admin,Employee")]
@@ -109,40 +144,68 @@ namespace LuxRentals.Controllers.Booking
 
         // Show cancellation info (no validation necessary)
         [HttpGet]
+        [HttpGet]
         public IActionResult Cancel(int id)
         {
             try
             {
                 var booking = _bookingRepo.GetBookingById(id);
-                int customerId = GetCustomerId();
+
+                if (booking == null)
+                {
+                    TempData["Error"] = "Booking not found.";
+                    return RedirectToAction("MyBookings");
+                }
+
                 bool isAdminOrEmployee = User.IsInRole("Admin") || User.IsInRole("Employee");
 
+                // Verify Customer owns Booking (unless Admin/Employee)
+                if (!isAdminOrEmployee)
+                {
+                    int customerId = GetCustomerId();
+                    if (booking.FkCustomerId != customerId)
+                    {
+                        TempData["Error"] = "You are not authorized to view this booking.";
+                        return RedirectToAction("MyBookings");
+                    }
+                }
 
-                var timeUntilStart = booking.StartDateTime - DateTime.UtcNow;
-                var canCancel = (booking.CancelledAt == null) &&
-                (isAdminOrEmployee || timeUntilStart.TotalHours >= 48);
+                var canCancel = _bookingRepo.CanCancelBooking(booking, isAdminOrEmployee);
+
+                // Build customer-specific message for admin
+                string customerName = $"{booking.FkCustomer.FirstName} {booking.FkCustomer.LastName}";
+                string message;
+
+                if (canCancel)
+                {
+                    message = isAdminOrEmployee
+                        ? $"Are you sure you want to cancel {customerName}'s booking?"
+                        : "Are you sure you want to cancel this booking?";
+                }
+                else
+                {
+                    message = booking.CancelledAt != null
+                        ? "This booking has already been cancelled."
+                        : "Cannot cancel within 48 hours of start date.";
+                }
 
                 var viewModel = new BookingCancellationViewModel
                 {
                     PkBookingId = id,
                     StartDateTime = booking.StartDateTime,
+                    EndDateTime = booking.EndDateTime,
                     CanCancel = canCancel,
-                    Message = canCancel
-                        ? "Are you sure you want to cancel this booking?"
-                        : booking.CancelledAt != null
-                            ? "This booking has already been cancelled."
-                            : "Cannot cancel within 48 hours of start date."
+                    Message = message
                 };
 
                 return View(viewModel);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 TempData["Error"] = "Unable to load cancellation page.";
                 return RedirectToAction("MyBookings");
-
             }
         }
-
         // Cancels booking
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -186,19 +249,18 @@ namespace LuxRentals.Controllers.Booking
         // Helper Methods
         private int GetCustomerId()
         {
-            return 2;
-
-            // TODO: Refactor this back in when Customer roles is working again.
-            var customerIdClaim = User.Claims
-                .FirstOrDefault(c => c.Type == "CustomerId");
-
-            if (customerIdClaim == null || !int.TryParse(customerIdClaim.Value, out int customerId))
+            // Get email of logged-in user
+            if (User.Identity?.IsAuthenticated == true)
             {
-                // TODO: Redirect to login page
-                return 0;
+                var email = User.Identity.Name; 
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    return _bookingRepo.GetCustomerIdByEmail(email);
+                }
             }
 
-            return customerId;
+            return 0;
         }
     }
 }

@@ -32,5 +32,10 @@ namespace LuxRentals.Repositories.Roles
                     }
                 ).FirstOrDefaultAsync();
         }
+
+        public async Task<int> GetUserCountAsync()
+        {
+            return await _db.Users.CountAsync();
+        }
     }
 }
