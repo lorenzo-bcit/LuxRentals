@@ -1,4 +1,5 @@
-﻿using LuxRentals.Repositories.Roles;
+using LuxRentals.Repositories.Roles;
+using LuxRentals.ViewModels;
 using LuxRentals.ViewModels.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,18 +32,10 @@ public class UserRoleController : Controller
     }
     public async Task<IActionResult> Detail(string userName)
     {
-        var user = await _userRepo.GetUserByEmailAsync(userName);
+        // Email is already known from the route — no need for a second DB lookup
         var rolesVm = await _userRoleRepo.GetUserRolesAsync(userName);
 
-        if (user == null)
-        {
-           ViewBag.UserName = userName;
-        }
-        else
-        {
-            ViewBag.UserName = user.Email;
-        }
-
+        ViewBag.UserName = userName;
         ViewBag.UserEmail = userName;
         return View(rolesVm);
     }
@@ -69,7 +62,7 @@ public class UserRoleController : Controller
             return View(userRoleVm);
         }
 
-        var success = await _userRoleRepo.AddUserRoleAsync(
+        bool success = await _userRoleRepo.AddUserRoleAsync(
             userRoleVm.Email,
             userRoleVm.Role);
 
@@ -83,49 +76,19 @@ public class UserRoleController : Controller
             return View(userRoleVm);
         }
 
-        if (success)
-        {
-            TempData["SuccessMessage"] = "Role assigned!";
-        }
-        else
-        {
-            TempData["ErrorMessage"] = "Unable to assign the role!.";
-        }
-
+        TempData["SuccessMessage"] = "Role assigned!";
         return RedirectToAction("Detail", "UserRole",
             new { userName = userRoleVm.Email });
     }
 
     private async Task BuildDropdownLists(string selectedUser)
     {
-        // --- Users dropdown ---
         var users = await _userRepo.GetAllUsersAsync();
+        ViewBag.UserSelectList = new SelectList(users, nameof(UserVm.Email), nameof(UserVm.Email), selectedUser);
 
-        ViewBag.UserSelectList = new SelectList(
-            users.Select(u => new SelectListItem
-            {
-                Value = u.Email,
-                Text = u.Email
-            }),
-            "Value",
-            "Text",
-            selectedUser
-        );
-
-        // --- Roles dropdown ---
         var roles = await _roleRepo.GetAllRolesAsync();
+        ViewBag.RoleSelectList = new SelectList(roles, nameof(RoleVm.RoleName), nameof(RoleVm.RoleName));
 
-        ViewBag.RoleSelectList = new SelectList(
-            roles.Select(r => new SelectListItem
-            {
-                Value = r.RoleName,
-                Text = r.RoleName
-            }),
-            "Value",
-            "Text"
-        );
-
-        // Keep the selected user
         ViewBag.SelectedUser = selectedUser;
     }
     // GET: UserRole/Delete?email=user@email.com&roleName=Admin

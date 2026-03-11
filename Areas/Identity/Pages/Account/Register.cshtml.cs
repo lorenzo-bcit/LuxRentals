@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using LuxRentals.Services;
+using LuxRentals.Services.ServiceSettings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -31,6 +32,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
         private readonly IConfiguration _config;
         private readonly IReCaptchaService _reCaptchaService;
         private readonly ReCaptchaOptions _reCaptchaOptions;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
@@ -41,7 +43,8 @@ namespace LuxRentals.Areas.Identity.Pages.Account
             LuxRentalsDbContext db,
             IConfiguration config,
             IReCaptchaService reCaptchaService,
-            IOptions<ReCaptchaOptions> reCaptchaOptions)
+            IOptions<ReCaptchaOptions> reCaptchaOptions,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -53,6 +56,7 @@ namespace LuxRentals.Areas.Identity.Pages.Account
             _config = config;
             _reCaptchaService = reCaptchaService;
             _reCaptchaOptions = reCaptchaOptions.Value;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -215,11 +219,21 @@ namespace LuxRentals.Areas.Identity.Pages.Account
                     await using var transaction = await _db.Database.BeginTransactionAsync();
                     try
                     {
+                         const string customerRole = "Customer";
                         _db.Customers.Add(newCustomer);
                         await _db.SaveChangesAsync();
                         await transaction.CommitAsync();
 
                         _logger.LogInformation("User and Customer created successfully for {Email}", user.Email);
+
+                        if (!await _roleManager.RoleExistsAsync(customerRole))
+                        {
+                            await _roleManager.CreateAsync(new IdentityRole(customerRole));
+                            _logger.LogInformation("Role created: {RoleName}", customerRole);
+                        }
+
+                        await _userManager.AddToRoleAsync(user, customerRole);
+                        _logger.LogInformation("Assigned role {Role} to  user {Email}", customerRole, user.Email);
                     }
                     catch (DbUpdateException ex)
                     {
