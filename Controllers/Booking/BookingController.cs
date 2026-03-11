@@ -144,6 +144,7 @@ namespace LuxRentals.Controllers.Booking
 
         // Show cancellation info (no validation necessary)
         [HttpGet]
+        [HttpGet]
         public IActionResult Cancel(int id)
         {
             try
@@ -156,14 +157,22 @@ namespace LuxRentals.Controllers.Booking
                     return RedirectToAction("MyBookings");
                 }
 
-                int customerId = GetCustomerId();
                 bool isAdminOrEmployee = User.IsInRole("Admin") || User.IsInRole("Employee");
 
-                var timeUntilStart = booking.StartDateTime - DateTime.UtcNow;
-                var canCancel = (booking.CancelledAt == null) &&
-                    (isAdminOrEmployee || timeUntilStart.TotalHours >= 48);
+                // Verify Customer owns Booking (unless Admin/Employee)
+                if (!isAdminOrEmployee)
+                {
+                    int customerId = GetCustomerId();
+                    if (booking.FkCustomerId != customerId)
+                    {
+                        TempData["Error"] = "You are not authorized to view this booking.";
+                        return RedirectToAction("MyBookings");
+                    }
+                }
 
-                // Customer-specific message for admin
+                var canCancel = _bookingRepo.CanCancelBooking(booking, isAdminOrEmployee);
+
+                // Build customer-specific message for admin
                 string customerName = $"{booking.FkCustomer.FirstName} {booking.FkCustomer.LastName}";
                 string message;
 
@@ -197,7 +206,6 @@ namespace LuxRentals.Controllers.Booking
                 return RedirectToAction("MyBookings");
             }
         }
-
         // Cancels booking
         [HttpPost]
         [ValidateAntiForgeryToken]

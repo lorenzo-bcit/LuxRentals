@@ -4,6 +4,7 @@
     ViewData["Title"] = "My Bookings";
     var isAdminView = ViewBag.CustomerId != null; // Admin viewing customer's bookings
     var now = DateTime.UtcNow;
+    var isAdminOrEmployee = User.IsInRole("Admin") || User.IsInRole("Employee");
 }
 
 <div class="container mt-4">
@@ -56,10 +57,13 @@
                 booking.EndDateTime > now ? "Active" : "Completed";
 
                 var timeUntilStart = booking.StartDateTime - now;
-                var canCancel = booking.CancelledAt == null && timeUntilStart.TotalHours >= 48;
+
+                // Check if admin OR if customer can cancel (48hr rule)
+                var canCancel = booking.CancelledAt == null &&
+                (isAdminOrEmployee || timeUntilStart.TotalHours >= 48);
 
                 var totalDays = (booking.EndDateTime - booking.StartDateTime).Days;
-                if (totalDays == 0) totalDays = 1; // Minimum 1 day
+                if (totalDays == 0) totalDays = 1;
                 var totalCost = booking.FkCar.DailyRate * totalDays;
 
                 <div class="col-md-6 col-lg-4 mb-4">
@@ -122,7 +126,7 @@
                         <div class="card-footer bg-white">
                             @if (canCancel)
                             {
-                                <!-- Can cancel (more than 48hrs before start) -->
+                                <!-- Can cancel -->
                                 <a asp-action="Cancel" asp-route-id="@booking.PkBookingId"
                                    class="btn btn-outline-danger btn-sm w-100">
                                     <i class="bi bi-x-circle"></i> Cancel Booking
@@ -137,28 +141,28 @@
                             }
                             else if (timeUntilStart.TotalHours < 48 && timeUntilStart.TotalHours > 0)
                             {
-                                <!-- Less than 48 hours before start (but hasn't started yet) -->
+                                <!-- Less than 48 hours (customer only - admin can still cancel) -->
                                 <button class="btn btn-secondary btn-sm w-100" disabled>
                                     <i class="bi bi-lock"></i> Cannot Cancel (Less than 48hrs)
                                 </button>
                             }
                             else if (booking.EndDateTime < now)
                             {
-                                <!-- Booking is completed (past end date) -->
+                                <!-- Completed -->
                                 <button class="btn btn-secondary btn-sm w-100" disabled>
                                     <i class="bi bi-check-circle"></i> Completed
                                 </button>
                             }
                             else if (booking.StartDateTime <= now && booking.EndDateTime > now)
                             {
-                                <!-- Booking is currently active (between start and end) -->
+                                <!-- Active (only shows for customers, admins see cancel button) -->
                                 <button class="btn btn-secondary btn-sm w-100" disabled>
                                     <i class="bi bi-hourglass-split"></i> Active Rental
                                 </button>
                             }
                             else
                             {
-                                <!-- Fallback for any other state -->
+                                <!-- Fallback -->
                                 <button class="btn btn-secondary btn-sm w-100" disabled>
                                     <i class="bi bi-dash-circle"></i> No Action Available
                                 </button>
