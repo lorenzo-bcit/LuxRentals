@@ -32,7 +32,7 @@ namespace LuxRentals.Controllers.Booking
         // [Authorize(Roles = "Customer")] ToDo uncomment this when roles are working again
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(int carId, BookingCreateViewModel model)
+        public async Task<IActionResult> CreateAsync(int carId, BookingCreateViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -49,32 +49,24 @@ namespace LuxRentals.Controllers.Booking
                 {
                     TempData["Error"] = "You must be logged in to make a booking.";
                     return RedirectToAction("Login", "Account");
-                }
-
-;
-                var booking = _bookingRepo.CreateBooking(
-                    carId,
-                    customerId,
-                    model.StartDateTime,
-                    model.EndDateTime);
-
+                };
                 var price = _bookingRepo.CalculateBookingPrice(
                     carId,
                     model.StartDateTime,
                     model.EndDateTime);
-                //_bookingRepo.CreateBooking(carId, customerId,
-                //    model.StartDateTime, model.EndDateTime);
 
-                //TempData["Success"] = "Booking created successfully!";
+                HttpContext.Session.SetInt32("CarId", carId);
+                HttpContext.Session.SetInt32("CustomerId", customerId);
+                HttpContext.Session.SetString("StartDate", model.StartDateTime.ToString());
+                HttpContext.Session.SetString("EndDate", model.EndDateTime.ToString());
 
-                var orderId = _paymentService.CreateOrderAsync(price, "CAD");
+                var orderId = await _paymentService.CreateOrderAsync(price, "CAD");
 
                 return RedirectToAction(
                     "Checkout",
                     "Payment",
                     new
                     {
-                        bookingId = booking.PkBookingId,
                         orderId = orderId
                     });
             }

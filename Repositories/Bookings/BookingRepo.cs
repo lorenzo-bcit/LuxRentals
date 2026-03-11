@@ -22,47 +22,49 @@ namespace LuxRentals.Repositories.Bookings
         public Booking CreateBooking(int carId, int customerId,
             DateTime startDate, DateTime endDate)
         {
-
-            // Validation checks
-            if (endDate <= startDate)
+            try
             {
-                throw new ArgumentException("End date must be after start date.");
-            }
+                // Validation checks
+                if (endDate <= startDate)
+                {
+                    throw new ArgumentException("End date must be after start date.");
+                }
 
-            if (startDate <= DateTime.Now)
-            {
-                throw new ArgumentException("Start date must be in the future.");
-            }
+                if (startDate <= DateTime.Now)
+                {
+                    throw new ArgumentException("Start date must be in the future.");
+                }
 
-            bool isCarAvailable = IsCarAvailable(carId, startDate, endDate);
-            if (!isCarAvailable)
-            {
-                throw new InvalidOperationException("The car is not available for the selected dates.");
-            }
+                bool isCarAvailable = IsCarAvailable(carId, startDate, endDate);
+                if (!isCarAvailable)
+                {
+                    throw new InvalidOperationException("The car is not available for the selected dates.");
+                }
 
-            bool hasConflictingBooking = HasConflictingBooking(customerId, startDate, endDate);
-            if (hasConflictingBooking)
-            {
-                throw new InvalidOperationException("You have another booking that conflicts with the selected dates.");
-            }
+                bool hasConflictingBooking = HasConflictingBooking(customerId, startDate, endDate);
+                if (hasConflictingBooking)
+                {
+                    throw new InvalidOperationException("You have another booking that conflicts with the selected dates.");
+                }
 
-            var booking = new Booking
-            {
-                FkCarId = carId,
-                FkCustomerId = customerId,
-                StartDateTime = startDate,
-                EndDateTime = endDate,
-                CreatedAt = DateTime.UtcNow,
-                FkBookingStatusId = STATUS_BOOKED,
-                CancelledAt = null
-            };
+                var booking = new Booking
+                {
+                    FkCarId = carId,
+                    FkCustomerId = customerId,
+                    StartDateTime = startDate,
+                    EndDateTime = endDate,
+                    CreatedAt = DateTime.UtcNow,
+                    FkBookingStatusId = STATUS_BOOKED,
+                    CancelledAt = null
+                };
 
-            Console.WriteLine($"Creating booking for Car ID {carId} from {startDate} to {endDate} for Customer ID {customerId}.");
+                Console.WriteLine($"Creating booking for Car ID {carId} from {startDate} to {endDate} for Customer ID {customerId}.");
 
                 _context.Bookings.Add(booking);
                 _context.SaveChanges();
 
                 return booking;
+            
             }
             catch (Exception ex)
             {
@@ -72,9 +74,9 @@ namespace LuxRentals.Repositories.Bookings
             }
         }
 
-        // Cancel Booking
-        public void CancelBooking(int bookingId, int customerId, bool isAdminOrEmployee)
-        {
+// Cancel Booking
+    public void CancelBooking(int bookingId, int customerId, bool isAdminOrEmployee)
+    {
 
             var booking = GetBookingById(bookingId);
             if (booking == null)
@@ -96,7 +98,7 @@ namespace LuxRentals.Repositories.Bookings
             booking.FkBookingStatusId = STATUS_CANCELLED;
 
             _context.SaveChanges();
-        }
+    }
 
         // Get booking by ID
         public Booking? GetBookingById(int bookingId)
@@ -203,6 +205,11 @@ namespace LuxRentals.Repositories.Bookings
                 days = 1;
 
             return car.DailyRate * days;
+        }
+
+        public void SaveChanges()
+        {
+            _context.SaveChanges();
         }
     }
 }

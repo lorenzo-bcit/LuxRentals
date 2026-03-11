@@ -1,7 +1,7 @@
-﻿using LuxRentals.Repositories.Bookings;
+﻿using LuxRentals.Data;
+using LuxRentals.Repositories.Bookings;
 using LuxRentals.Services.Payment;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace LuxRentals.Controllers.Payment
 {
@@ -9,47 +9,95 @@ namespace LuxRentals.Controllers.Payment
     {
         private readonly IPaymentService _paymentService;
         private readonly BookingRepo _bookingRepo;
+        private readonly LuxRentalsDbContext _db;
 
-        public PaymentController(IPaymentService paymentService, BookingRepo bookingRepo)
+        public PaymentController(IPaymentService paymentService, BookingRepo bookingRepo, LuxRentalsDbContext context)
         {
             _paymentService = paymentService;
             _bookingRepo = bookingRepo;
+            _db = context;
         }
 
-        public IActionResult Checkout(int bookingId, string orderId)
+        public IActionResult Checkout(string orderId)
         {
-            var booking = _bookingRepo.GetBookingById(bookingId);
-
-            if (booking == null)
+            if (string.IsNullOrEmpty(orderId))
             {
-                TempData["Error"] = "Booking not found.";
-                return RedirectToAction("MyBookings", "Booking");
+                return RedirectToAction("Index", "Home");
             }
 
-            var price = _bookingRepo.CalculateBookingPrice(
-                booking.FkCarId,
-                booking.StartDateTime,
-                booking.EndDateTime);
+            int? carId = HttpContext.Session.GetInt32("CarId");
+            string startDateStr = HttpContext.Session.GetString("StartDate");
+            string endDateStr = HttpContext.Session.GetString("EndDate");
 
-            ViewBag.BookingId = booking.PkBookingId;
+            if (carId == null || startDateStr == null || endDateStr == null)
+            {
+                TempData["Error"] = "Booking session expired.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            DateTime startDate = DateTime.Parse(startDateStr);
+            DateTime endDate = DateTime.Parse(endDateStr);
+
+            var price = _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
+
             ViewBag.OrderId = orderId;
-            ViewBag.StartDate = booking.StartDateTime.ToShortDateString();
-            ViewBag.EndDate = booking.EndDateTime.ToShortDateString();
+            ViewBag.StartDate = startDate.ToShortDateString();
+            ViewBag.EndDate = endDate.ToShortDateString();
             ViewBag.Price = price;
 
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Capture(string orderId, int bookingId)
+        public async Task<IActionResult> Capture([FromBody] CaptureRequest request)
         {
-            await _paymentService.CaptureOrderAsync(orderId, bookingId);
-            return RedirectToAction("Success");
-        }
+            try
+            {
+                int carId = HttpContext.Session.GetInt32("CarId") ?? 0;
+                int customerId = HttpContext.Session.GetInt32("CustomerId") ?? 0;
+                if (carId == 0 || customerId == 0)
+                    return BadRequest("Session expired or invalid.");
 
-        public IActionResult Success()
-        {
-            return View();
+                DateTime startDate = DateTime.Parse(HttpContext.Session.GetString("StartDate")!);
+                DateTime endDate = DateTime.Parse(HttpContext.Session.GetString("EndDate")!);
+
+                var booking = _bookingRepo.CreateBooking(carId, customerId, startDate, endDate);
+
+                var captureId = await _paymentService.CaptureOrderAsync(request.OrderId, booking.PkBookingId);
+
+                if (string.IsNullOrEmpty(captureId))
+                {
+                    return BadRequest("Payment failed.");
+                }
+
+
+                booking.FkBookingStatusId = 2; 
+                _bookingRepo.SaveChanges();     
+
+                // 5️⃣ Clear session
+                HttpContext.Session.Remove("CarId");
+                HttpContext.Session.Remove("CustomerId");
+                HttpContext.Session.Remove("StartDate");
+                HttpContext.Session.Remove("EndDate");
+
+                TempData["Success"] = "Your booking was completed successfully!";
+
+                return Json(new
+                {
+                    success = true,
+                    redirectUrl = Url.Action("MyBookings", "Booking")
+                });
+            }
+            catch (Exception ex)
+            {
+                // Optional: log exception
+                return BadRequest(ex.Message);
+            }
         }
+    }
+
+    public class CaptureRequest
+    {
+        public string OrderId { get; set; }
     }
 }
