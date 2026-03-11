@@ -48,6 +48,7 @@ builder.Services.AddScoped<ICarLookupRepository, CarLookupRepository>();
 builder.Services.AddScoped<RoleRepo>();
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<UserRoleRepo>();
+builder.Services.AddScoped<BookingRepo>();
 
 // Services
 builder.Services.AddScoped<ICarInventoryService, CarInventoryService>();
@@ -59,6 +60,7 @@ builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>(client =>
 {
     client.BaseAddress = new Uri("https://www.google.com");
 });
+builder.Services.AddHostedService<BookingCleanupService>();
 
 // Configure email
 var emailOptions = builder.Configuration
@@ -77,9 +79,6 @@ builder.Services
     });
 
 builder.Services.AddTransient<IEmailSender, IdentityEmailSender>();
-
-// Register repositories
-builder.Services.AddScoped<BookingRepo>();
 
 var app = builder.Build();
 

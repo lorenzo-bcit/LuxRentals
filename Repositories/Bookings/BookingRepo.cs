@@ -21,7 +21,6 @@ namespace LuxRentals.Repositories.Bookings
         // Create booking
         public void CreateBooking(int carId, int customerId, DateTime startDate, DateTime endDate)
         {
-            // NO TRY-CATCH HERE! Let exceptions bubble up to the controller
 
             // Validation checks
             if (endDate <= startDate)
@@ -66,7 +65,6 @@ namespace LuxRentals.Repositories.Bookings
         // Cancel Booking
         public void CancelBooking(int bookingId, int customerId, bool isAdminOrEmployee)
         {
-            // NO TRY-CATCH HERE EITHER!
 
             var booking = GetBookingById(bookingId);
             if (booking == null)
@@ -112,6 +110,17 @@ namespace LuxRentals.Repositories.Bookings
                         .ThenInclude(m => m.FkMake)
                 .Where(b => b.FkCustomerId == customerId)
                 .OrderByDescending(b => b.CreatedAt)
+                .ToList();
+        }
+
+        // Get all customers who have made bookings
+        public List<Customer> GetAllCustomersWithBookings()
+        {
+            return _context.Customers
+                .Include(c => c.Bookings)
+                .Where(c => c.Bookings.Any())
+                .OrderBy(c => c.LastName)
+                .ThenBy(c => c.FirstName)
                 .ToList();
         }
 

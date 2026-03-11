@@ -92,6 +92,37 @@ namespace LuxRentals.Controllers.Booking
             }
         }
 
+        // Admin/Employee can see list of all customers with bookings
+        [Authorize(Roles = "Admin,Employee")]
+        [HttpGet]
+        public IActionResult CustomerList()
+        {
+            try
+            {
+                var customers = _bookingRepo.GetAllCustomersWithBookings();
+
+                var viewModel = customers.Select(c => new CustomerListViewModel
+                {
+                    CustomerId = c.PkCustomerId,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    TotalBookings = c.Bookings.Count,
+                    ActiveBookings = c.Bookings.Count(b =>
+                        b.CancelledAt == null &&
+                        b.StartDateTime <= DateTime.UtcNow &&
+                        b.EndDateTime > DateTime.UtcNow)
+                }).ToList();
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Unable to load customer list.";
+                return View(new List<CustomerListViewModel>());
+            }
+        }
+
         // TODO: Need to verify this works after roles are implemented
         // Admin/Employee can view any customer's booking history
         [Authorize(Roles = "Admin,Employee")]
@@ -118,32 +149,52 @@ namespace LuxRentals.Controllers.Booking
             try
             {
                 var booking = _bookingRepo.GetBookingById(id);
+
+                if (booking == null)
+                {
+                    TempData["Error"] = "Booking not found.";
+                    return RedirectToAction("MyBookings");
+                }
+
                 int customerId = GetCustomerId();
                 bool isAdminOrEmployee = User.IsInRole("Admin") || User.IsInRole("Employee");
 
-
                 var timeUntilStart = booking.StartDateTime - DateTime.UtcNow;
                 var canCancel = (booking.CancelledAt == null) &&
-                (isAdminOrEmployee || timeUntilStart.TotalHours >= 48);
+                    (isAdminOrEmployee || timeUntilStart.TotalHours >= 48);
+
+                // Customer-specific message for admin
+                string customerName = $"{booking.FkCustomer.FirstName} {booking.FkCustomer.LastName}";
+                string message;
+
+                if (canCancel)
+                {
+                    message = isAdminOrEmployee
+                        ? $"Are you sure you want to cancel {customerName}'s booking?"
+                        : "Are you sure you want to cancel this booking?";
+                }
+                else
+                {
+                    message = booking.CancelledAt != null
+                        ? "This booking has already been cancelled."
+                        : "Cannot cancel within 48 hours of start date.";
+                }
 
                 var viewModel = new BookingCancellationViewModel
                 {
                     PkBookingId = id,
                     StartDateTime = booking.StartDateTime,
+                    EndDateTime = booking.EndDateTime,
                     CanCancel = canCancel,
-                    Message = canCancel
-                        ? "Are you sure you want to cancel this booking?"
-                        : booking.CancelledAt != null
-                            ? "This booking has already been cancelled."
-                            : "Cannot cancel within 48 hours of start date."
+                    Message = message
                 };
 
                 return View(viewModel);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 TempData["Error"] = "Unable to load cancellation page.";
                 return RedirectToAction("MyBookings");
-
             }
         }
 

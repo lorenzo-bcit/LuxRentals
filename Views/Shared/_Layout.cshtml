@@ -32,11 +32,22 @@
                     </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Booking" asp-action="MyBookings">
-                                    <i class="bi bi-calendar-check"></i> My Bookings
-                                </a>
-                            </li>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Booking" asp-action="CustomerList">
+                                        <i class="bi bi-calendar-check"></i> Customer Bookings
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Booking" asp-action="MyBookings">
+                                        <i class="bi bi-calendar-check"></i> My Bookings
+                                    </a>
+                                </li>
+                            }
                         }
                     @if (User.IsInRole("Admin"))
                     {
