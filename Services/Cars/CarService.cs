@@ -19,14 +19,6 @@ public class CarService : ICarService
 
     public Task<Car?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
 
-    public Task<List<FuelType>> GetFuelTypesAsync() => _repo.GetFuelTypesAsync();
-
-    public Task<List<VehicleClass>> GetVehicleClassesAsync() => _repo.GetVehicleClassesAsync();
-
-    public Task<List<CarStatus>> GetCarStatusesAsync() => _repo.GetCarStatusesAsync();
-
-    public Task<List<Model>> GetModelsAsync(int? makeId = null) => _repo.GetModelsAsync(makeId);
-
     public async Task<SaveResult> CreateAsync(CarUpsertVm vm)
     {
         var errors = await ValidateAsync(vm);
@@ -80,6 +72,14 @@ public class CarService : ICarService
         return await TrySaveAsync("Car deleted.");
     }
 
+    // Lookup data
+    public Task<List<FuelType>> GetFuelTypesAsync() => _repo.GetFuelTypesAsync();
+
+    public Task<List<VehicleClass>> GetVehicleClassesAsync() => _repo.GetVehicleClassesAsync();
+
+    public Task<List<CarStatus>> GetCarStatusesAsync() => _repo.GetCarStatusesAsync();
+
+    // Makes
     public async Task<IReadOnlyList<MakeListItemVm>> GetMakeListAsync()
     {
         var makes = await _repo.GetMakesAsync();
@@ -91,6 +91,16 @@ public class CarService : ICarService
                 CanDelete = x.Models.Count == 0
             })
             .ToList();
+    }
+
+    public async Task<IReadOnlyList<Make>> GetMakeOptionsAsync()
+    {
+        var makes = await _repo.GetMakesAsync();
+        return makes.Select(x => new Make
+        {
+            PkMakeId = x.PkMakeId,
+            MakeName = x.MakeName
+        }).ToList();
     }
 
     public Task<Make?> GetMakeByIdAsync(int id) => _repo.GetMakeByIdAsync(id);
@@ -137,6 +147,9 @@ public class CarService : ICarService
         _repo.RemoveMake(existing);
         return await TrySaveAsync("Make deleted.");
     }
+
+    // Models
+    public Task<List<Model>> GetModelsAsync(int? makeId = null) => _repo.GetModelsAsync(makeId);
 
     public async Task<IReadOnlyList<ModelListItemVm>> GetModelListAsync()
     {
@@ -224,16 +237,7 @@ public class CarService : ICarService
         return await TrySaveAsync("Model deleted.");
     }
 
-    public async Task<IReadOnlyList<Make>> GetMakeOptionsAsync()
-    {
-        var makes = await _repo.GetMakesAsync();
-        return makes.Select(x => new Make
-        {
-            PkMakeId = x.PkMakeId,
-            MakeName = x.MakeName
-        }).ToList();
-    }
-
+    // Vehicle classes
     public async Task<IReadOnlyList<VehicleClassListItemVm>> GetVehicleClassListAsync()
     {
         var vehicleClasses = await _repo.GetVehicleClassesAsync();
