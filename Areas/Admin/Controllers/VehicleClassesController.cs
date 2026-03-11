@@ -9,9 +9,9 @@ namespace LuxRentals.Areas.Admin.Controllers;
 [Authorize(Roles = "Admin")]
 public class VehicleClassesController : Controller
 {
-    private readonly ICarLookupAdminService _carLookupAdminService;
+    private readonly ICarService _carService;
 
-    public VehicleClassesController(ICarLookupAdminService carLookupAdminService) => _carLookupAdminService = carLookupAdminService;
+    public VehicleClassesController(ICarService carService) => _carService = carService;
 
     [HttpGet]
     public async Task<IActionResult> Index(string? returnUrl = null)
@@ -35,7 +35,7 @@ public class VehicleClassesController : Controller
             return View("Index", vm);
         }
 
-        var result = await _carLookupAdminService.CreateVehicleClassAsync(vm.VehicleClassName);
+        var result = await _carService.CreateVehicleClassAsync(vm.VehicleClassName);
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
@@ -51,7 +51,7 @@ public class VehicleClassesController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id, string? returnUrl = null)
     {
-        var vehicleClass = await _carLookupAdminService.GetVehicleClassByIdAsync(id);
+        var vehicleClass = await _carService.GetVehicleClassByIdAsync(id);
         if (vehicleClass is null)
             return NotFound();
 
@@ -73,7 +73,7 @@ public class VehicleClassesController : Controller
         if (!ModelState.IsValid)
             return View(vm);
 
-        var result = await _carLookupAdminService.UpdateVehicleClassAsync(id, vm.VehicleClassName);
+        var result = await _carService.UpdateVehicleClassAsync(id, vm.VehicleClassName);
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
@@ -88,7 +88,7 @@ public class VehicleClassesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id, string? returnUrl = null)
     {
-        var result = await _carLookupAdminService.DeleteVehicleClassAsync(id);
+        var result = await _carService.DeleteVehicleClassAsync(id);
         TempData[result.IsSuccess ? "StatusMessage" : "ErrorMessage"] = result.Message;
 
         return RedirectToAction(nameof(Index), new { returnUrl });
@@ -96,7 +96,7 @@ public class VehicleClassesController : Controller
 
     private async Task PopulateAsync(AdminVehicleClassIndexVm vm)
     {
-        vm.VehicleClasses = await _carLookupAdminService.GetVehicleClassesAsync();
+        vm.VehicleClasses = await _carService.GetAdminVehicleClassesAsync();
     }
 
     private IActionResult RedirectToReturnOrIndex(string? returnUrl)

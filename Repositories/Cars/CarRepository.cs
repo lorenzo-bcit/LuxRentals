@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Repositories.Cars;
 
-public class CarRepository : ICarReadRepository, ICarWriteRepository
+public class CarRepository : ICarRepository
 {
     private readonly LuxRentalsDbContext _db;
     public CarRepository(LuxRentalsDbContext db) => _db = db;
@@ -102,6 +102,108 @@ public class CarRepository : ICarReadRepository, ICarWriteRepository
 
     public Task<bool> HasBookingsAsync(int carId) =>
         _db.Bookings.AnyAsync(b => b.FkCarId == carId);
+
+    public Task<List<FuelType>> GetFuelTypesAsync() =>
+        _db.FuelTypes
+            .AsNoTracking()
+            .OrderBy(x => x.FuelType1)
+            .ToListAsync();
+
+    public Task<List<VehicleClass>> GetVehicleClassesAsync() =>
+        _db.VehicleClasses
+            .AsNoTracking()
+            .OrderBy(x => x.VehicleClass1)
+            .ToListAsync();
+
+    public Task<List<CarStatus>> GetCarStatusesAsync() =>
+        _db.CarStatuses
+            .AsNoTracking()
+            .OrderBy(x => x.StatusFlag)
+            .ToListAsync();
+
+    public Task<List<Make>> GetMakesAsync() =>
+        _db.Makes
+            .AsNoTracking()
+            .Include(x => x.Models)
+            .OrderBy(x => x.MakeName)
+            .ToListAsync();
+
+    public Task<List<Model>> GetModelsAsync(int? makeId = null)
+    {
+        var q = _db.Models
+            .AsNoTracking()
+            .Include(x => x.FkMake)
+            .Include(x => x.Cars)
+            .AsQueryable();
+
+        if (makeId is not null)
+            q = q.Where(x => x.FkMakeId == makeId);
+
+        return q.OrderBy(x => x.FkMake.MakeName)
+            .ThenBy(x => x.ModelName)
+            .ToListAsync();
+    }
+
+    public async Task<int?> GetCarStatusIdByNameAsync(string statusName)
+    {
+        return await _db.CarStatuses
+            .AsNoTracking()
+            .Where(x => x.StatusFlag == statusName)
+            .Select(x => (int?)x.PkCarStatusId)
+            .FirstOrDefaultAsync();
+    }
+
+    public Task<Make?> GetMakeByIdAsync(int id) =>
+        _db.Makes.FirstOrDefaultAsync(x => x.PkMakeId == id);
+
+    public Task<bool> MakeNameExistsAsync(string makeName, int? excludeMakeId = null) =>
+        _db.Makes.AnyAsync(x =>
+            x.PkMakeId != excludeMakeId &&
+            x.MakeName.ToUpper() == makeName.ToUpper());
+
+    public Task<bool> MakeHasModelsAsync(int makeId) =>
+        _db.Models.AnyAsync(x => x.FkMakeId == makeId);
+
+    public Task AddMakeAsync(Make make) =>
+        _db.Makes.AddAsync(make).AsTask();
+
+    public void RemoveMake(Make make) => _db.Makes.Remove(make);
+
+    public Task<Model?> GetModelByIdAsync(int id) =>
+        _db.Models.FirstOrDefaultAsync(x => x.PkModelId == id);
+
+    public Task<bool> ModelNameExistsAsync(int makeId, string modelName, int? excludeModelId = null) =>
+        _db.Models.AnyAsync(x =>
+            x.PkModelId != excludeModelId &&
+            x.FkMakeId == makeId &&
+            x.ModelName.ToUpper() == modelName.ToUpper());
+
+    public Task<bool> ModelHasCarsAsync(int modelId) =>
+        _db.Cars.AnyAsync(x => x.FkModelId == modelId);
+
+    public Task AddModelAsync(Model model) =>
+        _db.Models.AddAsync(model).AsTask();
+
+    public void RemoveModel(Model model) => _db.Models.Remove(model);
+
+    public Task<VehicleClass?> GetVehicleClassByIdAsync(int id) =>
+        _db.VehicleClasses.FirstOrDefaultAsync(x => x.PkVehicleClassId == id);
+
+    public Task<bool> VehicleClassNameExistsAsync(string vehicleClassName, int? excludeVehicleClassId = null) =>
+        _db.VehicleClasses.AnyAsync(x =>
+            x.PkVehicleClassId != excludeVehicleClassId &&
+            x.VehicleClass1.ToUpper() == vehicleClassName.ToUpper());
+
+    public Task<bool> VehicleClassHasCarsAsync(int vehicleClassId) =>
+        _db.Cars.AnyAsync(x => x.FkVehicleClassId == vehicleClassId);
+
+    public Task AddVehicleClassAsync(VehicleClass vehicleClass) =>
+        _db.VehicleClasses.AddAsync(vehicleClass).AsTask();
+
+    public void RemoveVehicleClass(VehicleClass vehicleClass) => _db.VehicleClasses.Remove(vehicleClass);
+
+    public Task<bool> MakeExistsAsync(int makeId) =>
+        _db.Makes.AnyAsync(x => x.PkMakeId == makeId);
 
     // WRITE
     public Task AddAsync(Car car) => _db.Cars.AddAsync(car).AsTask();

@@ -1,4 +1,5 @@
 using LuxRentals.Repositories.Cars;
+using LuxRentals.Services.Cars;
 using LuxRentals.ViewModels.Cars;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -9,14 +10,9 @@ public class CarsController : Controller
 {
     private const int PAGE_SIZE = 5;
 
-    private readonly ICarReadRepository _carReadRepository;
-    private readonly ICarLookupRepository _carLookupRepository;
+    private readonly ICarService _carService;
 
-    public CarsController(ICarReadRepository carReadRepository, ICarLookupRepository carLookupRepository)
-    {
-        _carReadRepository = carReadRepository;
-        _carLookupRepository = carLookupRepository;
-    }
+    public CarsController(ICarService carService) => _carService = carService;
 
     [HttpGet]
     public async Task<IActionResult> Index([FromQuery] CarBrowseVm vm)
@@ -32,7 +28,7 @@ public class CarsController : Controller
             ModelState.AddModelError(nameof(vm.EndDate), "Drop-off date must be after pick-up date.");
 
         var criteria = ToCriteria(vm, hasInvalidDateRange);
-        var pagedCars = await _carReadRepository.SearchAsync(criteria);
+        var pagedCars = await _carService.SearchAsync(criteria);
 
         vm.ApplyPagedResult(pagedCars);
 
@@ -86,7 +82,7 @@ public class CarsController : Controller
 
     private async Task PopulateLookupOptionsAsync(CarBrowseVm vm)
     {
-        var fuelTypes = await _carLookupRepository.GetFuelTypesAsync();
+        var fuelTypes = await _carService.GetFuelTypesAsync();
         vm.FuelTypeOptions = new List<SelectListItem>
         {
             new SelectListItem("Any", "", vm.FuelTypeId == null)
@@ -95,7 +91,7 @@ public class CarsController : Controller
             .Select(x => new SelectListItem(x.FuelType1, x.PkFuelTypeId.ToString(), x.PkFuelTypeId == vm.FuelTypeId)))
         .ToList();
 
-        var classes = await _carLookupRepository.GetVehicleClassesAsync();
+        var classes = await _carService.GetVehicleClassesAsync();
         vm.VehicleClassOptions = new List<SelectListItem>
         {
             new SelectListItem("Any", "", vm.VehicleClassId == null)

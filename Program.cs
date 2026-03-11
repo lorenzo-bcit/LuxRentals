@@ -39,14 +39,10 @@ builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>(client =>
 builder.Services.AddControllersWithViews();
 
 // Repositories
-builder.Services.AddScoped<ICarReadRepository, CarRepository>();
-builder.Services.AddScoped<ICarWriteRepository, CarRepository>();
-builder.Services.AddScoped<ICarLookupRepository, CarLookupRepository>();
-builder.Services.AddScoped<ICarLookupAdminRepository, CarLookupAdminRepository>();
+builder.Services.AddScoped<ICarRepository, CarRepository>();
 
 // Services
-builder.Services.AddScoped<ICarInventoryService, CarInventoryService>();
-builder.Services.AddScoped<ICarLookupAdminService, CarLookupAdminService>();
+builder.Services.AddScoped<ICarService, CarService>();
 
 builder.Services.Configure<ReCaptchaOptions>(
     builder.Configuration.GetSection("ReCaptcha"));

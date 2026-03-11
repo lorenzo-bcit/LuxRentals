@@ -14,19 +14,9 @@ public class CarsController : Controller
 {
     private const int PAGE_SIZE = 10;
 
-    private readonly ICarReadRepository _carReadRepository;
-    private readonly ICarLookupRepository _carLookupRepository;
-    private readonly ICarInventoryService _carInventoryService;
+    private readonly ICarService _carService;
 
-    public CarsController(
-        ICarReadRepository carReadRepository,
-        ICarLookupRepository carLookupRepository,
-        ICarInventoryService carInventoryService)
-    {
-        _carReadRepository = carReadRepository;
-        _carLookupRepository = carLookupRepository;
-        _carInventoryService = carInventoryService;
-    }
+    public CarsController(ICarService carService) => _carService = carService;
 
     [HttpGet]
     public async Task<IActionResult> Index(int page = 1)
@@ -38,7 +28,7 @@ public class CarsController : Controller
             PageSize = PAGE_SIZE
         };
 
-        var pagedCars = await _carReadRepository.SearchAsync(criteria);
+        var pagedCars = await _carService.SearchAsync(criteria);
         var vm = new AdminCarIndexVm();
         vm.ApplyPagedResult(pagedCars);
 
@@ -64,7 +54,7 @@ public class CarsController : Controller
             return View(vm);
         }
 
-        var result = await _carInventoryService.CreateAsync(vm.Car);
+        var result = await _carService.CreateAsync(vm.Car);
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
@@ -79,7 +69,7 @@ public class CarsController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var car = await _carReadRepository.GetByIdAsync(id);
+        var car = await _carService.GetByIdAsync(id);
         if (car is null)
             return NotFound();
 
@@ -105,7 +95,7 @@ public class CarsController : Controller
             return View(vm);
         }
 
-        var result = await _carInventoryService.UpdateAsync(id, vm.Car);
+        var result = await _carService.UpdateAsync(id, vm.Car);
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
@@ -121,7 +111,7 @@ public class CarsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        var result = await _carInventoryService.DeleteAsync(id);
+        var result = await _carService.DeleteAsync(id);
         TempData[result.IsSuccess ? "StatusMessage" : "ErrorMessage"] = result.Message;
 
         return RedirectToAction(nameof(Index));
@@ -138,22 +128,22 @@ public class CarsController : Controller
 
     private async Task PopulateOptionsAsync(AdminCarEditVm vm)
     {
-        var fuelTypes = await _carLookupRepository.GetFuelTypesAsync();
+        var fuelTypes = await _carService.GetFuelTypesAsync();
         vm.FuelTypeOptions = fuelTypes
             .Select(x => new SelectListItem(x.FuelType1, x.PkFuelTypeId.ToString(), x.PkFuelTypeId == vm.Car.FkFuelTypeId))
             .ToList();
 
-        var classes = await _carLookupRepository.GetVehicleClassesAsync();
+        var classes = await _carService.GetVehicleClassesAsync();
         vm.VehicleClassOptions = classes
             .Select(x => new SelectListItem(x.VehicleClass1, x.PkVehicleClassId.ToString(), x.PkVehicleClassId == vm.Car.FkVehicleClassId))
             .ToList();
 
-        var statuses = await _carLookupRepository.GetCarStatusesAsync();
+        var statuses = await _carService.GetCarStatusesAsync();
         vm.CarStatusOptions = statuses
             .Select(x => new SelectListItem(x.StatusFlag, x.PkCarStatusId.ToString(), x.PkCarStatusId == vm.Car.FkCarStatusId))
             .ToList();
 
-        var models = await _carLookupRepository.GetModelsAsync();
+        var models = await _carService.GetModelsAsync();
         vm.ModelOptions = models
             .Select(x => new SelectListItem($"{x.FkMake.MakeName} {x.ModelName}", x.PkModelId.ToString(), x.PkModelId == vm.Car.FkModelId))
             .ToList();

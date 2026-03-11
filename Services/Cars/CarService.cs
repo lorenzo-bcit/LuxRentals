@@ -1,15 +1,84 @@
 using LuxRentals.Models;
+using LuxRentals.Repositories;
 using LuxRentals.Repositories.Cars;
+using LuxRentals.ViewModels.Cars;
 using LuxRentals.ViewModels.Cars.Admin;
 using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Services.Cars;
 
-public class CarLookupAdminService : ICarLookupAdminService
+public class CarService : ICarService
 {
-    private readonly ICarLookupAdminRepository _repo;
+    private const string OUT_OF_SERVICE_STATUS = "Out of Service";
 
-    public CarLookupAdminService(ICarLookupAdminRepository repo) => _repo = repo;
+    private readonly ICarRepository _repo;
+
+    public CarService(ICarRepository repo) => _repo = repo;
+
+    public Task<PagedList<Car>> SearchAsync(CarSearchCriteria criteria) => _repo.SearchAsync(criteria);
+
+    public Task<Car?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
+
+    public Task<List<FuelType>> GetFuelTypesAsync() => _repo.GetFuelTypesAsync();
+
+    public Task<List<VehicleClass>> GetVehicleClassesAsync() => _repo.GetVehicleClassesAsync();
+
+    public Task<List<CarStatus>> GetCarStatusesAsync() => _repo.GetCarStatusesAsync();
+
+    public Task<List<Model>> GetModelsAsync(int? makeId = null) => _repo.GetModelsAsync(makeId);
+
+    public async Task<SaveResult> CreateAsync(CarUpsertVm vm)
+    {
+        var errors = await ValidateAsync(vm);
+
+        if (errors.Count > 0)
+            return SaveResult.FailMany(errors);
+
+        var car = new Car();
+        vm.ApplyToEntity(car);
+
+        await _repo.AddAsync(car);
+
+        return await TrySaveAsync("Car created.");
+    }
+
+    public async Task<SaveResult> UpdateAsync(int id, CarUpsertVm vm)
+    {
+        var existing = await _repo.GetByIdAsync(id);
+        if (existing is null)
+            return SaveResult.Fail("", "Car not found.");
+
+        var errors = await ValidateAsync(vm, id);
+
+        if (errors.Count > 0)
+            return SaveResult.FailMany(errors);
+
+        vm.ApplyToEntity(existing);
+
+        return await TrySaveAsync("Car updated.");
+    }
+
+    public async Task<SaveResult> DeleteAsync(int id)
+    {
+        var existing = await _repo.GetByIdAsync(id);
+        if (existing is null)
+            return SaveResult.Fail("", "Car not found.");
+
+        if (await _repo.HasBookingsAsync(id))
+        {
+            var outOfServiceStatusId = await _repo.GetCarStatusIdByNameAsync(OUT_OF_SERVICE_STATUS);
+            if (outOfServiceStatusId is null)
+                return SaveResult.Fail("", "Out of Service status is missing. Seed car statuses and try again.");
+
+            existing.FkCarStatusId = outOfServiceStatusId.Value;
+
+            return await TrySaveAsync("Car has bookings, so it was marked Out of Service instead of being deleted.");
+        }
+
+        _repo.Remove(existing);
+
+        return await TrySaveAsync("Car deleted.");
+    }
 
     public async Task<IReadOnlyList<AdminMakeListItemVm>> GetMakesAsync()
     {
@@ -69,7 +138,7 @@ public class CarLookupAdminService : ICarLookupAdminService
         return await TrySaveAsync("Make deleted.");
     }
 
-    public async Task<IReadOnlyList<AdminModelListItemVm>> GetModelsAsync()
+    public async Task<IReadOnlyList<AdminModelListItemVm>> GetAdminModelsAsync()
     {
         var models = await _repo.GetModelsAsync();
         return models
@@ -165,7 +234,7 @@ public class CarLookupAdminService : ICarLookupAdminService
         }).ToList();
     }
 
-    public async Task<IReadOnlyList<AdminVehicleClassListItemVm>> GetVehicleClassesAsync()
+    public async Task<IReadOnlyList<AdminVehicleClassListItemVm>> GetAdminVehicleClassesAsync()
     {
         var vehicleClasses = await _repo.GetVehicleClassesAsync();
         return vehicleClasses
@@ -234,6 +303,19 @@ public class CarLookupAdminService : ICarLookupAdminService
         {
             return SaveResult.Fail(string.Empty, "Save failed due to a database constraint. Please refresh and try again.");
         }
+    }
+
+    private async Task<List<(string Field, string Message)>> ValidateAsync(CarUpsertVm vm, int? excludeCarId = null)
+    {
+        var errors = new List<(string Field, string Message)>();
+
+        if (await _repo.VinExistsAsync(vm.VinNumber, excludeCarId))
+            errors.Add((nameof(vm.VinNumber), "VIN already exists."));
+
+        if (await _repo.PlateExistsAsync(vm.LicencePlate, excludeCarId))
+            errors.Add((nameof(vm.LicencePlate), "Licence plate already exists."));
+
+        return errors;
     }
 
     private static string NormalizeName(string? value) => value?.Trim() ?? string.Empty;

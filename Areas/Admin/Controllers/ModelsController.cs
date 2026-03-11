@@ -10,9 +10,9 @@ namespace LuxRentals.Areas.Admin.Controllers;
 [Authorize(Roles = "Admin")]
 public class ModelsController : Controller
 {
-    private readonly ICarLookupAdminService _carLookupAdminService;
+    private readonly ICarService _carService;
 
-    public ModelsController(ICarLookupAdminService carLookupAdminService) => _carLookupAdminService = carLookupAdminService;
+    public ModelsController(ICarService carService) => _carService = carService;
 
     [HttpGet]
     public async Task<IActionResult> Index(string? returnUrl = null)
@@ -36,7 +36,7 @@ public class ModelsController : Controller
             return View("Index", vm);
         }
 
-        var result = await _carLookupAdminService.CreateModelAsync(vm.FkMakeId, vm.ModelName);
+        var result = await _carService.CreateModelAsync(vm.FkMakeId, vm.ModelName);
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
@@ -52,7 +52,7 @@ public class ModelsController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id, string? returnUrl = null)
     {
-        var model = await _carLookupAdminService.GetModelByIdAsync(id);
+        var model = await _carService.GetModelByIdAsync(id);
         if (model is null)
             return NotFound();
 
@@ -81,7 +81,7 @@ public class ModelsController : Controller
             return View(vm);
         }
 
-        var result = await _carLookupAdminService.UpdateModelAsync(id, vm.FkMakeId, vm.ModelName);
+        var result = await _carService.UpdateModelAsync(id, vm.FkMakeId, vm.ModelName);
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
@@ -97,7 +97,7 @@ public class ModelsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id, string? returnUrl = null)
     {
-        var result = await _carLookupAdminService.DeleteModelAsync(id);
+        var result = await _carService.DeleteModelAsync(id);
         TempData[result.IsSuccess ? "StatusMessage" : "ErrorMessage"] = result.Message;
 
         return RedirectToAction(nameof(Index), new { returnUrl });
@@ -105,7 +105,7 @@ public class ModelsController : Controller
 
     private async Task PopulateAsync(AdminModelIndexVm vm)
     {
-        var makes = await _carLookupAdminService.GetMakeOptionsAsync();
+        var makes = await _carService.GetMakeOptionsAsync();
 
         vm.MakeOptions =
         [
@@ -113,12 +113,12 @@ public class ModelsController : Controller
             .. makes.Select(x => new SelectListItem(x.MakeName, x.PkMakeId.ToString(), x.PkMakeId == vm.FkMakeId))
         ];
 
-        vm.Models = await _carLookupAdminService.GetModelsAsync();
+        vm.Models = await _carService.GetAdminModelsAsync();
     }
 
     private async Task PopulateAsync(AdminModelEditVm vm)
     {
-        var makes = await _carLookupAdminService.GetMakeOptionsAsync();
+        var makes = await _carService.GetMakeOptionsAsync();
         vm.MakeOptions =
         [
             new SelectListItem("Select a make", string.Empty, vm.FkMakeId is null),

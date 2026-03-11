@@ -9,9 +9,9 @@ namespace LuxRentals.Areas.Admin.Controllers;
 [Authorize(Roles = "Admin")]
 public class MakesController : Controller
 {
-    private readonly ICarLookupAdminService _carLookupAdminService;
+    private readonly ICarService _carService;
 
-    public MakesController(ICarLookupAdminService carLookupAdminService) => _carLookupAdminService = carLookupAdminService;
+    public MakesController(ICarService carService) => _carService = carService;
 
     [HttpGet]
     public async Task<IActionResult> Index(string? returnUrl = null)
@@ -35,7 +35,7 @@ public class MakesController : Controller
             return View("Index", vm);
         }
 
-        var result = await _carLookupAdminService.CreateMakeAsync(vm.MakeName);
+        var result = await _carService.CreateMakeAsync(vm.MakeName);
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
@@ -51,7 +51,7 @@ public class MakesController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id, string? returnUrl = null)
     {
-        var make = await _carLookupAdminService.GetMakeByIdAsync(id);
+        var make = await _carService.GetMakeByIdAsync(id);
         if (make is null)
             return NotFound();
 
@@ -73,7 +73,7 @@ public class MakesController : Controller
         if (!ModelState.IsValid)
             return View(vm);
 
-        var result = await _carLookupAdminService.UpdateMakeAsync(id, vm.MakeName);
+        var result = await _carService.UpdateMakeAsync(id, vm.MakeName);
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
@@ -88,7 +88,7 @@ public class MakesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id, string? returnUrl = null)
     {
-        var result = await _carLookupAdminService.DeleteMakeAsync(id);
+        var result = await _carService.DeleteMakeAsync(id);
         TempData[result.IsSuccess ? "StatusMessage" : "ErrorMessage"] = result.Message;
 
         return RedirectToAction(nameof(Index), new { returnUrl });
@@ -96,7 +96,7 @@ public class MakesController : Controller
 
     private async Task PopulateAsync(AdminMakeIndexVm vm)
     {
-        vm.Makes = await _carLookupAdminService.GetMakesAsync();
+        vm.Makes = await _carService.GetMakesAsync();
     }
 
     private IActionResult RedirectToReturnOrIndex(string? returnUrl)
