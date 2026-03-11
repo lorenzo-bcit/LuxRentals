@@ -1,3 +1,5 @@
+using LuxRentals.Services.ServiceSettings;
+
 namespace LuxRentals.Services
 {
     public interface IReCaptchaService

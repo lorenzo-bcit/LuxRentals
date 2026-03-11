@@ -110,5 +110,10 @@ namespace LuxRentals.Repositories.Roles
             }
         }
 
+        public async Task<int> GetRoleCountAsync()
+        {
+            return await _db.Roles.CountAsync();
+        }
+
     }
 }
