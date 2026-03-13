@@ -2,13 +2,14 @@
 
 @{
     ViewData["Title"] = "Admin Cars";
+    var isModelFilterDisabled = Model.MakeId == null;
 }
 
 <section class="py-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <h1 class="mb-1">Fleet Inventory</h1>
-            <p class="text-muted mb-0">Manage all cars, including unavailable inventory.</p>
+            <p class="text-muted mb-0">Search, filter, and manage all cars across the fleet.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Makes" asp-action="Index">Manage Makes</a>
@@ -28,79 +29,137 @@
         <div class="alert alert-danger">@errorMessage</div>
     }
 
-    <div class="card shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                <tr>
-                    <th>Car</th>
-                    <th>Status</th>
-                    <th>Specs</th>
-                    <th>Plate</th>
-                    <th>VIN</th>
-                    <th class="text-end">Daily Rate</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                @if (Model.Cars.Count == 0)
-                {
+    <form method="get" asp-area="Admin" asp-controller="Cars" asp-action="Index" class="d-flex flex-column gap-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-4">
+                        <label asp-for="SearchTerm" class="form-label"></label>
+                        <input asp-for="SearchTerm" class="form-control" placeholder="Plate, VIN, make, or model" />
+                    </div>
+                    <div class="col-md-6 col-lg-2">
+                        <label asp-for="StatusId" class="form-label"></label>
+                        <select asp-for="StatusId" asp-items="Model.StatusOptions" class="form-select"></select>
+                    </div>
+                    <div class="col-md-6 col-lg-2">
+                        <label asp-for="VehicleClassId" class="form-label"></label>
+                        <select asp-for="VehicleClassId" asp-items="Model.VehicleClassOptions" class="form-select"></select>
+                    </div>
+                    <div class="col-md-6 col-lg-2">
+                        <label asp-for="MakeId" class="form-label"></label>
+                        <select asp-for="MakeId" asp-items="Model.MakeOptions" class="form-select"></select>
+                    </div>
+                    <div class="col-md-6 col-lg-2">
+                        <label asp-for="ModelId" class="form-label"></label>
+                        <select asp-for="ModelId" asp-items="Model.ModelOptions" class="form-select" disabled="@isModelFilterDisabled"></select>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <label asp-for="SortBy" class="form-label"></label>
+                        <select asp-for="SortBy" asp-items="Model.SortOptions" class="form-select"></select>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-dark flex-grow-1">Apply</button>
+                            <a asp-area="Admin" asp-controller="Cars" asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div>
+                <div class="fw-semibold">@Model.TotalCount cars</div>
+                <div class="text-muted small">Showing page @Model.Page of @Model.TotalPages</div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">No cars found.</td>
+                        <th>Car</th>
+                        <th>Year</th>
+                        <th>Status</th>
+                        <th>Class</th>
+                        <th>Specs</th>
+                        <th>Plate</th>
+                        <th>VIN</th>
+                        <th class="text-end">Daily Rate</th>
+                        <th class="text-end">Actions</th>
                     </tr>
-                }
-                else
-                {
-                    @foreach (var car in Model.Cars)
+                    </thead>
+                    <tbody>
+                    @if (Model.Cars.Count == 0)
                     {
                         <tr>
-                            <td>
-                                <div class="fw-semibold">@car.DisplayName</div>
-                                <div class="text-muted small">@car.VehicleClass</div>
-                            </td>
-                            <td>
-                                <span class="badge text-bg-secondary">@car.Status</span>
-                            </td>
-                            <td class="small text-muted">@car.Transmission • @car.FuelType</td>
-                            <td>@car.LicencePlate</td>
-                            <td class="small">@car.VinNumber</td>
-                            <td class="text-end">@car.DailyRate.ToString("C")</td>
-                            <td>
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a class="btn btn-sm btn-outline-primary"
-                                       asp-area="Admin"
-                                       asp-controller="Cars"
-                                       asp-action="Edit"
-                                       asp-route-id="@car.CarId">Edit</a>
-                                    <form method="post"
-                                          asp-area="Admin"
-                                          asp-controller="Cars"
-                                          asp-action="Delete"
-                                          asp-route-id="@car.CarId"
-                                          onsubmit="return confirm('Delete this car? Cars with bookings will be moved Out of Service instead.');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </form>
-                                </div>
-                            </td>
+                            <td colspan="9" class="text-center py-4 text-muted">No cars found for the current filters.</td>
                         </tr>
                     }
-                }
-                </tbody>
-            </table>
+                    else
+                    {
+                        @foreach (var car in Model.Cars)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@car.MakeName @car.ModelName</div>
+                                    <div class="text-muted small">ID #@car.CarId</div>
+                                </td>
+                                <td>@car.Year</td>
+                                <td>
+                                    <span class="badge text-bg-secondary">@car.Status</span>
+                                </td>
+                                <td>@car.VehicleClass</td>
+                                <td class="small text-muted">@car.Transmission • @car.FuelType</td>
+                                <td>@car.LicencePlate</td>
+                                <td class="small">@car.VinNumber</td>
+                                <td class="text-end">@car.DailyRate.ToString("C")</td>
+                                <td>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a class="btn btn-sm btn-outline-primary"
+                                           asp-area="Admin"
+                                           asp-controller="Cars"
+                                           asp-action="Edit"
+                                           asp-route-id="@car.CarId">Edit</a>
+                                        <form method="post"
+                                              asp-area="Admin"
+                                              asp-controller="Cars"
+                                              asp-action="Delete"
+                                              asp-route-id="@car.CarId"
+                                              onsubmit="return confirm('Delete this car? Cars with bookings will be moved Out of Service instead.');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
 
-    <nav aria-label="Admin car pages" class="d-flex justify-content-center align-items-center gap-3 mt-4">
-        <a class="btn btn-outline-dark @(Model.HasPreviousPage ? "" : "disabled")"
-           asp-area="Admin"
-           asp-controller="Cars"
-           asp-action="Index"
-           asp-route-page="@(Model.Page - 1)">Previous</a>
-        <span class="text-muted">Page @Model.Page of @Model.TotalPages</span>
-        <a class="btn btn-outline-dark @(Model.HasNextPage ? "" : "disabled")"
-           asp-area="Admin"
-           asp-controller="Cars"
-           asp-action="Index"
-           asp-route-page="@(Model.Page + 1)">Next</a>
-    </nav>
+        <nav aria-label="Admin car pages" class="d-flex justify-content-center align-items-center gap-3">
+            <button type="submit"
+                    name="Page"
+                    value="@(Model.Page - 1)"
+                    class="btn btn-outline-dark @(Model.HasPreviousPage ? "" : "disabled")"
+                    aria-disabled="@(!Model.HasPreviousPage)"
+                    @(Model.HasPreviousPage ? null : "disabled")>
+                Previous
+            </button>
+
+            <span class="text-muted">Page @Model.Page of @Model.TotalPages</span>
+
+            <button type="submit"
+                    name="Page"
+                    value="@(Model.Page + 1)"
+                    class="btn btn-outline-dark @(Model.HasNextPage ? "" : "disabled")"
+                    aria-disabled="@(!Model.HasNextPage)"
+                    @(Model.HasNextPage ? null : "disabled")>
+                Next
+            </button>
+        </nav>
+    </form>
 </section>
