@@ -9,6 +9,7 @@ namespace LuxRentals.Controllers;
 public class CarsController : Controller
 {
     private const int PAGE_SIZE = 5;
+    private const int DEFAULT_BOOKING_WINDOW_DAYS = 7;
 
     private readonly ICarService _carService;
 
@@ -17,7 +18,7 @@ public class CarsController : Controller
     [HttpGet]
     public async Task<IActionResult> Index([FromQuery] CarBrowseVm vm)
     {
-        NormalizePage(vm);
+        NormalizeBrowseState(vm);
 
         var hasInvalidDateRange =
             vm.StartDate.HasValue &&
@@ -37,9 +38,24 @@ public class CarsController : Controller
         return View(vm);
     }
 
-    private static void NormalizePage(CarBrowseVm vm)
+    private static void NormalizeBrowseState(CarBrowseVm vm)
     {
         vm.Page = Math.Max(1, vm.Page);
+
+        var today = DateTime.Today;
+
+        if (!vm.StartDate.HasValue && !vm.EndDate.HasValue)
+        {
+            vm.StartDate = today;
+            vm.EndDate = today.AddDays(DEFAULT_BOOKING_WINDOW_DAYS);
+            return;
+        }
+
+        if (!vm.StartDate.HasValue)
+            vm.StartDate = vm.EndDate?.Date.AddDays(-DEFAULT_BOOKING_WINDOW_DAYS) ?? today;
+
+        if (!vm.EndDate.HasValue)
+            vm.EndDate = vm.StartDate.Value.Date.AddDays(DEFAULT_BOOKING_WINDOW_DAYS);
     }
 
     private static CarSearchCriteria ToCriteria(CarBrowseVm vm, bool hasInvalidDateRange)
