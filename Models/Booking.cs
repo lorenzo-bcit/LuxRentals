@@ -24,5 +24,5 @@ public class Booking
 
     public Customer FkCustomer { get; set; } = null!;
 
-    public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    public string TransactionId { get; set; } = null!;
 }

@@ -342,34 +342,6 @@ namespace LuxRentals.Data.Migrations
                     b.ToTable("Model", (string)null);
                 });
 
-            modelBuilder.Entity("LuxRentals.Models.Transaction", b =>
-                {
-                    b.Property<int>("PkTransactionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("pkTransactionId");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PkTransactionId"));
-
-                    b.Property<decimal>("AmountPaid")
-                        .HasColumnType("decimal(19, 2)")
-                        .HasColumnName("amountPaid");
-
-                    b.Property<int>("FkBookingId")
-                        .HasColumnType("int")
-                        .HasColumnName("fkBookingId");
-
-                    b.Property<DateTime>("PaymentDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("paymentDate");
-
-                    b.HasKey("PkTransactionId")
-                        .HasName("PK__Transact__D335440639A81962");
-
-                    b.HasIndex("FkBookingId");
-
-                    b.ToTable("Transaction", (string)null);
-                });
 
             modelBuilder.Entity("LuxRentals.Models.VehicleClass", b =>
                 {
