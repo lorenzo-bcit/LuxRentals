@@ -148,24 +148,6 @@ namespace LuxRentals.Services.Payment
 
                     request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
 
-                    Console.WriteLine("=== HTTP REQUEST ===");
-                    Console.WriteLine($"{request.Method} {request.RequestUri}");
-                    Console.WriteLine("Headers:");
-                    foreach (var header in request.Headers)
-                        Console.WriteLine($"  {header.Key}: {string.Join(", ", header.Value)}");
-
-                    if (request.Content != null)
-                    {
-                        Console.WriteLine("Content Headers:");
-                        foreach (var header in request.Content.Headers)
-                            Console.WriteLine($"  {header.Key}: {string.Join(", ", header.Value)}");
-
-                        var body = await request.Content.ReadAsStringAsync();
-                        Console.WriteLine("Body:");
-                        Console.WriteLine(body);
-                    }
-                    Console.WriteLine("===================");
-
                     var response = await _httpClient.SendAsync(request);
 
             var json = await response.Content.ReadAsStringAsync();
