@@ -4,6 +4,10 @@ public class CarSearchCriteria
 {
     public bool AvailableOnly { get; set; }
 
+    public string? SearchTerm { get; set; }
+    public int? StatusId { get; set; }
+    public int? MakeId { get; set; }
+    public int? ModelId { get; set; }
     public int? FuelTypeId { get; set; }
     public int? VehicleClassId { get; set; }
     public byte? TransmissionType { get; set; }

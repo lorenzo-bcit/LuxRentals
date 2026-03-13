@@ -30,6 +30,27 @@ public class CarRepository : ICarRepository
 
     private static IQueryable<Car> ApplyAttributeFilters(IQueryable<Car> cars, CarSearchCriteria criteria)
     {
+        if (!string.IsNullOrWhiteSpace(criteria.SearchTerm))
+        {
+            var searchTerm = criteria.SearchTerm.Trim();
+            var pattern = $"%{searchTerm}%";
+
+            cars = cars.Where(c =>
+                EF.Functions.Like(c.LicencePlate, pattern) ||
+                EF.Functions.Like(c.VinNumber, pattern) ||
+                EF.Functions.Like(c.FkModel.ModelName, pattern) ||
+                EF.Functions.Like(c.FkModel.FkMake.MakeName, pattern));
+        }
+
+        if (criteria.StatusId != null)
+            cars = cars.Where(c => c.FkCarStatusId == criteria.StatusId);
+
+        if (criteria.MakeId != null)
+            cars = cars.Where(c => c.FkModel.FkMakeId == criteria.MakeId);
+
+        if (criteria.ModelId != null)
+            cars = cars.Where(c => c.FkModelId == criteria.ModelId);
+
         if (criteria.FuelTypeId != null)
             cars = cars.Where(c => c.FkFuelTypeId == criteria.FuelTypeId);
 
@@ -71,14 +92,42 @@ public class CarRepository : ICarRepository
 
     private static IQueryable<Car> ApplySorting(IQueryable<Car> cars, CarSearchCriteria criteria)
     {
-        var sortBy = criteria.SortBy?.ToLower();
+        var sortBy = criteria.SortBy?.ToLowerInvariant();
         var descending = criteria.SortDescending;
 
         return sortBy switch
         {
             "rate" => descending
-                ? cars.OrderByDescending(c => c.DailyRate)
-                : cars.OrderBy(c => c.DailyRate),
+                ? cars.OrderByDescending(c => c.DailyRate).ThenByDescending(c => c.PkCarId)
+                : cars.OrderBy(c => c.DailyRate).ThenBy(c => c.PkCarId),
+
+            "year" => descending
+                ? cars.OrderByDescending(c => c.Year)
+                    .ThenBy(c => c.FkModel.FkMake.MakeName)
+                    .ThenBy(c => c.FkModel.ModelName)
+                : cars.OrderBy(c => c.Year)
+                    .ThenBy(c => c.FkModel.FkMake.MakeName)
+                    .ThenBy(c => c.FkModel.ModelName),
+
+            "make" => descending
+                ? cars.OrderByDescending(c => c.FkModel.FkMake.MakeName)
+                    .ThenByDescending(c => c.FkModel.ModelName)
+                    .ThenByDescending(c => c.Year)
+                : cars.OrderBy(c => c.FkModel.FkMake.MakeName)
+                    .ThenBy(c => c.FkModel.ModelName)
+                    .ThenByDescending(c => c.Year),
+
+            "status" => descending
+                ? cars.OrderByDescending(c => c.FkCarStatus.StatusFlag)
+                    .ThenBy(c => c.FkModel.FkMake.MakeName)
+                    .ThenBy(c => c.FkModel.ModelName)
+                : cars.OrderBy(c => c.FkCarStatus.StatusFlag)
+                    .ThenBy(c => c.FkModel.FkMake.MakeName)
+                    .ThenBy(c => c.FkModel.ModelName),
+
+            "id" => descending
+                ? cars.OrderByDescending(c => c.PkCarId)
+                : cars.OrderBy(c => c.PkCarId),
 
             _ => cars.OrderBy(c => c.PkCarId)
         };
