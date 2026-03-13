@@ -1,0 +1,70 @@
+﻿@model LuxRentals.ViewModels.Roles.ProfileVM
+
+@{
+    ViewData["Title"] = "Profile Details";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Profile Details</h3>
+                </div>
+
+                <div class="card-body">
+                    <p class="text-muted mb-4">View profile information below.</p>
+
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 fw-semibold">
+                            @Html.DisplayNameFor(model => model.FirstName)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.FirstName)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-semibold">
+                            @Html.DisplayNameFor(model => model.LastName)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.LastName)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-semibold">
+                            @Html.DisplayNameFor(model => model.Email)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.Email)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-semibold">
+                            @Html.DisplayNameFor(model => model.PhoneNumber)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.PhoneNumber)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-semibold">
+                            @Html.DisplayNameFor(model => model.DriverLicenceNo)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.DriverLicenceNo)
+                        </dd>
+                    </dl>
+                    
+                        <div class="d-flex justify-content-between mt-4">
+                            @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>            
+                        }
+                        @if (Model.PkCustomerId != 0)
+                            {
+                                <a asp-action="Edit" asp-route-id="@Model.PkCustomerId" class="btn btn-primary px-4">Edit Profile</a>
+                            }
+                        </div>            
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

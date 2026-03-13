@@ -6,7 +6,12 @@
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Profile </a>
+            <a class="nav-link text-dark"
+                   asp-controller="Profile"
+                   asp-action="Details"
+                   asp-route-id="@User.Identity?.Name">
+                My Profile
+            </a>
         </li>
         <li class="nav-item">
             <span class="nav-link text-dark" >Hello @User.Identity?.Name!</span>
@@ -20,7 +25,7 @@
     else
     {
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register" >Register</a>
         </li>
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
