@@ -90,7 +90,7 @@ namespace LuxRentals.Controllers.Payment
                 DateTime startDate = DateTime.Parse(HttpContext.Session.GetString("StartDate"));
                 DateTime endDate = DateTime.Parse(HttpContext.Session.GetString("EndDate"));
 
-                var booking = _bookingRepo.CreateBooking(carId, customerId, startDate, endDate);
+                var booking = _bookingRepo.CreateBooking(carId, customerId, startDate, endDate, request.OrderId);
 
                 HttpContext.Session.Clear();
 

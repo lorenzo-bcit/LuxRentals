@@ -31,7 +31,6 @@ public class LuxRentalsDbContext : IdentityDbContext
 
     public DbSet<Model> Models { get; set; }
 
-    public DbSet<Transaction> Transactions { get; set; }
 
     public DbSet<VehicleClass> VehicleClasses { get; set; }
     public DbSet<ProviderPayment> ProviderPayments { get; set; }
@@ -54,6 +53,7 @@ public class LuxRentalsDbContext : IdentityDbContext
             entity.Property(e => e.FkCarId).HasColumnName("fkCarId");
             entity.Property(e => e.FkCustomerId).HasColumnName("fkCustomerId");
             entity.Property(e => e.StartDateTime).HasColumnName("startDateTime");
+            entity.Property(e => e.TransactionId).HasColumnName("transactionId");
 
             entity.HasOne(d => d.FkBookingStatus).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.FkBookingStatusId)
@@ -236,25 +236,6 @@ public class LuxRentalsDbContext : IdentityDbContext
                 .HasConstraintName("FK_Model_Make");
         });
 
-        modelBuilder.Entity<Transaction>(entity =>
-        {
-            entity.HasKey(e => e.PkTransactionId).HasName("PK__Transact__D335440639A81962");
-
-            entity.ToTable("Transaction");
-
-            entity.Property(e => e.PkTransactionId).HasColumnName("pkTransactionId");
-            entity.Property(e => e.AmountPaid)
-                .HasColumnType("decimal(19, 2)")
-                .HasColumnName("amountPaid");
-            entity.Property(e => e.FkBookingId).HasColumnName("fkBookingId");
-            entity.Property(e => e.PaymentDate).HasColumnName("paymentDate");
-
-            entity.HasOne(d => d.FkBooking).WithMany(p => p.Transactions)
-                .HasForeignKey(d => d.FkBookingId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Transaction_Booking");
-        });
-
         modelBuilder.Entity<VehicleClass>(entity =>
         {
             entity.HasKey(e => e.PkVehicleClassId).HasName("PK__VehicleC__0B88CBFE1D5AB50C");
@@ -278,8 +259,6 @@ public class LuxRentalsDbContext : IdentityDbContext
             entity.Property(e => e.PkPaymentId)
                 .HasColumnName("pkPaymentId");
 
-            entity.Property(e => e.FkTransactionId)
-                .HasColumnName("fkTransactionId");
 
             entity.Property(e => e.PaymentProvider)
                 .HasMaxLength(50)
@@ -303,11 +282,6 @@ public class LuxRentalsDbContext : IdentityDbContext
                 .HasColumnType("nvarchar(max)")
                 .HasColumnName("rawWebHookJson");
 
-            entity.HasOne(d => d.Transaction)
-                .WithMany(t => t.ProviderPayments)
-                .HasForeignKey(d => d.FkTransactionId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ProviderPayment_Transaction");
         });
     }
 }

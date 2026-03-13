@@ -20,7 +20,7 @@ namespace LuxRentals.Repositories.Bookings
 
         // Create booking
         public Booking CreateBooking(int carId, int customerId,
-            DateTime startDate, DateTime endDate)
+            DateTime startDate, DateTime endDate, string transactionId)
         {
             try
             {
@@ -55,7 +55,8 @@ namespace LuxRentals.Repositories.Bookings
                     EndDateTime = endDate,
                     CreatedAt = DateTime.UtcNow,
                     FkBookingStatusId = STATUS_BOOKED,
-                    CancelledAt = null
+                    CancelledAt = null,
+                    TransactionId = transactionId
                 };
 
                 Console.WriteLine($"Creating booking for Car ID {carId} from {startDate} to {endDate} for Customer ID {customerId}.");

@@ -134,7 +134,7 @@ namespace LuxRentals.Controllers.Booking
             }
         }
 
-        // TODO: Need to verify this works after roles are implemented
+        
         // Admin/Employee can view any customer's booking history
         [Authorize(Roles = "Admin,Employee")]
         public IActionResult ViewCustomerBookings(int customerId)

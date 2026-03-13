@@ -65,7 +65,7 @@
                 var totalDays = (booking.EndDateTime - booking.StartDateTime).Days;
                 if (totalDays == 0) totalDays = 1;
                 var totalCost = booking.FkCar.DailyRate * totalDays;
-                var transactionId = booking.PkBookingId.ToString("D8");
+                var transactionId = booking.TransactionId;
 
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 shadow-sm">
@@ -110,7 +110,7 @@
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted"><i class="bi bi-clock"></i> Transaction ID:</span>
-                                    <strong>@totalDays day(s)</strong>
+                                    <strong>@transactionId</strong>
                                 </div>
                                 <hr>
                                 <div class="d-flex justify-content-between">
