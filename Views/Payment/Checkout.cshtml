@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "Checkout";
+}
+
+<script src="https://www.paypal.com/sdk/js?client-id=@ViewBag.PayPalClientId&currency=CAD"></script>
+
+
+<div class="checkout-page">
+
+    <div class="checkout-header mb-4">
+        <h1><i class="bi bi-credit-card-fill"></i> Checkout</h1>
+        <p class="text-muted">Complete your booking payment</p>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+
+        <!-- Booking Summary -->
+        <div class="col-md-6">
+            <div class="card admin-card shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="admin-card-icon bg-primary bg-opacity-10 text-primary me-3">
+                            <i class="bi bi-car-front-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">Booking Summary</h5>
+                            <p class="text-muted mb-0">Review your booking details</p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <p><strong>Start Date:</strong> @ViewBag.StartDate</p>
+                    <p><strong>End Date:</strong> @ViewBag.EndDate</p>
+                    <p><strong>Total Price:</strong> <span class="text-success fw-bold">$@ViewBag.Price CAD</span></p>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Payment Section -->
+        <div class="col-md-6">
+            <div class="card admin-card shadow-sm h-100">
+                <div class="card-body text-center">
+
+                    <div class="mb-3">
+                        <i class="bi bi-paypal display-4 text-primary"></i>
+                    </div>
+
+                    <h5 class="card-title">Pay with PayPal</h5>
+                    <p class="text-muted">
+                        Secure payment processed through PayPal.
+                    </p>
+
+                    <hr />
+
+                    <div id="paypal-button-container"></div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    paypal.Buttons({
+
+        createOrder: function (data, actions) {
+            return "@ViewBag.OrderId";
+        },
+
+        onApprove: function (data, actions) {
+
+                fetch("/Payment/Capture", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    orderId: data.orderID
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.success) {
+                    window.location = data.redirectUrl;
+                } else {
+                    alert("Payment failed.");
+                }
+
+            });
+
+        },
+
+        onError: function (err) {
+            console.error("PayPal error:", err);
+            alert("Payment failed. Please try again.");
+        }
+
+    }).render('#paypal-button-container');
+</script>

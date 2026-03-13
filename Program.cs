@@ -1,6 +1,4 @@
-using System.Net;
-using System.Net.Mail;
-using DotNetEnv.Configuration;
+﻿using DotNetEnv.Configuration;
 using LuxRentals.Data;
 using LuxRentals.Data.Seeders;
 using LuxRentals.Repositories.Cars;
@@ -12,10 +10,15 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using LuxRentals.Repositories.Roles;
 using LuxRentals.Services.ServiceSettings;
+using LuxRentals.Repositories.Bookings;
+using System.Net.Mail;
+using System.Net;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddDotNetEnv();
+builder.Services.AddSession();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -28,28 +31,28 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
 
-builder.Services.Configure<PaypalOptions>(builder.Configuration.GetSection("Paypal"));
+// Load .env into builder.Configuration
+builder.Configuration.AddDotNetEnv();
 
-builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>(client =>
-{
-    var paypalOptions = builder.Configuration.GetSection("Paypal").Get<PaypalOptions>()
-        ?? throw new InvalidOperationException("PayPal configuration missing");
+// Bind PaypalOptions from configuration (.env variables)
+builder.Services.Configure<PaypalOptions>(
+    builder.Configuration.GetSection("PAYPAL")
+);
 
-    client.BaseAddress = new Uri(paypalOptions.BaseUrl);
-});
+// Register PayPal service
+builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>();
 
 builder.Services.AddControllersWithViews();
 
 // Repositories
-builder.Services.AddScoped<ICarReadRepository, CarRepository>();
-builder.Services.AddScoped<ICarWriteRepository, CarRepository>();
-builder.Services.AddScoped<ICarLookupRepository, CarLookupRepository>();
 builder.Services.AddScoped<RoleRepo>();
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<UserRoleRepo>();
+builder.Services.AddScoped<BookingRepo>();
+builder.Services.AddScoped<ICarRepository, CarRepository>();
 
 // Services
-builder.Services.AddScoped<ICarInventoryService, CarInventoryService>();
+builder.Services.AddScoped<ICarService, CarService>();
 
 builder.Services.Configure<ReCaptchaOptions>(
     builder.Configuration.GetSection("ReCaptcha"));
@@ -58,6 +61,7 @@ builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>(client =>
 {
     client.BaseAddress = new Uri("https://www.google.com");
 });
+builder.Services.AddHostedService<BookingCleanupService>();
 
 // Configure email
 var emailOptions = builder.Configuration
@@ -94,12 +98,20 @@ if (app.Environment.IsProduction())
     app.UseHsts();
 }
 
+app.UseSession();
+
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+app.MapControllerRoute(
+        name: "areas",
+        pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.MapControllerRoute(
         name: "default",

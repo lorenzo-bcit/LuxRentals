@@ -4,6 +4,7 @@ namespace LuxRentals.Data;
 
 public static class DatabaseMigrator
 {
+    
     public static async Task ApplyPendingMigrationsAsync(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();

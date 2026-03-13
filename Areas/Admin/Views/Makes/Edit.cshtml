@@ -1,0 +1,52 @@
+@model LuxRentals.ViewModels.Cars.Admin.MakeEditVm
+
+@{
+    ViewData["Title"] = "Edit Make";
+}
+
+<section class="py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">Edit Make</h1>
+            <p class="text-muted mb-0">Update a manufacturer name used by the car inventory.</p>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.ReturnUrl))
+        {
+            <a class="btn btn-outline-secondary" href="@Model.ReturnUrl">Back to Car</a>
+        }
+        else
+        {
+            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Makes" asp-action="Index">Back to Makes</a>
+        }
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form method="post" asp-area="Admin" asp-controller="Makes" asp-action="Edit" asp-route-id="@Model.MakeId">
+                <input asp-for="MakeId" type="hidden" />
+                <input asp-for="ReturnUrl" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="MakeName" class="form-label"></label>
+                    <input asp-for="MakeName" class="form-control" />
+                    <span asp-validation-for="MakeName" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a class="btn btn-outline-secondary"
+                       asp-area="Admin"
+                       asp-controller="Makes"
+                       asp-action="Index"
+                       asp-route-returnUrl="@Model.ReturnUrl">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
