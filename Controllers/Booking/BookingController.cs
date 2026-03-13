@@ -19,7 +19,7 @@ namespace LuxRentals.Controllers.Booking
 
 
         // Shows booking creation form
-      //  [Authorize(Roles = "Customer")] ToDo Remove comment when roles work
+        [Authorize(Roles = "Customer")]
         [HttpGet]
         public IActionResult Create(int carId)
         {
@@ -29,7 +29,7 @@ namespace LuxRentals.Controllers.Booking
         }
 
         // Creates the booking
-        // [Authorize(Roles = "Customer")] ToDo uncomment this when roles are working again
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateAsync(int carId, BookingCreateViewModel model)
@@ -154,7 +154,6 @@ namespace LuxRentals.Controllers.Booking
 
 
         // Show cancellation info (no validation necessary)
-        [HttpGet]
         [HttpGet]
         public IActionResult Cancel(int id)
         {
