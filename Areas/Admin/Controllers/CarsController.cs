@@ -1,5 +1,6 @@
 using LuxRentals.Repositories.Cars;
 using LuxRentals.Services.Cars;
+using LuxRentals.Utils;
 using LuxRentals.ViewModels.Cars;
 using LuxRentals.ViewModels.Cars.Admin;
 using Microsoft.AspNetCore.Authorization;
@@ -125,24 +126,32 @@ public class CarsController : Controller
     private async Task PopulateOptionsAsync(CarEditVm vm)
     {
         var fuelTypes = await _carService.GetFuelTypesAsync();
-        vm.FuelTypeOptions = fuelTypes
-            .Select(x => new SelectListItem(x.FuelType1, x.PkFuelTypeId.ToString(), x.PkFuelTypeId == vm.Car.FkFuelTypeId))
-            .ToList();
+        vm.FuelTypeOptions = SelectListItems.Build(
+            fuelTypes,
+            x => x.FuelType1,
+            x => x.PkFuelTypeId.ToString(),
+            x => x.PkFuelTypeId == vm.Car.FkFuelTypeId);
 
         var classes = await _carService.GetVehicleClassesAsync();
-        vm.VehicleClassOptions = classes
-            .Select(x => new SelectListItem(x.VehicleClass1, x.PkVehicleClassId.ToString(), x.PkVehicleClassId == vm.Car.FkVehicleClassId))
-            .ToList();
+        vm.VehicleClassOptions = SelectListItems.Build(
+            classes,
+            x => x.VehicleClass1,
+            x => x.PkVehicleClassId.ToString(),
+            x => x.PkVehicleClassId == vm.Car.FkVehicleClassId);
 
         var statuses = await _carService.GetCarStatusesAsync();
-        vm.CarStatusOptions = statuses
-            .Select(x => new SelectListItem(x.StatusFlag, x.PkCarStatusId.ToString(), x.PkCarStatusId == vm.Car.FkCarStatusId))
-            .ToList();
+        vm.CarStatusOptions = SelectListItems.Build(
+            statuses,
+            x => x.StatusFlag,
+            x => x.PkCarStatusId.ToString(),
+            x => x.PkCarStatusId == vm.Car.FkCarStatusId);
 
         var models = await _carService.GetModelsAsync();
-        vm.ModelOptions = models
-            .Select(x => new SelectListItem($"{x.FkMake.MakeName} {x.ModelName}", x.PkModelId.ToString(), x.PkModelId == vm.Car.FkModelId))
-            .ToList();
+        vm.ModelOptions = SelectListItems.Build(
+            models,
+            x => $"{x.FkMake.MakeName} {x.ModelName}",
+            x => x.PkModelId.ToString(),
+            x => x.PkModelId == vm.Car.FkModelId);
 
         vm.TransmissionOptions =
         [
@@ -218,31 +227,31 @@ public class CarsController : Controller
     private async Task PopulateIndexOptionsAsync(CarIndexVm vm)
     {
         var statuses = await _carService.GetCarStatusesAsync();
-        vm.StatusOptions = new List<SelectListItem>
-        {
-            new("Any status", "", vm.StatusId == null)
-        }
-        .Concat(statuses.Select(x =>
-            new SelectListItem(x.StatusFlag, x.PkCarStatusId.ToString(), x.PkCarStatusId == vm.StatusId)))
-        .ToList();
+        vm.StatusOptions = SelectListItems.Build(
+            statuses,
+            x => x.StatusFlag,
+            x => x.PkCarStatusId.ToString(),
+            x => x.PkCarStatusId == vm.StatusId,
+            emptyText: "Any status",
+            emptySelected: vm.StatusId == null);
 
         var classes = await _carService.GetVehicleClassesAsync();
-        vm.VehicleClassOptions = new List<SelectListItem>
-        {
-            new("Any class", "", vm.VehicleClassId == null)
-        }
-        .Concat(classes.Select(x =>
-            new SelectListItem(x.VehicleClass1, x.PkVehicleClassId.ToString(), x.PkVehicleClassId == vm.VehicleClassId)))
-        .ToList();
+        vm.VehicleClassOptions = SelectListItems.Build(
+            classes,
+            x => x.VehicleClass1,
+            x => x.PkVehicleClassId.ToString(),
+            x => x.PkVehicleClassId == vm.VehicleClassId,
+            emptyText: "Any class",
+            emptySelected: vm.VehicleClassId == null);
 
         var makes = await _carService.GetMakeOptionsAsync();
-        vm.MakeOptions = new List<SelectListItem>
-        {
-            new("Any make", "", vm.MakeId == null)
-        }
-        .Concat(makes.Select(x =>
-            new SelectListItem(x.MakeName, x.PkMakeId.ToString(), x.PkMakeId == vm.MakeId)))
-        .ToList();
+        vm.MakeOptions = SelectListItems.Build(
+            makes,
+            x => x.MakeName,
+            x => x.PkMakeId.ToString(),
+            x => x.PkMakeId == vm.MakeId,
+            emptyText: "Any make",
+            emptySelected: vm.MakeId == null);
 
         vm.SortOptions =
         [

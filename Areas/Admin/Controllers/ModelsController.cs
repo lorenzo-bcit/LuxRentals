@@ -1,8 +1,8 @@
 using LuxRentals.Services.Cars;
+using LuxRentals.Utils;
 using LuxRentals.ViewModels.Cars.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LuxRentals.Areas.Admin.Controllers;
 
@@ -107,11 +107,13 @@ public class ModelsController : Controller
     {
         var makes = await _carService.GetMakeOptionsAsync();
 
-        vm.MakeOptions =
-        [
-            new SelectListItem("Select a make", string.Empty, vm.FkMakeId is null),
-            .. makes.Select(x => new SelectListItem(x.MakeName, x.PkMakeId.ToString(), x.PkMakeId == vm.FkMakeId))
-        ];
+        vm.MakeOptions = SelectListItems.Build(
+            makes,
+            x => x.MakeName,
+            x => x.PkMakeId.ToString(),
+            x => x.PkMakeId == vm.FkMakeId,
+            emptyText: "Select a make",
+            emptySelected: vm.FkMakeId is null);
 
         vm.Models = await _carService.GetModelListAsync();
     }
@@ -119,11 +121,13 @@ public class ModelsController : Controller
     private async Task PopulateAsync(ModelEditVm vm)
     {
         var makes = await _carService.GetMakeOptionsAsync();
-        vm.MakeOptions =
-        [
-            new SelectListItem("Select a make", string.Empty, vm.FkMakeId is null),
-            .. makes.Select(x => new SelectListItem(x.MakeName, x.PkMakeId.ToString(), x.PkMakeId == vm.FkMakeId))
-        ];
+        vm.MakeOptions = SelectListItems.Build(
+            makes,
+            x => x.MakeName,
+            x => x.PkMakeId.ToString(),
+            x => x.PkMakeId == vm.FkMakeId,
+            emptyText: "Select a make",
+            emptySelected: vm.FkMakeId is null);
     }
 
     private IActionResult RedirectToReturnOrIndex(string? returnUrl)

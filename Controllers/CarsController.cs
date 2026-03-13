@@ -1,8 +1,8 @@
 using LuxRentals.Repositories.Cars;
 using LuxRentals.Services.Cars;
+using LuxRentals.Utils;
 using LuxRentals.ViewModels.Cars;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LuxRentals.Controllers;
 
@@ -83,21 +83,21 @@ public class CarsController : Controller
     private async Task PopulateLookupOptionsAsync(CarBrowseVm vm)
     {
         var fuelTypes = await _carService.GetFuelTypesAsync();
-        vm.FuelTypeOptions = new List<SelectListItem>
-        {
-            new SelectListItem("Any", "", vm.FuelTypeId == null)
-        }
-        .Concat(fuelTypes
-            .Select(x => new SelectListItem(x.FuelType1, x.PkFuelTypeId.ToString(), x.PkFuelTypeId == vm.FuelTypeId)))
-        .ToList();
+        vm.FuelTypeOptions = SelectListItems.Build(
+            fuelTypes,
+            x => x.FuelType1,
+            x => x.PkFuelTypeId.ToString(),
+            x => x.PkFuelTypeId == vm.FuelTypeId,
+            emptyText: "Any",
+            emptySelected: vm.FuelTypeId == null);
 
         var classes = await _carService.GetVehicleClassesAsync();
-        vm.VehicleClassOptions = new List<SelectListItem>
-        {
-            new SelectListItem("Any", "", vm.VehicleClassId == null)
-        }
-        .Concat(classes
-            .Select(x => new SelectListItem(x.VehicleClass1, x.PkVehicleClassId.ToString(), x.PkVehicleClassId == vm.VehicleClassId)))
-        .ToList();
+        vm.VehicleClassOptions = SelectListItems.Build(
+            classes,
+            x => x.VehicleClass1,
+            x => x.PkVehicleClassId.ToString(),
+            x => x.PkVehicleClassId == vm.VehicleClassId,
+            emptyText: "Any",
+            emptySelected: vm.VehicleClassId == null);
     }
 }
