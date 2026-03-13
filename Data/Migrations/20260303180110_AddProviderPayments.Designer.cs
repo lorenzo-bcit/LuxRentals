@@ -4,6 +4,7 @@ using LuxRentals.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LuxRentals.Data.Migrations
 {
     [DbContext(typeof(LuxRentalsDbContext))]
-    partial class LuxRentalsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260303180110_AddProviderPayments")]
+    partial class AddProviderPayments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,11 +61,6 @@ namespace LuxRentals.Data.Migrations
                     b.Property<DateTime>("StartDateTime")
                         .HasColumnType("datetime2")
                         .HasColumnName("startDateTime");
-
-                    b.Property<string>("TransactionId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("transactionId");
 
                     b.HasKey("PkBookingId")
                         .HasName("PK__Booking__8A399DE0B0FB731A");
@@ -358,7 +356,8 @@ namespace LuxRentals.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PkPaymentId"));
 
                     b.Property<int>("FkTransactionId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("fkTransactionId");
 
                     b.Property<string>("PaymentProvider")
                         .IsRequired()
@@ -392,7 +391,38 @@ namespace LuxRentals.Data.Migrations
                     b.HasKey("PkPaymentId")
                         .HasName("PK_ProviderPayment");
 
+                    b.HasIndex("FkTransactionId");
+
                     b.ToTable("ProviderPayment", (string)null);
+                });
+
+            modelBuilder.Entity("LuxRentals.Models.Transaction", b =>
+                {
+                    b.Property<int>("PkTransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("pkTransactionId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PkTransactionId"));
+
+                    b.Property<decimal>("AmountPaid")
+                        .HasColumnType("decimal(19, 2)")
+                        .HasColumnName("amountPaid");
+
+                    b.Property<int>("FkBookingId")
+                        .HasColumnType("int")
+                        .HasColumnName("fkBookingId");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("paymentDate");
+
+                    b.HasKey("PkTransactionId")
+                        .HasName("PK__Transact__D335440639A81962");
+
+                    b.HasIndex("FkBookingId");
+
+                    b.ToTable("Transaction", (string)null);
                 });
 
             modelBuilder.Entity("LuxRentals.Models.VehicleClass", b =>
@@ -692,6 +722,28 @@ namespace LuxRentals.Data.Migrations
                     b.Navigation("FkMake");
                 });
 
+            modelBuilder.Entity("LuxRentals.Models.ProviderPayment", b =>
+                {
+                    b.HasOne("LuxRentals.Models.Transaction", "Transaction")
+                        .WithMany("ProviderPayments")
+                        .HasForeignKey("FkTransactionId")
+                        .IsRequired()
+                        .HasConstraintName("FK_ProviderPayment_Transaction");
+
+                    b.Navigation("Transaction");
+                });
+
+            modelBuilder.Entity("LuxRentals.Models.Transaction", b =>
+                {
+                    b.HasOne("LuxRentals.Models.Booking", "FkBooking")
+                        .WithMany("Transactions")
+                        .HasForeignKey("FkBookingId")
+                        .IsRequired()
+                        .HasConstraintName("FK_Transaction_Booking");
+
+                    b.Navigation("FkBooking");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -743,6 +795,11 @@ namespace LuxRentals.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LuxRentals.Models.Booking", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
             modelBuilder.Entity("LuxRentals.Models.BookingStatus", b =>
                 {
                     b.Navigation("Bookings");
@@ -776,6 +833,11 @@ namespace LuxRentals.Data.Migrations
             modelBuilder.Entity("LuxRentals.Models.Model", b =>
                 {
                     b.Navigation("Cars");
+                });
+
+            modelBuilder.Entity("LuxRentals.Models.Transaction", b =>
+                {
+                    b.Navigation("ProviderPayments");
                 });
 
             modelBuilder.Entity("LuxRentals.Models.VehicleClass", b =>
