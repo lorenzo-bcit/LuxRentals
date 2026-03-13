@@ -1,0 +1,50 @@
+@model LuxRentals.ViewModels.Roles.UserRoleVm
+@{
+    ViewData["Title"] = "Remove Role";
+}
+
+<div class="admin-section">
+    <h2 class="mb-4"><i class="bi bi-exclamation-triangle-fill text-danger"></i> Remove Role from User</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-danger">
+                <div class="card-body p-4">
+                    <p class="mb-3">Are you sure you want to remove this role assignment?</p>
+
+                    <div class="alert alert-warning">
+                        <div class="mb-2">
+                            <strong>User:</strong>
+                            <span class="ms-2">@Model.Email</span>
+                        </div>
+                        <div>
+                            <strong>Role:</strong>
+                            <span class="badge bg-info text-dark ms-2">@Model.Role</span>
+                        </div>
+                    </div>
+
+                    <p class="text-muted small">
+                        <i class="bi bi-info-circle"></i>
+                        The user will lose all permissions associated with this role.
+                    </p>
+
+                    <form asp-action="Delete" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="email" value="@Model.Email" />
+                        <input type="hidden" name="role" value="@Model.Role" />
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Detail" asp-route-userName="@Model.Email"
+                               class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x-circle"></i> Confirm Remove
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

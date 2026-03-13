@@ -10,6 +10,8 @@ using LuxRentals.Services.Payment;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using LuxRentals.Repositories.Roles;
+using LuxRentals.Services.ServiceSettings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,9 @@ builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>(client =>
 builder.Services.AddControllersWithViews();
 
 // Repositories
+builder.Services.AddScoped<RoleRepo>();
+builder.Services.AddScoped<UserRepo>();
+builder.Services.AddScoped<UserRoleRepo>();
 builder.Services.AddScoped<ICarRepository, CarRepository>();
 
 // Services

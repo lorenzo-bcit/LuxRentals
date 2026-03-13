@@ -32,4 +32,9 @@
       <Content Include=".github\CODEOWNERS" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Areas\Identity\Data\" />
+      <Folder Include="Views\AdminProfile\" />
+    </ItemGroup>
+
 </Project>
