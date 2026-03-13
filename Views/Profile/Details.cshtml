@@ -34,6 +34,7 @@
                 <div class="card-header bg-primary text-white">
                     <h3 class="mb-0">Profile Details</h3>
                 </div>
+
                 <div class="card-body">
                     <dl class="row">
                         <dt class="col-sm-4">First Name</dt>
@@ -51,18 +52,19 @@
                         <dt class="col-sm-4">Driver Licence</dt>
                         <dd class="col-sm-8">@Model.DriverLicenceNo</dd>
                     </dl>
-
-                    <div class="d-flex justify-content-between mt-4">
+                    
+                        <div class="d-flex justify-content-between mt-4">
                         @if (isAdmin)
                         {
-                            <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                            <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>            
                         }
                         else
-                        {
+                            {
                             <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary">Home</a>
-                        }
+                            }
                         <a asp-action="Edit" asp-route-id="@Model.PkCustomerId" class="btn btn-primary">Edit Profile</a>
-                    </div>
+                        </div>            
+                    
                 </div>
             </div>
         </div>

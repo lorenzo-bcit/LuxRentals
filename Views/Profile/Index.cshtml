@@ -26,8 +26,8 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <table class="table table-hover">
-                <thead>
-                    <tr>
+    <thead>
+        <tr>
                         <th>ID</th>
                         <th>First Name</th>
                         <th>Last Name</th>
@@ -35,30 +35,30 @@
                         <th>Phone Number</th>
                         <th>Driver Licence</th>
                         <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
+        </tr>
+    </thead>
+    <tbody>
                     @foreach (var item in Model)
                     {
-                        <tr>
+        <tr>
                             <td>@item.PkCustomerId</td>
                             <td>@item.FirstName</td>
                             <td>@item.LastName</td>
                             <td>@item.Email</td>
                             <td>@item.PhoneNumber</td>
                             <td>@item.DriverLicenceNo</td>
-                            <td>
+            <td>
                                 <a asp-action="Edit" asp-route-id="@item.PkCustomerId" class="btn btn-sm btn-primary">
                                     <i class="bi bi-pencil"></i> Edit
                                 </a>
                                 <a asp-action="Details" asp-route-id="@item.Email" class="btn btn-sm btn-secondary">
                                     <i class="bi bi-eye"></i> Details
                                 </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
         </div>
     </div>
     <div class="mt-3">
