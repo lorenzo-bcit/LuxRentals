@@ -45,16 +45,14 @@ builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>();
 builder.Services.AddControllersWithViews();
 
 // Repositories
-builder.Services.AddScoped<ICarReadRepository, CarRepository>();
-builder.Services.AddScoped<ICarWriteRepository, CarRepository>();
-builder.Services.AddScoped<ICarLookupRepository, CarLookupRepository>();
 builder.Services.AddScoped<RoleRepo>();
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<UserRoleRepo>();
 builder.Services.AddScoped<BookingRepo>();
+builder.Services.AddScoped<ICarRepository, CarRepository>();
 
 // Services
-builder.Services.AddScoped<ICarInventoryService, CarInventoryService>();
+builder.Services.AddScoped<ICarService, CarService>();
 
 builder.Services.Configure<ReCaptchaOptions>(
     builder.Configuration.GetSection("ReCaptcha"));
@@ -105,9 +103,15 @@ app.UseSession();
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+app.MapControllerRoute(
+        name: "areas",
+        pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.MapControllerRoute(
         name: "default",

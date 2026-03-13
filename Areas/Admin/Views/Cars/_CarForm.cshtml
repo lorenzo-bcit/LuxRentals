@@ -1,0 +1,91 @@
+@model LuxRentals.ViewModels.Cars.Admin.CarEditVm
+
+@{
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+}
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="Car.Year" class="form-label"></label>
+        <input asp-for="Car.Year" class="form-control" />
+        <span asp-validation-for="Car.Year" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Car.Colour" class="form-label"></label>
+        <input asp-for="Car.Colour" class="form-control" />
+        <span asp-validation-for="Car.Colour" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Car.FkModelId" class="form-label"></label>
+        <select asp-for="Car.FkModelId" asp-items="Model.ModelOptions" class="form-select"></select>
+        <span asp-validation-for="Car.FkModelId" class="text-danger"></span>
+        <div class="form-text">
+            Need a new make or model?
+            <a asp-area="Admin" asp-controller="Makes" asp-action="Index" asp-route-returnUrl="@returnUrl">Add make</a>
+            or
+            <a asp-area="Admin" asp-controller="Models" asp-action="Index" asp-route-returnUrl="@returnUrl">add model</a>.
+        </div>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Car.FkFuelTypeId" class="form-label"></label>
+        <select asp-for="Car.FkFuelTypeId" asp-items="Model.FuelTypeOptions" class="form-select"></select>
+        <span asp-validation-for="Car.FkFuelTypeId" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Car.FkVehicleClassId" class="form-label"></label>
+        <select asp-for="Car.FkVehicleClassId" asp-items="Model.VehicleClassOptions" class="form-select"></select>
+        <span asp-validation-for="Car.FkVehicleClassId" class="text-danger"></span>
+        <div class="form-text">
+            Missing a class?
+            <a asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index" asp-route-returnUrl="@returnUrl">Add vehicle class</a>.
+        </div>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Car.FkCarStatusId" class="form-label"></label>
+        <select asp-for="Car.FkCarStatusId" asp-items="Model.CarStatusOptions" class="form-select"></select>
+        <span asp-validation-for="Car.FkCarStatusId" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Car.TransmissionType" class="form-label"></label>
+        <select asp-for="Car.TransmissionType" asp-items="Model.TransmissionOptions" class="form-select"></select>
+        <span asp-validation-for="Car.TransmissionType" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Car.DailyRate" class="form-label"></label>
+        <input asp-for="Car.DailyRate" class="form-control" />
+        <span asp-validation-for="Car.DailyRate" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Car.PersonCap" class="form-label"></label>
+        <input asp-for="Car.PersonCap" class="form-control" />
+        <span asp-validation-for="Car.PersonCap" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Car.LuggageCap" class="form-label"></label>
+        <input asp-for="Car.LuggageCap" class="form-control" />
+        <span asp-validation-for="Car.LuggageCap" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Car.LicencePlate" class="form-label"></label>
+        <input asp-for="Car.LicencePlate" class="form-control" />
+        <span asp-validation-for="Car.LicencePlate" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Car.VinNumber" class="form-label"></label>
+        <input asp-for="Car.VinNumber" class="form-control" />
+        <span asp-validation-for="Car.VinNumber" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Car.CarThumbnail" class="form-label"></label>
+        <input asp-for="Car.CarThumbnail" class="form-control" />
+        <span asp-validation-for="Car.CarThumbnail" class="text-danger"></span>
+    </div>
+</div>

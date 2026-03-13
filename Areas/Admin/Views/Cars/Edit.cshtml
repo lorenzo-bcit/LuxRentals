@@ -1,0 +1,33 @@
+@model LuxRentals.ViewModels.Cars.Admin.CarEditVm
+
+@{
+    ViewData["Title"] = "Edit Car";
+}
+
+<section class="py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1">Edit Car</h1>
+            <p class="text-muted mb-0">Update the selected inventory record.</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Cars" asp-action="Index">Back to Inventory</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form method="post" asp-area="Admin" asp-controller="Cars" asp-action="Edit" asp-route-id="@Model.Car.CarId">
+                <input asp-for="Car.CarId" type="hidden" />
+                <partial name="_CarForm" model="Model" />
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Cars" asp-action="Index">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

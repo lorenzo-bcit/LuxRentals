@@ -1,27 +1,24 @@
 using LuxRentals.Repositories.Cars;
+using LuxRentals.Services.Cars;
+using LuxRentals.Utils;
 using LuxRentals.ViewModels.Cars;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LuxRentals.Controllers;
 
 public class CarsController : Controller
 {
     private const int PAGE_SIZE = 5;
+    private const int DEFAULT_BOOKING_WINDOW_DAYS = 7;
 
-    private readonly ICarReadRepository _carReadRepository;
-    private readonly ICarLookupRepository _carLookupRepository;
+    private readonly ICarService _carService;
 
-    public CarsController(ICarReadRepository carReadRepository, ICarLookupRepository carLookupRepository)
-    {
-        _carReadRepository = carReadRepository;
-        _carLookupRepository = carLookupRepository;
-    }
+    public CarsController(ICarService carService) => _carService = carService;
 
     [HttpGet]
     public async Task<IActionResult> Index([FromQuery] CarBrowseVm vm)
     {
-        NormalizePage(vm);
+        NormalizeBrowseState(vm);
 
         var hasInvalidDateRange =
             vm.StartDate.HasValue &&
@@ -32,7 +29,7 @@ public class CarsController : Controller
             ModelState.AddModelError(nameof(vm.EndDate), "Drop-off date must be after pick-up date.");
 
         var criteria = ToCriteria(vm, hasInvalidDateRange);
-        var pagedCars = await _carReadRepository.SearchAsync(criteria);
+        var pagedCars = await _carService.SearchAsync(criteria);
 
         vm.ApplyPagedResult(pagedCars);
 
@@ -41,9 +38,24 @@ public class CarsController : Controller
         return View(vm);
     }
 
-    private static void NormalizePage(CarBrowseVm vm)
+    private static void NormalizeBrowseState(CarBrowseVm vm)
     {
         vm.Page = Math.Max(1, vm.Page);
+
+        var today = DateTime.Today;
+
+        if (!vm.StartDate.HasValue && !vm.EndDate.HasValue)
+        {
+            vm.StartDate = today;
+            vm.EndDate = today.AddDays(DEFAULT_BOOKING_WINDOW_DAYS);
+            return;
+        }
+
+        if (!vm.StartDate.HasValue)
+            vm.StartDate = vm.EndDate?.Date.AddDays(-DEFAULT_BOOKING_WINDOW_DAYS) ?? today;
+
+        if (!vm.EndDate.HasValue)
+            vm.EndDate = vm.StartDate.Value.Date.AddDays(DEFAULT_BOOKING_WINDOW_DAYS);
     }
 
     private static CarSearchCriteria ToCriteria(CarBrowseVm vm, bool hasInvalidDateRange)
@@ -86,22 +98,22 @@ public class CarsController : Controller
 
     private async Task PopulateLookupOptionsAsync(CarBrowseVm vm)
     {
-        var fuelTypes = await _carLookupRepository.GetFuelTypesAsync();
-        vm.FuelTypeOptions = new List<SelectListItem>
-        {
-            new SelectListItem("Any", "", vm.FuelTypeId == null)
-        }
-        .Concat(fuelTypes
-            .Select(x => new SelectListItem(x.FuelType1, x.PkFuelTypeId.ToString(), x.PkFuelTypeId == vm.FuelTypeId)))
-        .ToList();
+        var fuelTypes = await _carService.GetFuelTypesAsync();
+        vm.FuelTypeOptions = SelectListItems.Build(
+            fuelTypes,
+            x => x.FuelType1,
+            x => x.PkFuelTypeId.ToString(),
+            x => x.PkFuelTypeId == vm.FuelTypeId,
+            emptyText: "Any",
+            emptySelected: vm.FuelTypeId == null);
 
-        var classes = await _carLookupRepository.GetVehicleClassesAsync();
-        vm.VehicleClassOptions = new List<SelectListItem>
-        {
-            new SelectListItem("Any", "", vm.VehicleClassId == null)
-        }
-        .Concat(classes
-            .Select(x => new SelectListItem(x.VehicleClass1, x.PkVehicleClassId.ToString(), x.PkVehicleClassId == vm.VehicleClassId)))
-        .ToList();
+        var classes = await _carService.GetVehicleClassesAsync();
+        vm.VehicleClassOptions = SelectListItems.Build(
+            classes,
+            x => x.VehicleClass1,
+            x => x.PkVehicleClassId.ToString(),
+            x => x.PkVehicleClassId == vm.VehicleClassId,
+            emptyText: "Any",
+            emptySelected: vm.VehicleClassId == null);
     }
 }
