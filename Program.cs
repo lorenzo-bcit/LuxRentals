@@ -13,10 +13,12 @@ using LuxRentals.Services.ServiceSettings;
 using LuxRentals.Repositories.Bookings;
 using System.Net.Mail;
 using System.Net;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddDotNetEnv();
+builder.Services.AddSession();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -29,15 +31,16 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
 
-builder.Services.Configure<PaypalOptions>(builder.Configuration.GetSection("Paypal"));
+// Load .env into builder.Configuration
+builder.Configuration.AddDotNetEnv();
 
-builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>(client =>
-{
-    var paypalOptions = builder.Configuration.GetSection("Paypal").Get<PaypalOptions>()
-        ?? throw new InvalidOperationException("PayPal configuration missing");
+// Bind PaypalOptions from configuration (.env variables)
+builder.Services.Configure<PaypalOptions>(
+    builder.Configuration.GetSection("PAYPAL")
+);
 
-    client.BaseAddress = new Uri(paypalOptions.BaseUrl);
-});
+// Register PayPal service
+builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>();
 
 builder.Services.AddControllersWithViews();
 
@@ -96,6 +99,8 @@ if (app.Environment.IsProduction())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseSession();
 
 app.UseHttpsRedirection();
 app.UseRouting();

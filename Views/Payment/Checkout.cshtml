@@ -2,7 +2,7 @@
     ViewData["Title"] = "Checkout";
 }
 
-<script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=CAD"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=@ViewBag.PayPalClientId&currency=CAD"></script>
 
 <div class="checkout-page">
 
@@ -76,26 +76,37 @@
 <script>
     paypal.Buttons({
 
-        createOrder: function () {
+        createOrder: function (data, actions) {
             return "@ViewBag.OrderId";
         },
 
-        onApprove: function (data) {
+        onApprove: function (data, actions) {
 
-            fetch("/Payment/Capture", {
+                fetch("/Payment/Capture", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    orderId: data.orderID,
-                    bookingId: "@ViewBag.BookingId"
+                    orderId: data.orderID
                 })
             })
-            .then(res => {
-                window.location.href = "/Payment/Success";
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.success) {
+                    window.location = data.redirectUrl;
+                } else {
+                    alert("Payment failed.");
+                }
+
             });
 
+        },
+
+        onError: function (err) {
+            console.error("PayPal error:", err);
+            alert("Payment failed. Please try again.");
         }
 
     }).render('#paypal-button-container');

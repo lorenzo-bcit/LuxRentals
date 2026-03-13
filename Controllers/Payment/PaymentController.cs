@@ -2,6 +2,7 @@
 using LuxRentals.Repositories.Bookings;
 using LuxRentals.Services.Payment;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace LuxRentals.Controllers.Payment
 {
@@ -10,12 +11,18 @@ namespace LuxRentals.Controllers.Payment
         private readonly IPaymentService _paymentService;
         private readonly BookingRepo _bookingRepo;
         private readonly LuxRentalsDbContext _db;
+        private readonly PaypalOptions _paypalOptions;
 
-        public PaymentController(IPaymentService paymentService, BookingRepo bookingRepo, LuxRentalsDbContext context)
+        public PaymentController(
+            IPaymentService paymentService,
+            BookingRepo bookingRepo,
+            LuxRentalsDbContext context,
+            IOptions<PaypalOptions> paypalOptions)   // ✅ Inject IOptions<T>
         {
             _paymentService = paymentService;
             _bookingRepo = bookingRepo;
             _db = context;
+            _paypalOptions = paypalOptions.Value;   // ✅ Get the actual options
         }
 
         public IActionResult Checkout(string orderId)
@@ -35,8 +42,21 @@ namespace LuxRentals.Controllers.Payment
                 return RedirectToAction("Index", "Home");
             }
 
-            DateTime startDate = DateTime.Parse(startDateStr);
-            DateTime endDate = DateTime.Parse(endDateStr);
+            var clientId = _paypalOptions.ClientId;
+
+            if (string.IsNullOrEmpty(clientId))
+            {
+                throw new Exception("PayPal ClientId not configured.");
+            }
+
+            ViewBag.PayPalClientId = clientId;
+
+            if (!DateTime.TryParse(startDateStr, out DateTime startDate) ||
+                !DateTime.TryParse(endDateStr, out DateTime endDate))
+            {
+                TempData["Error"] = "Invalid booking dates.";
+                return RedirectToAction("Index", "Home");
+            }
 
             var price = _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
 
@@ -53,34 +73,22 @@ namespace LuxRentals.Controllers.Payment
         {
             try
             {
-                int carId = HttpContext.Session.GetInt32("CarId") ?? 0;
-                int customerId = HttpContext.Session.GetInt32("CustomerId") ?? 0;
-                if (carId == 0 || customerId == 0)
-                    return BadRequest("Session expired or invalid.");
+                var paymentSuccess = await _paymentService.CaptureOrderAsync(request.OrderId);
 
-                DateTime startDate = DateTime.Parse(HttpContext.Session.GetString("StartDate")!);
-                DateTime endDate = DateTime.Parse(HttpContext.Session.GetString("EndDate")!);
+                if (!paymentSuccess)
+                {
+                    return Json(new { success = false, message = "Payment failed." });
+                }
+
+                int carId = HttpContext.Session.GetInt32("CarId").Value;
+                int customerId = HttpContext.Session.GetInt32("CustomerId").Value;
+
+                DateTime startDate = DateTime.Parse(HttpContext.Session.GetString("StartDate"));
+                DateTime endDate = DateTime.Parse(HttpContext.Session.GetString("EndDate"));
 
                 var booking = _bookingRepo.CreateBooking(carId, customerId, startDate, endDate);
 
-                var captureId = await _paymentService.CaptureOrderAsync(request.OrderId, booking.PkBookingId);
-
-                if (string.IsNullOrEmpty(captureId))
-                {
-                    return BadRequest("Payment failed.");
-                }
-
-
-                booking.FkBookingStatusId = 2; 
-                _bookingRepo.SaveChanges();     
-
-                // 5️⃣ Clear session
-                HttpContext.Session.Remove("CarId");
-                HttpContext.Session.Remove("CustomerId");
-                HttpContext.Session.Remove("StartDate");
-                HttpContext.Session.Remove("EndDate");
-
-                TempData["Success"] = "Your booking was completed successfully!";
+                HttpContext.Session.Clear();
 
                 return Json(new
                 {
@@ -90,8 +98,7 @@ namespace LuxRentals.Controllers.Payment
             }
             catch (Exception ex)
             {
-                // Optional: log exception
-                return BadRequest(ex.Message);
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }
