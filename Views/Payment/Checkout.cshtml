@@ -4,6 +4,7 @@
 
 <script src="https://www.paypal.com/sdk/js?client-id=@ViewBag.PayPalClientId&currency=CAD"></script>
 
+
 <div class="checkout-page">
 
     <div class="checkout-header mb-4">
@@ -38,7 +39,6 @@
 
                     <hr />
 
-                    <p><strong>Booking ID:</strong> @ViewBag.BookingId</p>
                     <p><strong>Start Date:</strong> @ViewBag.StartDate</p>
                     <p><strong>End Date:</strong> @ViewBag.EndDate</p>
                     <p><strong>Total Price:</strong> <span class="text-success fw-bold">$@ViewBag.Price CAD</span></p>

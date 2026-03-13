@@ -12,17 +12,20 @@ namespace LuxRentals.Controllers.Payment
         private readonly BookingRepo _bookingRepo;
         private readonly LuxRentalsDbContext _db;
         private readonly PaypalOptions _paypalOptions;
+        private readonly ILogger<IPaymentService> _logger;
 
         public PaymentController(
             IPaymentService paymentService,
             BookingRepo bookingRepo,
             LuxRentalsDbContext context,
-            IOptions<PaypalOptions> paypalOptions)   // ✅ Inject IOptions<T>
+            IOptions<PaypalOptions> paypalOptions,
+            ILogger<IPaymentService> logger)   
         {
             _paymentService = paymentService;
             _bookingRepo = bookingRepo;
             _db = context;
-            _paypalOptions = paypalOptions.Value;   // ✅ Get the actual options
+            _paypalOptions = paypalOptions.Value;
+            _logger = logger;
         }
 
         public IActionResult Checkout(string orderId)
@@ -73,10 +76,11 @@ namespace LuxRentals.Controllers.Payment
         {
             try
             {
-                var paymentSuccess = await _paymentService.CaptureOrderAsync(request.OrderId);
+                bool paymentSuccess = await _paymentService.CaptureOrderAsync(request.OrderId);
 
                 if (!paymentSuccess)
                 {
+                    _logger.LogError("Payment failed {Status Code}: ", Response.StatusCode);
                     return Json(new { success = false, message = "Payment failed." });
                 }
 
