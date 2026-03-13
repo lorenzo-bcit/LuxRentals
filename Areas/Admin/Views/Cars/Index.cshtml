@@ -2,7 +2,6 @@
 
 @{
     ViewData["Title"] = "Admin Cars";
-    var isModelFilterDisabled = Model.MakeId == null;
 }
 
 <section class="py-4">
@@ -48,10 +47,6 @@
                     <div class="col-md-6 col-lg-2">
                         <label asp-for="MakeId" class="form-label"></label>
                         <select asp-for="MakeId" asp-items="Model.MakeOptions" class="form-select"></select>
-                    </div>
-                    <div class="col-md-6 col-lg-2">
-                        <label asp-for="ModelId" class="form-label"></label>
-                        <select asp-for="ModelId" asp-items="Model.ModelOptions" class="form-select" disabled="@isModelFilterDisabled"></select>
                     </div>
                     <div class="col-md-6 col-lg-3">
                         <label asp-for="SortBy" class="form-label"></label>

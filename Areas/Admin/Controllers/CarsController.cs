@@ -22,7 +22,6 @@ public class CarsController : Controller
     public async Task<IActionResult> Index([FromQuery] CarIndexVm vm)
     {
         NormalizePage(vm);
-        await NormalizeModelFilterAsync(vm);
         var criteria = ToCriteria(vm);
 
         var pagedCars = await _carService.SearchAsync(criteria);
@@ -168,7 +167,6 @@ public class CarsController : Controller
             StatusId = vm.StatusId,
             VehicleClassId = vm.VehicleClassId,
             MakeId = vm.MakeId,
-            ModelId = vm.ModelId,
             Page = vm.Page,
             PageSize = PAGE_SIZE
         };
@@ -217,22 +215,6 @@ public class CarsController : Controller
         return criteria;
     }
 
-    private async Task NormalizeModelFilterAsync(CarIndexVm vm)
-    {
-        if (vm.ModelId is null)
-            return;
-
-        if (vm.MakeId is null)
-        {
-            vm.ModelId = null;
-            return;
-        }
-
-        var models = await _carService.GetModelsAsync(vm.MakeId);
-        if (models.All(x => x.PkModelId != vm.ModelId.Value))
-            vm.ModelId = null;
-    }
-
     private async Task PopulateIndexOptionsAsync(CarIndexVm vm)
     {
         var statuses = await _carService.GetCarStatusesAsync();
@@ -260,18 +242,6 @@ public class CarsController : Controller
         }
         .Concat(makes.Select(x =>
             new SelectListItem(x.MakeName, x.PkMakeId.ToString(), x.PkMakeId == vm.MakeId)))
-        .ToList();
-
-        var models = vm.MakeId.HasValue
-            ? await _carService.GetModelsAsync(vm.MakeId)
-            : [];
-
-        vm.ModelOptions = new List<SelectListItem>
-        {
-            new(vm.MakeId.HasValue ? "Any model" : "Select make first", "", vm.ModelId == null)
-        }
-        .Concat(models.Select(x =>
-            new SelectListItem(x.ModelName, x.PkModelId.ToString(), x.PkModelId == vm.ModelId)))
         .ToList();
 
         vm.SortOptions =

@@ -19,16 +19,12 @@ public class CarIndexVm
     [Display(Name = "Make")]
     public int? MakeId { get; set; }
 
-    [Display(Name = "Model")]
-    public int? ModelId { get; set; }
-
     [Display(Name = "Sort By")]
     public string SortBy { get; set; } = "id_desc";
 
     public IReadOnlyList<SelectListItem> StatusOptions { get; set; } = [];
     public IReadOnlyList<SelectListItem> VehicleClassOptions { get; set; } = [];
     public IReadOnlyList<SelectListItem> MakeOptions { get; set; } = [];
-    public IReadOnlyList<SelectListItem> ModelOptions { get; set; } = [];
     public IReadOnlyList<SelectListItem> SortOptions { get; set; } = [];
 
     public IReadOnlyList<CarListItemVm> Cars { get; set; } = [];
