@@ -152,10 +152,14 @@
                         <div class="card p-3">
                             <div class="row align-items-center g-3">
                                 <div class="col-auto">
-                                    <div class="bg-light border d-flex justify-content-center align-items-center" style="width:90px;height:90px;">
+                                    <div class="bg-light border d-flex justify-content-center align-items-center overflow-hidden"
+                                         style="width: 150px; aspect-ratio: 3 / 2;">
                                         @if (!string.IsNullOrWhiteSpace(car.Thumbnail))
                                         {
-                                            <img src="@car.Thumbnail" alt="@car.Subtitle" class="img-fluid" style="width:90px;height:90px;object-fit:cover;" />
+                                            <img src="@car.Thumbnail"
+                                                 alt="@car.Subtitle"
+                                                 class="img-fluid"
+                                                 style="width: 100%; height: 100%; object-fit: cover;" />
                                         }
                                         else
                                         {
