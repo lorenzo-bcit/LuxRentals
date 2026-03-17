@@ -48,6 +48,7 @@ builder.Services.AddScoped<RoleRepo>();
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<UserRoleRepo>();
 builder.Services.AddScoped<BookingRepo>();
+builder.Services.AddScoped<BookingStatusRepo>();
 builder.Services.AddScoped<ICarRepository, CarRepository>();
 
 // Services
