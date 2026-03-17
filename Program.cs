@@ -13,7 +13,6 @@ using LuxRentals.Services.ServiceSettings;
 using LuxRentals.Repositories.Bookings;
 using System.Net.Mail;
 using System.Net;
-using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +52,7 @@ builder.Services.AddScoped<ICarRepository, CarRepository>();
 
 // Services
 builder.Services.AddScoped<ICarService, CarService>();
+builder.Services.AddScoped<ICarImageStorage, CarImageStorage>();
 
 builder.Services.Configure<ReCaptchaOptions>(
     builder.Configuration.GetSection("ReCaptcha"));
@@ -101,6 +101,7 @@ if (app.Environment.IsProduction())
 app.UseSession();
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
