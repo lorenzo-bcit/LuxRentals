@@ -160,6 +160,8 @@
                                     <a asp-controller="Booking"
                                        asp-action="Create"
                                        asp-route-carId="@car.CarId"
+                                       asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+                                       asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
                                        class="btn btn-secondary btn-sm mt-1">
                                         Book
                                     </a>

@@ -108,10 +108,13 @@
                                     <span class="text-muted"><i class="bi bi-clock"></i> Duration:</span>
                                     <strong>@totalDays day(s)</strong>
                                 </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted"><i class="bi bi-clock"></i> Transaction ID:</span>
-                                    <strong>@transactionId</strong>
-                                </div>
+                                @if (!string.IsNullOrEmpty(transactionId))
+                                {
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted"><i class="bi bi-receipt"></i> Transaction ID:</span>
+                                        <strong class="text-truncate" style="max-width: 150px;" title="@transactionId">@transactionId</strong>
+                                    </div>
+                                }
                                 <hr>
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted"><i class="bi bi-currency-dollar"></i> Total Cost:</span>
