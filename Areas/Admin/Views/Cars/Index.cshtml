@@ -74,6 +74,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                     <tr>
+                        <th>Image</th>
                         <th>Car</th>
                         <th>Year</th>
                         <th>Status</th>
@@ -89,7 +90,7 @@
                     @if (Model.Cars.Count == 0)
                     {
                         <tr>
-                            <td colspan="9" class="text-center py-4 text-muted">No cars found for the current filters.</td>
+                            <td colspan="10" class="text-center py-4 text-muted">No cars found for the current filters.</td>
                         </tr>
                     }
                     else
@@ -97,6 +98,21 @@
                         @foreach (var car in Model.Cars)
                         {
                             <tr>
+                                <td>
+                                    <div class="bg-light border d-flex justify-content-center align-items-center overflow-hidden"
+                                         style="width: 84px; aspect-ratio: 3 / 2;">
+                                        @if (!string.IsNullOrWhiteSpace(car.Thumbnail))
+                                        {
+                                            <img src="@car.Thumbnail"
+                                                 alt="@car.DisplayName"
+                                                 style="width: 100%; height: 100%; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">None</span>
+                                        }
+                                    </div>
+                                </td>
                                 <td>
                                     <div class="fw-semibold">@car.MakeName @car.ModelName</div>
                                 </td>

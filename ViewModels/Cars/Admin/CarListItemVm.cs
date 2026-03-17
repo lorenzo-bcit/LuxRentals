@@ -5,6 +5,7 @@ namespace LuxRentals.ViewModels.Cars.Admin;
 public class CarListItemVm
 {
     public int CarId { get; set; }
+    public string? Thumbnail { get; set; }
     public int Year { get; set; }
     public string MakeName { get; set; } = "";
     public string ModelName { get; set; } = "";
@@ -20,6 +21,7 @@ public class CarListItemVm
     public static CarListItemVm FromEntity(Car car) => new()
     {
         CarId = car.PkCarId,
+        Thumbnail = car.CarThumbnail,
         Year = car.Year,
         MakeName = car.FkModel.FkMake.MakeName,
         ModelName = car.FkModel.ModelName,
