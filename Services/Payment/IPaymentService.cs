@@ -193,7 +193,7 @@ namespace LuxRentals.Services.Payment
                     return false;
                 }
 
-                // ✅ DB update
+                // DB update
                 var booking = await _db.Bookings.FindAsync(bookingId);
 
                 if (booking == null)
@@ -213,6 +213,6 @@ namespace LuxRentals.Services.Payment
                 _logger.LogError(ex, "Error capturing PayPal order {OrderId}", orderId);
                 throw;
             }
-        }     // Get PayPal access token
+        }
     }
 }

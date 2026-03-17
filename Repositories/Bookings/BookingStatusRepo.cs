@@ -1,4 +1,5 @@
 ﻿using LuxRentals.Data;
+using LuxRentals.Models;
 
 namespace LuxRentals.Repositories.BookingStatus
 {
@@ -9,6 +10,12 @@ namespace LuxRentals.Repositories.BookingStatus
         public BookingStatusRepo(LuxRentalsDbContext context)
         {
             _context = context;
+        }
+
+        public void SetBookingStatus(Booking booking, string statusName)
+        {
+            var statusId = GetStatusIdByName(statusName);
+            booking.FkBookingStatusId = statusId;
         }
 
         public int GetStatusIdByName(string statusName)
