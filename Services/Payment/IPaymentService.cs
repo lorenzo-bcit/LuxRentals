@@ -1,5 +1,6 @@
 ﻿using LuxRentals.Data;
 using LuxRentals.Models;
+using LuxRentals.Repositories.BookingStatus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,7 +15,7 @@ namespace LuxRentals.Services.Payment
     {
         Task<string> CreateOrderAsync(decimal amount, string currency);
 
-        Task<bool> CaptureOrderAsync(string orderId);
+        Task<bool> CaptureOrderAsync(string orderId, int bookingId);
     }
 
     public class PayPalPaymentService : IPaymentService
@@ -23,6 +24,7 @@ namespace LuxRentals.Services.Payment
         private readonly PaypalOptions _options;
         private readonly ILogger<PayPalPaymentService> _logger;
         private readonly LuxRentalsDbContext _db;
+        private readonly BookingStatusRepo _bookingStatusRepo;
 
         private string? _accessToken;
         private DateTime _tokenExpiry;
@@ -31,12 +33,14 @@ namespace LuxRentals.Services.Payment
             HttpClient httpClient,
             IOptions<PaypalOptions> options,
             ILogger<PayPalPaymentService> logger,
-            LuxRentalsDbContext db)
+            LuxRentalsDbContext db,
+            BookingStatusRepo bookingStatusRepo)
         {
             _httpClient = httpClient;
             _options = options.Value;
             _logger = logger;
             _db = db;
+            _bookingStatusRepo = bookingStatusRepo;
 
             var baseUrl = _options.Environment.ToLower() == "live"
                 ? "https://api-m.paypal.com"
@@ -134,48 +138,81 @@ namespace LuxRentals.Services.Payment
         }
 
         // Create a PayPal order
-        public async Task<bool> CaptureOrderAsync(string orderId)
+        public async Task<bool> CaptureOrderAsync(string orderId, int bookingId)
         {
-                    var token = await GetAccessTokenAsync();
-                    Console.WriteLine("Access Token: {0}", token);
-                    var request = new HttpRequestMessage(
-                HttpMethod.Post,
-                $"/v2/checkout/orders/{orderId}/capture");
+            using var transaction = await _db.Database.BeginTransactionAsync();
 
-
-                    request.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
-
-                    request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
-
-                    var response = await _httpClient.SendAsync(request);
-
-            var json = await response.Content.ReadAsStringAsync();
-
-            _logger.LogInformation("PayPal capture response: {json}", json);
-
-            if (!response.IsSuccessStatusCode)
-                return false;
-
-            using var doc = JsonDocument.Parse(json);
-
-            var root = doc.RootElement;
-
-            if (root.TryGetProperty("status", out var rootStatus))
+            try
             {
-                if (rootStatus.GetString() == "COMPLETED")
-                    return true;
+                var token = await GetAccessTokenAsync();
+
+                var request = new HttpRequestMessage(
+                    HttpMethod.Post,
+                    $"/v2/checkout/orders/{orderId}/capture");
+
+                request.Headers.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+
+                request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.SendAsync(request);
+
+                var json = await response.Content.ReadAsStringAsync();
+
+                _logger.LogInformation("PayPal capture response: {json}", json);
+
+                if (!response.IsSuccessStatusCode)
+                    return false;
+
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                bool isSuccess = false;
+
+                if (root.TryGetProperty("status", out var rootStatus))
+                {
+                    if (rootStatus.GetString() == "COMPLETED")
+                        isSuccess = true;
+                }
+
+                if (!isSuccess)
+                {
+                    var captureStatus = root
+                        .GetProperty("purchase_units")[0]
+                        .GetProperty("payments")
+                        .GetProperty("captures")[0]
+                        .GetProperty("status")
+                        .GetString();
+
+                    isSuccess = captureStatus == "COMPLETED";
+                }
+
+                if (!isSuccess)
+                {
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+
+                // ✅ DB update
+                var booking = await _db.Bookings.FindAsync(bookingId);
+
+                if (booking == null)
+                    throw new Exception("Booking not found");
+
+                _bookingStatusRepo.SetBookingStatus(booking, "Paid");
+
+                await _db.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return true;
             }
-
-            var captureStatus = root
-                .GetProperty("purchase_units")[0]
-                .GetProperty("payments")
-                .GetProperty("captures")[0]
-                .GetProperty("status")
-                .GetString();
-
-            return captureStatus == "COMPLETED";
-        }
-        // Get PayPal access token
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error capturing PayPal order {OrderId}", orderId);
+                throw;
+            }
+        }     // Get PayPal access token
     }
 }
