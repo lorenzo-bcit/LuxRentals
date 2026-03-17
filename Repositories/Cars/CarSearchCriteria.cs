@@ -13,6 +13,7 @@ public class CarSearchCriteria
     public byte? TransmissionType { get; set; }
     public int? MinSeats { get; set; }
     public int? MinLuggage { get; set; }
+    public decimal? MaxRate { get; set; }
 
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }

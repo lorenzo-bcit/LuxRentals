@@ -11,23 +11,24 @@
             <div class="cars-sort">
                 <label asp-for="SortBy" class="form-label">Sort by</label>
                 <select asp-for="SortBy" class="form-select" onchange="this.form.submit()">
-                    <option value="featured">Featured</option>
                     <option value="price_asc">Price: Low to High</option>
                     <option value="price_desc">Price: High to Low</option>
+                    <option value="year_desc">Year: Newest First</option>
+                    <option value="year_asc">Year: Oldest First</option>
                 </select>
             </div>
         </div>
 
         <div class="row g-3 mb-3">
             <div class="col-md-6">
-                <label asp-for="StartDate" class="form-label">From</label>
+                <label asp-for="StartDate" class="form-label">Pick-up</label>
                 <input asp-for="StartDate"
                        type="date"
                        class="form-control"
                        onchange="submitIfBothDatesSelected(this.form)" />
             </div>
             <div class="col-md-6">
-                <label asp-for="EndDate" class="form-label">To</label>
+                <label asp-for="EndDate" class="form-label">Drop-off</label>
                 <input asp-for="EndDate"
                        type="date"
                        class="form-control"
@@ -36,11 +37,25 @@
         </div>
 
         <span asp-validation-for="EndDate" class="text-danger"></span>
-
         <div class="row g-3">
             <aside class="col-lg-3">
                 <div class="card p-3 row-gap-2">
                     <h2>Filters</h2>
+
+                    <div class="cars-filter-block">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label asp-for="MaxRate" class="form-label mb-0">Max daily rate</label>
+                            <span class="fw-semibold" id="maxRateDisplay">CAD @Model.MaxRate?.ToString("0")</span>
+                        </div>
+                        <input asp-for="MaxRate"
+                               type="range"
+                               class="form-range mt-2"
+                               min="0"
+                               max="@Model.MaxRateFilter.ToString("0")"
+                               step="5"
+                               oninput="document.getElementById('maxRateDisplay').innerText = 'CAD ' + this.value"
+                               onchange="this.form.submit()" />
+                    </div>
 
                     <div class="cars-filter-block">
                         <div class="d-flex justify-content-between align-items-center">
@@ -51,7 +66,7 @@
                                type="range"
                                class="form-range mt-2"
                                min="0"
-                               max="10"
+                               max="@Model.MaxSeatsFilter"
                                step="1"
                                oninput="document.getElementById('seatsDisplay').innerText = this.value"
                                onchange="this.form.submit()" />
@@ -66,72 +81,34 @@
                                type="range"
                                class="form-range mt-2"
                                min="0"
-                               max="10"
+                               max="@Model.MaxLuggageFilter"
                                step="1"
                                oninput="document.getElementById('luggageDisplay').innerText = this.value"
                                onchange="this.form.submit()" />
                     </div>
 
                     <div class="cars-filter-block">
-                        <label class="form-label fw-semibold">Vehicle Type</label>
-                        <div class="d-flex flex-column gap-1">
-                            @foreach (var option in Model.VehicleClassOptions)
-                            {
-                                <div class="form-check">
-                                    <input class="form-check-input"
-                                           type="radio"
-                                           asp-for="VehicleClassId"
-                                           value="@option.Value"
-                                           id="vehicle-@option.Value"
-                                           onchange="this.form.submit()"
-                                           checked="@(option.Selected ? "checked" : null)" />
-                                    <label class="form-check-label" for="vehicle-@option.Value">@option.Text</label>
-                                </div>
-                            }
-                        </div>
+                        <label asp-for="MakeId" class="form-label fw-semibold">Make</label>
+                        <select asp-for="MakeId" asp-items="Model.MakeOptions" class="form-select" onchange="this.form.submit()"></select>
                     </div>
 
                     <div class="cars-filter-block">
-                        <label class="form-label fw-semibold">Fuel Type</label>
-                        <div class="d-flex flex-column gap-1">
-                            @foreach (var option in Model.FuelTypeOptions)
-                            {
-                                <div class="form-check">
-                                    <input class="form-check-input"
-                                           type="radio"
-                                           asp-for="FuelTypeId"
-                                           value="@option.Value"
-                                           id="fuel-@option.Value"
-                                           onchange="this.form.submit()"
-                                           checked="@(option.Selected ? "checked" : null)" />
-                                    <label class="form-check-label" for="fuel-@option.Value">@option.Text</label>
-                                </div>
-                            }
-                        </div>
+                        <label asp-for="VehicleClassId" class="form-label fw-semibold">Vehicle Type</label>
+                        <select asp-for="VehicleClassId" asp-items="Model.VehicleClassOptions" class="form-select" onchange="this.form.submit()"></select>
                     </div>
 
                     <div class="cars-filter-block">
-                        <label class="form-label fw-semibold">Transmission</label>
-                        <div class="d-flex flex-column gap-1">
-                            <div class="form-check">
-                                <input class="form-check-input"
-                                       type="radio"
-                                       asp-for="TransmissionType"
-                                       value=""
-                                       id="trans-any"
-                                       onchange="this.form.submit()"
-                                       checked="@(Model.TransmissionType == null ? "checked" : null)" />
-                                <label class="form-check-label" for="trans-any">Any</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="1" id="trans-auto" onchange="this.form.submit()" />
-                                <label class="form-check-label" for="trans-auto">Automatic</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" asp-for="TransmissionType" value="0" id="trans-manual" onchange="this.form.submit()" />
-                                <label class="form-check-label" for="trans-manual">Manual</label>
-                            </div>
-                        </div>
+                        <label asp-for="FuelTypeId" class="form-label fw-semibold">Fuel Type</label>
+                        <select asp-for="FuelTypeId" asp-items="Model.FuelTypeOptions" class="form-select" onchange="this.form.submit()"></select>
+                    </div>
+
+                    <div class="cars-filter-block">
+                        <label asp-for="TransmissionType" class="form-label fw-semibold">Transmission</label>
+                        <select asp-for="TransmissionType" class="form-select" onchange="this.form.submit()">
+                            <option value="">Any</option>
+                            <option value="1">Automatic</option>
+                            <option value="0">Manual</option>
+                        </select>
                     </div>
 
                     <div class="d-grid gap-2">
