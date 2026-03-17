@@ -15,8 +15,8 @@
 
     <div class="card shadow-sm">
         <div class="card-body p-4">
-            <form method="post" asp-area="Admin" asp-controller="Cars" asp-action="Edit" asp-route-id="@Model.Car.CarId">
-                <input asp-for="Car.CarId" type="hidden" />
+            <form method="post" asp-area="Admin" asp-controller="Cars" asp-action="Edit" asp-route-id="@Model.CarId">
+                <input asp-for="CarId" type="hidden" />
                 <partial name="_CarForm" model="Model" />
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
