@@ -19,13 +19,31 @@ namespace LuxRentals.Controllers.Booking
 
 
         // Shows booking creation form
+        // Shows booking creation form
         [Authorize(Roles = "Customer")]
         [HttpGet]
-        public IActionResult Create(int carId)
+        public IActionResult Create(int carId, DateOnly? startDate, DateOnly? endDate)
         {
             ViewBag.CarId = carId;
 
-            return View(new BookingCreateViewModel());
+            var model = new BookingCreateViewModel();
+
+            // Use dates from query params OR set defaults
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                // Convert DateOnly from query params to DateTime (date only, no time)
+                model.StartDateTime = startDate.Value.ToDateTime(TimeOnly.MinValue);
+                model.EndDateTime = endDate.Value.ToDateTime(TimeOnly.MinValue);
+            }
+            else
+            {
+                // Default: today + 7 days
+                var today = DateTime.Today;
+                model.StartDateTime = today;
+                model.EndDateTime = today.AddDays(7);
+            }
+
+            return View(model);
         }
 
         // Creates the booking
@@ -50,15 +68,19 @@ namespace LuxRentals.Controllers.Booking
                     return RedirectToAction("Login", "Account");
                 }
 
+                // Convert to UTC
+                var startDateTime = DateTime.SpecifyKind(model.StartDateTime.Date, DateTimeKind.Utc);
+                var endDateTime = DateTime.SpecifyKind(model.EndDateTime.Date, DateTimeKind.Utc);
+
                 var price = await _bookingRepo.CalculateBookingPrice(
                     carId,
-                    model.StartDateTime,
-                    model.EndDateTime);
+                    startDateTime,
+                    endDateTime);
 
                 HttpContext.Session.SetInt32("CarId", carId);
                 HttpContext.Session.SetInt32("CustomerId", customerId);
-                HttpContext.Session.SetString("StartDate", model.StartDateTime.ToString());
-                HttpContext.Session.SetString("EndDate", model.EndDateTime.ToString());
+                HttpContext.Session.SetString("StartDate", startDateTime.ToString("o")); 
+                HttpContext.Session.SetString("EndDate", endDateTime.ToString("o"));
 
                 var orderId = await _paymentService.CreateOrderAsync(price, "CAD");
 

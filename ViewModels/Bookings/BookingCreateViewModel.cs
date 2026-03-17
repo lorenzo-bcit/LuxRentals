@@ -11,7 +11,5 @@ namespace LuxRentals.ViewModels.Bookings
         [Required]
         [Display(Name = "Return Date")]
         public DateTime EndDateTime { get; set; }
-
-
     }
 }
