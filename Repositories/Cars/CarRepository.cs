@@ -66,6 +66,9 @@ public class CarRepository : ICarRepository
         if (criteria.MinLuggage != null)
             cars = cars.Where(c => c.LuggageCap >= criteria.MinLuggage);
 
+        if (criteria.MaxRate != null)
+            cars = cars.Where(c => c.DailyRate <= criteria.MaxRate);
+
         return cars;
     }
 
