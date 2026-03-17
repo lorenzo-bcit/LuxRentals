@@ -1,7 +1,6 @@
 using LuxRentals.Repositories.Cars;
 using LuxRentals.Services.Cars;
 using LuxRentals.Utils;
-using LuxRentals.ViewModels.Cars;
 using LuxRentals.ViewModels.Cars.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -51,7 +50,7 @@ public class CarsController : Controller
             return View(vm);
         }
 
-        var result = await _carService.CreateAsync(vm.Car);
+        var result = await _carService.CreateAsync(vm);
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
@@ -70,10 +69,7 @@ public class CarsController : Controller
         if (car is null)
             return NotFound();
 
-        var vm = new CarEditVm
-        {
-            Car = CarUpsertVm.FromEntity(car)
-        };
+        var vm = CarEditVm.FromEntity(car);
 
         await PopulateOptionsAsync(vm);
         return View(vm);
@@ -83,7 +79,7 @@ public class CarsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, CarEditVm vm)
     {
-        if (vm.Car.CarId != id)
+        if (vm.CarId != id)
             return BadRequest();
 
         if (!ModelState.IsValid)
@@ -92,7 +88,7 @@ public class CarsController : Controller
             return View(vm);
         }
 
-        var result = await _carService.UpdateAsync(id, vm.Car);
+        var result = await _carService.UpdateAsync(id, vm);
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
@@ -118,7 +114,7 @@ public class CarsController : Controller
     {
         foreach (var error in result.Errors)
         {
-            var key = string.IsNullOrWhiteSpace(error.Field) ? string.Empty : $"Car.{error.Field}";
+            var key = string.IsNullOrWhiteSpace(error.Field) ? string.Empty : error.Field;
             ModelState.AddModelError(key, error.Message);
         }
     }
@@ -130,33 +126,33 @@ public class CarsController : Controller
             fuelTypes,
             x => x.FuelType1,
             x => x.PkFuelTypeId.ToString(),
-            x => x.PkFuelTypeId == vm.Car.FkFuelTypeId);
+            x => x.PkFuelTypeId == vm.FkFuelTypeId);
 
         var classes = await _carService.GetVehicleClassesAsync();
         vm.VehicleClassOptions = SelectListItems.Build(
             classes,
             x => x.VehicleClass1,
             x => x.PkVehicleClassId.ToString(),
-            x => x.PkVehicleClassId == vm.Car.FkVehicleClassId);
+            x => x.PkVehicleClassId == vm.FkVehicleClassId);
 
         var statuses = await _carService.GetCarStatusesAsync();
         vm.CarStatusOptions = SelectListItems.Build(
             statuses,
             x => x.StatusFlag,
             x => x.PkCarStatusId.ToString(),
-            x => x.PkCarStatusId == vm.Car.FkCarStatusId);
+            x => x.PkCarStatusId == vm.FkCarStatusId);
 
         var models = await _carService.GetModelsAsync();
         vm.ModelOptions = SelectListItems.Build(
             models,
             x => $"{x.FkMake.MakeName} {x.ModelName}",
             x => x.PkModelId.ToString(),
-            x => x.PkModelId == vm.Car.FkModelId);
+            x => x.PkModelId == vm.FkModelId);
 
         vm.TransmissionOptions =
         [
-            new SelectListItem("Manual", "0", vm.Car.TransmissionType == 0),
-            new SelectListItem("Automatic", "1", vm.Car.TransmissionType == 1)
+            new SelectListItem("Manual", "0", vm.TransmissionType == 0),
+            new SelectListItem("Automatic", "1", vm.TransmissionType == 1)
         ];
     }
 

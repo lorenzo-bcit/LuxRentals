@@ -1,7 +1,6 @@
 using LuxRentals.Models;
 using LuxRentals.Repositories;
 using LuxRentals.Repositories.Cars;
-using LuxRentals.ViewModels.Cars;
 using LuxRentals.ViewModels.Cars.Admin;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +18,7 @@ public class CarService : ICarService
 
     public Task<Car?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
 
-    public async Task<SaveResult> CreateAsync(CarUpsertVm vm)
+    public async Task<SaveResult> CreateAsync(CarEditVm vm)
     {
         var errors = await ValidateAsync(vm);
 
@@ -34,7 +33,7 @@ public class CarService : ICarService
         return await TrySaveAsync("Car created.");
     }
 
-    public async Task<SaveResult> UpdateAsync(int id, CarUpsertVm vm)
+    public async Task<SaveResult> UpdateAsync(int id, CarEditVm vm)
     {
         var existing = await _repo.GetByIdAsync(id);
         if (existing is null)
@@ -309,7 +308,7 @@ public class CarService : ICarService
         }
     }
 
-    private async Task<List<(string Field, string Message)>> ValidateAsync(CarUpsertVm vm, int? excludeCarId = null)
+    private async Task<List<(string Field, string Message)>> ValidateAsync(CarEditVm vm, int? excludeCarId = null)
     {
         var errors = new List<(string Field, string Message)>();
 
