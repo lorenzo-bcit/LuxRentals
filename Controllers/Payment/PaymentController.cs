@@ -1,5 +1,6 @@
 ﻿using LuxRentals.Data;
 using LuxRentals.Repositories.Bookings;
+using LuxRentals.Repositories.BookingStatus;
 using LuxRentals.Services.Payment;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -13,19 +14,22 @@ namespace LuxRentals.Controllers.Payment
         private readonly LuxRentalsDbContext _db;
         private readonly PaypalOptions _paypalOptions;
         private readonly ILogger<IPaymentService> _logger;
+        private readonly BookingStatusRepo _bookingStatusRepo;
 
         public PaymentController(
             IPaymentService paymentService,
             BookingRepo bookingRepo,
             LuxRentalsDbContext context,
             IOptions<PaypalOptions> paypalOptions,
-            ILogger<IPaymentService> logger)   
+            ILogger<IPaymentService> logger,
+            BookingStatusRepo bookingStatusRepo)
         {
             _paymentService = paymentService;
             _bookingRepo = bookingRepo;
             _db = context;
             _paypalOptions = paypalOptions.Value;
             _logger = logger;
+            _bookingStatusRepo = bookingStatusRepo;
         }
 
         public IActionResult Checkout(string orderId)
@@ -80,17 +84,42 @@ namespace LuxRentals.Controllers.Payment
 
                 if (!paymentSuccess)
                 {
-                    _logger.LogError("Payment failed {Status Code}: ", Response.StatusCode);
-                    return Json(new { success = false, message = "Payment failed." });
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Payment failed."
+                    });
                 }
 
-                int carId = HttpContext.Session.GetInt32("CarId").Value;
-                int customerId = HttpContext.Session.GetInt32("CustomerId").Value;
+                // Get session data
+                var carId = HttpContext.Session.GetInt32("CarId");
+                var customerId = HttpContext.Session.GetInt32("CustomerId");
+                var startDateStr = HttpContext.Session.GetString("StartDate");
+                var endDateStr = HttpContext.Session.GetString("EndDate");
 
-                DateTime startDate = DateTime.Parse(HttpContext.Session.GetString("StartDate"));
-                DateTime endDate = DateTime.Parse(HttpContext.Session.GetString("EndDate"));
+                if (carId == null || customerId == null || startDateStr == null || endDateStr == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Session expired."
+                    });
+                }
 
-                var booking = _bookingRepo.CreateBooking(carId, customerId, startDate, endDate, request.OrderId);
+                var startDate = DateTime.Parse(startDateStr);
+                var endDate = DateTime.Parse(endDateStr);
+
+                // CREATE BOOKING ONLY AFTER PAYMENT SUCCESS
+                var booking = _bookingRepo.CreateBooking(
+                    carId.Value,
+                    customerId.Value,
+                    startDate,
+                    endDate);
+
+                // Set status to Paid
+                _bookingStatusRepo.SetBookingStatus(booking, "Paid");
+
+                await _db.SaveChangesAsync();
 
                 HttpContext.Session.Clear();
 
@@ -102,13 +131,16 @@ namespace LuxRentals.Controllers.Payment
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
         }
-    }
-
-    public class CaptureRequest
-    {
-        public string OrderId { get; set; }
+        public class CaptureRequest
+        {
+            public string OrderId { get; set; }
+        }
     }
 }
