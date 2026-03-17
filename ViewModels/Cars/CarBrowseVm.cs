@@ -10,11 +10,21 @@ public class CarBrowseVm
 
     public int? VehicleClassId { get; set; }
 
+    public int? MakeId { get; set; }
+
     public int? TransmissionType { get; set; }
 
     public int MinSeats { get; set; }
 
     public int MinLuggage { get; set; }
+
+    public decimal? MaxRate { get; set; }
+
+    public decimal MaxRateFilter { get; set; }
+
+    public int MaxSeatsFilter { get; set; }
+
+    public int MaxLuggageFilter { get; set; }
 
     public bool AvailableOnly { get; set; } = true;
 
@@ -24,13 +34,15 @@ public class CarBrowseVm
 
     public DateTime? EndDate { get; set; }
 
-    public string SortBy { get; set; } = "featured";
+    public string SortBy { get; set; } = "price_asc";
 
     public IReadOnlyList<CarCardVm> Cars { get; set; } = [];
 
     public IReadOnlyList<SelectListItem> FuelTypeOptions { get; set; } = [];
 
     public IReadOnlyList<SelectListItem> VehicleClassOptions { get; set; } = [];
+
+    public IReadOnlyList<SelectListItem> MakeOptions { get; set; } = [];
 
     public int TotalCount { get; set; }
 
