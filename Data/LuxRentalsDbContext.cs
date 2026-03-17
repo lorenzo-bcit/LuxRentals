@@ -45,6 +45,9 @@ public class LuxRentalsDbContext : IdentityDbContext
 
             entity.ToTable("Booking");
 
+            entity.HasIndex(e => new { e.FkCarId, e.CancelledAt, e.StartDateTime, e.EndDateTime })
+                .HasDatabaseName("IX_Booking_Car_ActiveWindow");
+
             entity.Property(e => e.PkBookingId).HasColumnName("pkBookingId");
             entity.Property(e => e.CancelledAt).HasColumnName("cancelledAt");
             entity.Property(e => e.CreatedAt).HasColumnName("createdAt");
