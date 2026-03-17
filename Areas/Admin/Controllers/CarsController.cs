@@ -114,7 +114,11 @@ public class CarsController : Controller
     {
         foreach (var error in result.Errors)
         {
-            var key = string.IsNullOrWhiteSpace(error.Field) ? string.Empty : error.Field;
+            var key = string.IsNullOrWhiteSpace(error.Field)
+                ? string.Empty
+                : error.Field == nameof(CarEditVm.ImageFile)
+                    ? error.Field
+                    : error.Field;
             ModelState.AddModelError(key, error.Message);
         }
     }

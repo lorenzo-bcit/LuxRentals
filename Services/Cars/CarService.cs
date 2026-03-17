@@ -9,10 +9,16 @@ namespace LuxRentals.Services.Cars;
 public class CarService : ICarService
 {
     private const string OUT_OF_SERVICE_STATUS = "Out of Service";
+    private const string IMAGE_UPLOAD_FAILED_MESSAGE = "Image upload failed. Please try again.";
 
     private readonly ICarRepository _repo;
+    private readonly ICarImageStorage _carImageStorage;
 
-    public CarService(ICarRepository repo) => _repo = repo;
+    public CarService(ICarRepository repo, ICarImageStorage carImageStorage)
+    {
+        _repo = repo;
+        _carImageStorage = carImageStorage;
+    }
 
     public Task<PagedList<Car>> SearchAsync(CarSearchCriteria criteria) => _repo.SearchAsync(criteria);
 
@@ -28,9 +34,24 @@ public class CarService : ICarService
         var car = new Car();
         vm.ApplyToEntity(car);
 
+        string? uploadedThumbnailPath = null;
+
+        if (vm.ImageFile is not null)
+        {
+            uploadedThumbnailPath = await _carImageStorage.SaveNewAsync(vm.ImageFile);
+            if (uploadedThumbnailPath is null)
+                return SaveResult.Fail(nameof(CarEditVm.ImageFile), IMAGE_UPLOAD_FAILED_MESSAGE);
+
+            car.CarThumbnail = uploadedThumbnailPath;
+        }
+
         await _repo.AddAsync(car);
 
-        return await TrySaveAsync("Car created.");
+        var result = await TrySaveAsync("Car created.");
+        if (!result.IsSuccess && uploadedThumbnailPath is not null)
+            await _carImageStorage.DeleteAsync(uploadedThumbnailPath);
+
+        return result;
     }
 
     public async Task<SaveResult> UpdateAsync(int id, CarEditVm vm)
@@ -44,9 +65,40 @@ public class CarService : ICarService
         if (errors.Count > 0)
             return SaveResult.FailMany(errors);
 
+        var previousThumbnailPath = existing.CarThumbnail;
+        string? uploadedThumbnailPath = null;
+
         vm.ApplyToEntity(existing);
 
-        return await TrySaveAsync("Car updated.");
+        if (vm.ImageFile is not null)
+        {
+            uploadedThumbnailPath = await _carImageStorage.SaveNewAsync(vm.ImageFile);
+            if (uploadedThumbnailPath is null)
+            {
+                existing.CarThumbnail = previousThumbnailPath;
+                return SaveResult.Fail(nameof(CarEditVm.ImageFile), IMAGE_UPLOAD_FAILED_MESSAGE);
+            }
+
+            existing.CarThumbnail = uploadedThumbnailPath;
+        }
+
+        var result = await TrySaveAsync("Car updated.");
+        if (!result.IsSuccess)
+        {
+            if (uploadedThumbnailPath is not null)
+                await _carImageStorage.DeleteAsync(uploadedThumbnailPath);
+
+            existing.CarThumbnail = previousThumbnailPath;
+            return result;
+        }
+
+        if (uploadedThumbnailPath is not null &&
+            !string.Equals(previousThumbnailPath, uploadedThumbnailPath, StringComparison.OrdinalIgnoreCase))
+        {
+            await _carImageStorage.DeleteAsync(previousThumbnailPath);
+        }
+
+        return result;
     }
 
     public async Task<SaveResult> DeleteAsync(int id)
@@ -66,9 +118,14 @@ public class CarService : ICarService
             return await TrySaveAsync("Car has bookings, so it was marked Out of Service instead of being deleted.");
         }
 
+        var thumbnailPath = existing.CarThumbnail;
         _repo.Remove(existing);
 
-        return await TrySaveAsync("Car deleted.");
+        var result = await TrySaveAsync("Car deleted.");
+        if (result.IsSuccess)
+            await _carImageStorage.DeleteAsync(thumbnailPath);
+
+        return result;
     }
 
     // Lookup data
@@ -310,7 +367,9 @@ public class CarService : ICarService
 
     private async Task<List<(string Field, string Message)>> ValidateAsync(CarEditVm vm, int? excludeCarId = null)
     {
-        var errors = new List<(string Field, string Message)>();
+        var errors = _carImageStorage.Validate(vm.ImageFile)
+            .Select(message => (nameof(CarEditVm.ImageFile), message))
+            .ToList();
 
         if (await _repo.VinExistsAsync(vm.VinNumber, excludeCarId))
             errors.Add((nameof(vm.VinNumber), "VIN already exists."));
