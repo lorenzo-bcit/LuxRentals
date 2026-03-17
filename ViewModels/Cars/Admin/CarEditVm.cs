@@ -58,6 +58,9 @@ public class CarEditVm
     [Required]
     public int FkFuelTypeId { get; set; }
 
+    [Display(Name = "Car Image")]
+    public IFormFile? ImageFile { get; set; }
+
     public IReadOnlyList<SelectListItem> TransmissionOptions { get; set; } = [];
     public IReadOnlyList<SelectListItem> FuelTypeOptions { get; set; } = [];
     public IReadOnlyList<SelectListItem> VehicleClassOptions { get; set; } = [];

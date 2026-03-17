@@ -5,6 +5,7 @@
 }
 
 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<input asp-for="CarThumbnail" type="hidden" />
 
 <div class="row g-3">
     <div class="col-md-6">
@@ -84,8 +85,19 @@
     </div>
 
     <div class="col-12">
-        <label asp-for="CarThumbnail" class="form-label"></label>
-        <input asp-for="CarThumbnail" class="form-control" />
-        <span asp-validation-for="CarThumbnail" class="text-danger"></span>
+        <label asp-for="ImageFile" class="form-label"></label>
+        <input asp-for="ImageFile" class="form-control" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+        <span asp-validation-for="ImageFile" class="text-danger"></span>
+        <div class="form-text">Accepted formats: JPG, PNG, WEBP. Max file size: 5 MB.</div>
+        @if (!string.IsNullOrWhiteSpace(Model.CarThumbnail))
+        {
+            <div class="mt-3">
+                <div class="small text-muted mb-2">Current image</div>
+                <img src="@Model.CarThumbnail"
+                     alt="Current car image"
+                     class="img-thumbnail"
+                     style="max-width: 240px; max-height: 180px; object-fit: cover;" />
+            </div>
+        }
     </div>
 </div>
