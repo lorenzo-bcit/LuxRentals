@@ -25,18 +25,22 @@ namespace LuxRentals.Repositories.Bookings
         public async Task<Booking> CreateBooking(int carId, int customerId,
             DateTime startDate, DateTime endDate, string transactionId)
         {
-            startDate = startDate.ToUniversalTime();
-            endDate = endDate.ToUniversalTime();
+            // Normalize to midnight UTC
+            startDate = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
+            endDate = DateTime.SpecifyKind(endDate.Date, DateTimeKind.Utc);
 
-            // Validation checks
+            // Get tomorrow's date in UTC
+            var tomorrowUtc = DateTime.SpecifyKind(DateTime.UtcNow.Date.AddDays(1), DateTimeKind.Utc);
+
+            // Validation checks (date-only comparison)
             if (endDate <= startDate)
             {
                 throw new ArgumentException("End date must be after start date.");
             }
 
-            if (startDate <= DateTime.UtcNow)
+            if (startDate < tomorrowUtc)
             {
-                throw new ArgumentException("Start date must be in the future.");
+                throw new ArgumentException("Start date must be at least one day in the future.");
             }
 
             bool isCarAvailable = await IsCarAvailable(carId, startDate, endDate);
