@@ -82,6 +82,7 @@ var emailOptions = builder.Configuration
 
 builder.Services
     .AddFluentEmail(emailOptions.From, emailOptions.Name)
+    .AddRazorRenderer()
     .AddSmtpSender(() => new SmtpClient(emailOptions.Host)
     {
         Port = emailOptions.Port,
