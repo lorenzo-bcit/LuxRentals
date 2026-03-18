@@ -148,22 +148,21 @@ namespace LuxRentals.Services.Payment
 
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
-                new AuthenticationHeaderValue("Bearer", token);
+
             request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
-                    request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+
             var response = await _httpClient.SendAsync(request);
-                    var response = await _httpClient.SendAsync(request);
 
-                var json = await response.Content.ReadAsStringAsync();
+            var json = await response.Content.ReadAsStringAsync();
 
-                _logger.LogInformation("PayPal capture response: {json}", json);
+            _logger.LogInformation("PayPal capture response: {json}", json);
+
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("PayPal capture failed: {Status} - {Body}",
                     response.StatusCode, json);
                 return null;
             }
-                return false;
 
             try
             {
@@ -183,6 +182,7 @@ namespace LuxRentals.Services.Payment
                     _logger.LogWarning("CaptureId is null or empty");
                     return null;
                 }
+
                 if (status == "COMPLETED")
                 {
                     _logger.LogInformation("Payment successful. CaptureId: {id}", captureId);
@@ -193,9 +193,8 @@ namespace LuxRentals.Services.Payment
             {
                 _logger.LogError(ex, "Failed to parse PayPal capture response");
             }
-                .GetString();
+
             return null;
-            return captureStatus == "COMPLETED";
         }
     }
 }

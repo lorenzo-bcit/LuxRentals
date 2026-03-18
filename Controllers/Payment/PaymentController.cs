@@ -119,7 +119,7 @@ namespace LuxRentals.Controllers.Payment
                     transactionId);
 
                 // Set status to Paid
-                _bookingStatusRepo.SetBookingStatus(booking, "Paid");
+                _bookingStatusRepo.SetBookingStatus(booking, "booked");
 
                 await _db.SaveChangesAsync();
 
