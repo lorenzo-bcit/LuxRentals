@@ -28,7 +28,7 @@ namespace LuxRentals.Controllers.Payment
             _logger = logger;
         }
 
-        public IActionResult Checkout(string orderId)
+        public async Task<IActionResult> Checkout(string orderId)
         {
             if (string.IsNullOrEmpty(orderId))
             {
@@ -46,7 +46,6 @@ namespace LuxRentals.Controllers.Payment
             }
 
             var clientId = _paypalOptions.ClientId;
-
             if (string.IsNullOrEmpty(clientId))
             {
                 throw new Exception("PayPal ClientId not configured.");
@@ -61,7 +60,8 @@ namespace LuxRentals.Controllers.Payment
                 return RedirectToAction("Index", "Home");
             }
 
-            var price = _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
+
+            var price = await _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
 
             ViewBag.OrderId = orderId;
             ViewBag.StartDate = startDate.ToShortDateString();
@@ -90,7 +90,7 @@ namespace LuxRentals.Controllers.Payment
                 DateTime startDate = DateTime.Parse(HttpContext.Session.GetString("StartDate"));
                 DateTime endDate = DateTime.Parse(HttpContext.Session.GetString("EndDate"));
 
-                var booking = _bookingRepo.CreateBooking(carId, customerId, startDate, endDate, request.OrderId);
+                var booking = await _bookingRepo.CreateBooking(carId, customerId, startDate, endDate, request.OrderId);
 
                 HttpContext.Session.Clear();
 
