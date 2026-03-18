@@ -155,6 +155,12 @@ public class CarRepository : ICarRepository
     public Task<bool> HasBookingsAsync(int carId) =>
         _db.Bookings.AnyAsync(b => b.FkCarId == carId);
 
+    public Task<int> CountActiveOrUpcomingBookingsAsync(int carId, DateTime utcNow) =>
+        _db.Bookings.CountAsync(b =>
+            b.FkCarId == carId &&
+            b.CancelledAt == null &&
+            b.EndDateTime > utcNow);
+
     public Task AddAsync(Car car) => _db.Cars.AddAsync(car).AsTask();
 
     public void Remove(Car car) => _db.Cars.Remove(car);

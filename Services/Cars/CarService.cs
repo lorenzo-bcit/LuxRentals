@@ -8,6 +8,7 @@ namespace LuxRentals.Services.Cars;
 
 public class CarService : ICarService
 {
+    private const string AVAILABLE_STATUS = "Available";
     private const string OUT_OF_SERVICE_STATUS = "Out of Service";
     private const string IMAGE_UPLOAD_FAILED_MESSAGE = "Image upload failed. Please try again.";
 
@@ -66,9 +67,21 @@ public class CarService : ICarService
             return SaveResult.FailMany(errors);
 
         var previousThumbnailPath = existing.CarThumbnail;
+        var previousStatusId = existing.FkCarStatusId;
         string? uploadedThumbnailPath = null;
 
         vm.ApplyToEntity(existing);
+
+        var unavailableStatusChangeResult = await ValidateUnavailableStatusChangeAsync(
+            previousStatusId,
+            existing.FkCarStatusId,
+            id);
+
+        if (!unavailableStatusChangeResult.IsSuccess)
+        {
+            existing.CarThumbnail = previousThumbnailPath;
+            return unavailableStatusChangeResult;
+        }
 
         if (vm.ImageFile is not null)
         {
@@ -106,6 +119,14 @@ public class CarService : ICarService
         var existing = await _repo.GetByIdAsync(id);
         if (existing is null)
             return SaveResult.Fail("", "Car not found.");
+
+        var activeOrUpcomingBookingCount = await _repo.CountActiveOrUpcomingBookingsAsync(id, DateTime.UtcNow);
+        if (activeOrUpcomingBookingCount > 0)
+        {
+            return SaveResult.Fail(
+                string.Empty,
+                "This car has active or upcoming bookings. Resolve them before deleting it.");
+        }
 
         if (await _repo.HasBookingsAsync(id))
         {
@@ -363,6 +384,27 @@ public class CarService : ICarService
         {
             return SaveResult.Fail(string.Empty, "Save failed due to a database constraint. Please refresh and try again.");
         }
+    }
+
+    private async Task<SaveResult> ValidateUnavailableStatusChangeAsync(int previousStatusId, int newStatusId, int carId)
+    {
+        if (previousStatusId == newStatusId)
+            return SaveResult.Ok(string.Empty);
+
+        var availableStatusId = await _repo.GetCarStatusIdByNameAsync(AVAILABLE_STATUS);
+        if (availableStatusId is null)
+            return SaveResult.Fail(nameof(CarEditVm.FkCarStatusId), "Available status is missing. Seed car statuses and try again.");
+
+        if (previousStatusId != availableStatusId.Value || newStatusId == availableStatusId.Value)
+            return SaveResult.Ok(string.Empty);
+
+        var activeOrUpcomingBookingCount = await _repo.CountActiveOrUpcomingBookingsAsync(carId, DateTime.UtcNow);
+        if (activeOrUpcomingBookingCount == 0)
+            return SaveResult.Ok(string.Empty);
+
+        return SaveResult.Fail(
+            nameof(CarEditVm.FkCarStatusId),
+            "This car has active or upcoming bookings. Resolve them before marking it unavailable.");
     }
 
     private async Task<List<(string Field, string Message)>> ValidateAsync(CarEditVm vm, int? excludeCarId = null)
