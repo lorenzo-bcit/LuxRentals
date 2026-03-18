@@ -19,7 +19,6 @@ namespace LuxRentals.Controllers.Booking
 
 
         // Shows booking creation form
-        // Shows booking creation form
         [Authorize(Roles = "Customer")]
         [HttpGet]
         public IActionResult Create(int carId, DateOnly? startDate, DateOnly? endDate)
@@ -175,7 +174,6 @@ namespace LuxRentals.Controllers.Booking
             }
         }
 
-
         // Show cancellation info (no validation necessary)
         [HttpGet]
         public async Task<IActionResult> Cancel(int id)
@@ -230,6 +228,10 @@ namespace LuxRentals.Controllers.Booking
                     CanCancel = canCancel,
                     Message = message
                 };
+
+
+                ViewBag.IsAdminOrEmployee = isAdminOrEmployee;
+                ViewBag.BookingCustomerId = booking.FkCustomerId;
 
                 return View(viewModel);
             }
