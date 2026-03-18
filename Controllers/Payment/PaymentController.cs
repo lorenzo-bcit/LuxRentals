@@ -136,7 +136,7 @@ namespace LuxRentals.Controllers.Payment
                 return Json(new
                 {
                     success = false,
-                    message = ex.Message
+                    message = "Booking failed: " + ex.Message
                 });
             }
         }
