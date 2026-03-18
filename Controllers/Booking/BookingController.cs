@@ -262,13 +262,17 @@ namespace LuxRentals.Controllers.Booking
 
                 int bookingCustomerId = booking.FkCustomerId;
 
-                await _bookingRepo.CancelBooking(bookingId, customerId, isAdminOrEmployee);
+                // Verify Customer owns Booking (unless Admin/Employee)
+                int customerIdToPass = isAdminOrEmployee ? bookingCustomerId : customerId;
+
+                await _bookingRepo.CancelBooking(bookingId, customerIdToPass, isAdminOrEmployee);
 
                 TempData["Success"] = "Booking cancelled successfully.";
 
                 if (isAdminOrEmployee)
                 {
-                    return RedirectToAction("ViewCustomerBookings", customerId);
+                    // Use bookingCustomerId
+                    return RedirectToAction("ViewCustomerBookings", new { customerId = bookingCustomerId });
                 }
                 else
                 {
@@ -279,7 +283,7 @@ namespace LuxRentals.Controllers.Booking
             catch (Exception ex)
             {
                 TempData["Error"] = ex.Message;
-                return RedirectToAction("Cancel");
+                return RedirectToAction("Cancel", new { id = bookingId });
             }
         }
 
