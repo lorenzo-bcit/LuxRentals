@@ -13,6 +13,8 @@ using LuxRentals.Services.ServiceSettings;
 using LuxRentals.Repositories.Bookings;
 using System.Net.Mail;
 using System.Net;
+using DotNetEnv;
+using LuxRentals.Repositories.BookingStatus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +50,7 @@ builder.Services.AddScoped<RoleRepo>();
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<UserRoleRepo>();
 builder.Services.AddScoped<BookingRepo>();
+builder.Services.AddScoped<BookingStatusRepo>();
 builder.Services.AddScoped<BookingStatusRepo>();
 builder.Services.AddScoped<ICarRepository, CarRepository>();
 

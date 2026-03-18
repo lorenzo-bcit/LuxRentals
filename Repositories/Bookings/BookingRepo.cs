@@ -19,8 +19,11 @@ namespace LuxRentals.Repositories.Bookings
         }
 
         // Create booking
-        public Booking CreateBooking(int carId, int customerId,
-            DateTime startDate, DateTime endDate, string transactionId)
+        public Booking CreateBooking(int carId,
+            int customerId,
+            DateTime startDate,
+            DateTime endDate,
+            string transactionId)
         {
             try
             {
