@@ -98,6 +98,8 @@ if (app.Environment.IsProduction())
     app.UseHsts();
 }
 
+await app.EnsureBookingStatusSeededAsync();
+
 app.UseSession();
 
 app.UseHttpsRedirection();
