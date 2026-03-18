@@ -92,12 +92,12 @@
                 })
             })
             .then(res => res.json())
-            .then(data => {
+               .then(data => {
 
                 if (data.success) {
                     window.location = data.redirectUrl;
                 } else {
-                    alert("Payment failed.");
+                    alert(data.message || "Payment failed."); 
                 }
 
             });
