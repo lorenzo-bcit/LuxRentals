@@ -58,7 +58,7 @@
                             <i class="bi bi-info-circle-fill"></i>
                             <strong>Important:</strong>
                             <ul class="mb-0 mt-2">
-                                <li>Rental must start in the future</li>
+                                <li>Rental must start at least one day in the future</li>
                                 <li>Return date must be after pickup date</li>
                                 <li>You cannot have overlapping bookings</li>
                                 <li>Cancellations must be made at least 48 hours before pickup</li>
@@ -90,19 +90,26 @@
     }
 
     <script>
-        // Set minimum date to today for both date pickers
+        // Set minimum date to tomorrow for both date pickers
         document.addEventListener('DOMContentLoaded', function() {
-            const today = new Date().toISOString().split('T')[0];
+            // Get TOMORROW's date in USER'S LOCAL TIMEZONE
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const year = tomorrow.getFullYear();
+            const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const day = String(tomorrow.getDate()).padStart(2, '0');
+            const tomorrowLocal = `${year}-${month}-${day}`; // e.g., "2026-03-20"
 
             const startInput = document.querySelector('input[name="StartDateTime"]');
             const endInput = document.querySelector('input[name="EndDateTime"]');
 
             if (startInput) {
-                startInput.min = today;
+                startInput.min = tomorrowLocal;
             }
 
             if (endInput) {
-                endInput.min = today;
+                endInput.min = tomorrowLocal;
             }
 
             // When start date changes, update end date minimum
