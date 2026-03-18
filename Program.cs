@@ -14,6 +14,7 @@ using LuxRentals.Repositories.Bookings;
 using System.Net.Mail;
 using System.Net;
 using DotNetEnv;
+using LuxRentals.Repositories.BookingStatus;
 
 var builder = WebApplication.CreateBuilder(args);
 

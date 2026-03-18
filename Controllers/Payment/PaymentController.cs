@@ -80,9 +80,9 @@ namespace LuxRentals.Controllers.Payment
         {
             try
             {
-                bool paymentSuccess = await _paymentService.CaptureOrderAsync(request.OrderId);
+                var transactionId = await _paymentService.CaptureOrderAsync(request.OrderId);
 
-                if (!paymentSuccess)
+                if (transactionId == null)
                 {
                     return Json(new
                     {
@@ -108,13 +108,15 @@ namespace LuxRentals.Controllers.Payment
 
                 var startDate = DateTime.Parse(startDateStr);
                 var endDate = DateTime.Parse(endDateStr);
+                
 
                 // CREATE BOOKING ONLY AFTER PAYMENT SUCCESS
                 var booking = _bookingRepo.CreateBooking(
                     carId.Value,
                     customerId.Value,
                     startDate,
-                    endDate);
+                    endDate,
+                    transactionId);
 
                 // Set status to Paid
                 _bookingStatusRepo.SetBookingStatus(booking, "Paid");

@@ -15,7 +15,7 @@ namespace LuxRentals.Services.Payment
     {
         Task<string> CreateOrderAsync(decimal amount, string currency);
 
-        Task<bool> CaptureOrderAsync(string orderId, int bookingId);
+        Task<string?> CaptureOrderAsync(string orderId);
     }
 
     public class PayPalPaymentService : IPaymentService
@@ -69,8 +69,8 @@ namespace LuxRentals.Services.Payment
 
                 request.Content = new FormUrlEncodedContent(new[]
                 {
-            new KeyValuePair<string, string>("grant_type", "client_credentials")
-        });
+                new KeyValuePair<string, string>("grant_type", "client_credentials")
+                });
 
                 var response = await _httpClient.SendAsync(request);
 
@@ -138,81 +138,63 @@ namespace LuxRentals.Services.Payment
         }
 
         // Create a PayPal order
-        public async Task<bool> CaptureOrderAsync(string orderId, int bookingId)
+        public async Task<string?> CaptureOrderAsync(string orderId)
         {
-            using var transaction = await _db.Database.BeginTransactionAsync();
+            var token = await GetAccessTokenAsync();
+
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"/v2/checkout/orders/{orderId}/capture");
+
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            _logger.LogInformation("PayPal capture response: {json}", json);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("PayPal capture failed: {Status} - {Body}",
+                    response.StatusCode, json);
+                return null;
+            }
 
             try
             {
-                var token = await GetAccessTokenAsync();
-
-                var request = new HttpRequestMessage(
-                    HttpMethod.Post,
-                    $"/v2/checkout/orders/{orderId}/capture");
-
-                request.Headers.Authorization =
-                    new AuthenticationHeaderValue("Bearer", token);
-
-                request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
-
-                var response = await _httpClient.SendAsync(request);
-
-                var json = await response.Content.ReadAsStringAsync();
-
-                _logger.LogInformation("PayPal capture response: {json}", json);
-
-                if (!response.IsSuccessStatusCode)
-                    return false;
-
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
 
-                bool isSuccess = false;
+                var capture = root
+                    .GetProperty("purchase_units")[0]
+                    .GetProperty("payments")
+                    .GetProperty("captures")[0];
 
-                if (root.TryGetProperty("status", out var rootStatus))
+                var captureId = capture.GetProperty("id").GetString();
+                var status = capture.GetProperty("status").GetString();
+
+                if (string.IsNullOrEmpty(captureId))
                 {
-                    if (rootStatus.GetString() == "COMPLETED")
-                        isSuccess = true;
+                    _logger.LogWarning("CaptureId is null or empty");
+                    return null;
                 }
 
-                if (!isSuccess)
+                if (status == "COMPLETED")
                 {
-                    var captureStatus = root
-                        .GetProperty("purchase_units")[0]
-                        .GetProperty("payments")
-                        .GetProperty("captures")[0]
-                        .GetProperty("status")
-                        .GetString();
-
-                    isSuccess = captureStatus == "COMPLETED";
+                    _logger.LogInformation("Payment successful. CaptureId: {id}", captureId);
+                    return captureId;
                 }
-
-                if (!isSuccess)
-                {
-                    await transaction.RollbackAsync();
-                    return false;
-                }
-
-                // DB update
-                var booking = await _db.Bookings.FindAsync(bookingId);
-
-                if (booking == null)
-                    throw new Exception("Booking not found");
-
-                _bookingStatusRepo.SetBookingStatus(booking, "Paid");
-
-                await _db.SaveChangesAsync();
-
-                await transaction.CommitAsync();
-
-                return true;
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error capturing PayPal order {OrderId}", orderId);
-                throw;
+                _logger.LogError(ex, "Failed to parse PayPal capture response");
             }
+
+            return null;
         }
     }
 }
