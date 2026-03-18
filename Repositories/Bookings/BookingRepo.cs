@@ -185,6 +185,7 @@ namespace LuxRentals.Repositories.Bookings
             );
         }
 
+        // Calculate booking price
         public async Task<decimal> CalculateBookingPrice(int carId, DateTime start, DateTime end)
         {
             var car = await _context.Cars.FirstOrDefaultAsync(c => c.PkCarId == carId);
