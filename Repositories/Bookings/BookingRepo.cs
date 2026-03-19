@@ -19,7 +19,7 @@ namespace LuxRentals.Repositories.Bookings
         }
 
         // Create booking
-        public Booking CreateBooking(int carId,
+        public async Task<Booking> CreateBooking(int carId,
             int customerId,
             DateTime startDate,
             DateTime endDate,
@@ -65,7 +65,7 @@ namespace LuxRentals.Repositories.Bookings
                 Console.WriteLine($"Creating booking for Car ID {carId} from {startDate} to {endDate} for Customer ID {customerId}.");
 
                 _context.Bookings.Add(booking);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
                 return booking;
             

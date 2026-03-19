@@ -111,7 +111,7 @@ namespace LuxRentals.Controllers.Payment
                 
 
                 // CREATE BOOKING ONLY AFTER PAYMENT SUCCESS
-                var booking = _bookingRepo.CreateBooking(
+                var booking = await _bookingRepo.CreateBooking(
                     carId.Value,
                     customerId.Value,
                     startDate,
