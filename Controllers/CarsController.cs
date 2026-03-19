@@ -25,6 +25,7 @@ public class CarsController : Controller
         vm.MaxSeatsFilter = MAX_SEATS_FILTER;
         vm.MaxLuggageFilter = MAX_LUGGAGE_FILTER;
         vm.MaxRateFilter = MAX_RATE_FILTER;
+        vm.MinBrowseDate = BookingClock.Tomorrow().ToString("yyyy-MM-dd");
 
         var hasInvalidDateRange =
             vm.StartDate.HasValue &&
@@ -45,23 +46,26 @@ public class CarsController : Controller
         return View(vm);
     }
 
-    private static void NormalizeBrowseState(CarBrowseVm vm)
+    private void NormalizeBrowseState(CarBrowseVm vm)
     {
         vm.Page = Math.Max(1, vm.Page);
 
-        var today = DateTime.Today;
+        var tomorrow = BookingClock.Tomorrow();
 
         if (!vm.StartDate.HasValue && !vm.EndDate.HasValue)
         {
-            vm.StartDate = today;
-            vm.EndDate = today.AddDays(DEFAULT_BOOKING_WINDOW_DAYS);
+            vm.StartDate = tomorrow;
+            vm.EndDate = tomorrow.AddDays(DEFAULT_BOOKING_WINDOW_DAYS);
             return;
         }
 
         if (!vm.StartDate.HasValue)
-            vm.StartDate = vm.EndDate?.Date.AddDays(-DEFAULT_BOOKING_WINDOW_DAYS) ?? today;
+            vm.StartDate = vm.EndDate?.Date.AddDays(-DEFAULT_BOOKING_WINDOW_DAYS) ?? tomorrow;
 
-        if (!vm.EndDate.HasValue)
+        if (vm.StartDate.Value.Date < tomorrow)
+            vm.StartDate = tomorrow;
+
+        if (!vm.EndDate.HasValue || vm.EndDate.Value.Date <= vm.StartDate.Value.Date)
             vm.EndDate = vm.StartDate.Value.Date.AddDays(DEFAULT_BOOKING_WINDOW_DAYS);
     }
 
