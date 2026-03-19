@@ -26,6 +26,54 @@
             </form>
         </div>
     </div>
+
+    @if (Model.ActiveOrUpcomingBookings.Count > 0)
+    {
+        <div class="card border-warning shadow-sm mt-4">
+            <div class="card-body p-4">
+                <h2 class="h5 mb-2">Current and Upcoming Bookings</h2>
+                <p class="text-muted mb-3">These bookings may need to be resolved before changing this car to an unavailable status.</p>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Customer</th>
+                                <th>Pickup</th>
+                                <th>Return</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var booking in Model.ActiveOrUpcomingBookings)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge @(booking.IsActive ? "bg-primary" : "bg-success")">
+                                        @(booking.IsActive ? "Active" : "Upcoming")
+                                    </span>
+                                </td>
+                                <td>@booking.CustomerName</td>
+                                <td>@booking.StartDate.ToString("yyyy-MM-dd")</td>
+                                <td>@booking.EndDate.ToString("yyyy-MM-dd")</td>
+                                <td class="text-end">
+                                    <a class="btn btn-outline-secondary btn-sm"
+                                       asp-area=""
+                                       asp-controller="Booking"
+                                       asp-action="ViewCustomerBookings"
+                                       asp-route-customerId="@booking.CustomerId">
+                                        View Customer Bookings
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
 </section>
 
 @section Scripts {

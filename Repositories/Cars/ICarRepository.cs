@@ -11,6 +11,7 @@ public interface ICarRepository
     public Task<bool> PlateExistsAsync(string plate, int? excludeCarId);
     public Task<bool> HasBookingsAsync(int carId);
     public Task<int> CountActiveOrUpcomingBookingsAsync(int carId, DateTime utcNow);
+    public Task<List<Booking>> GetActiveOrUpcomingBookingsAsync(int carId, DateTime utcNow);
     public Task AddAsync(Car car);
     public void Remove(Car car);
 

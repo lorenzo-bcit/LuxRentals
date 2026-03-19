@@ -11,6 +11,7 @@ public interface ICarService
     // Cars
     public Task<PagedList<Car>> SearchAsync(CarSearchCriteria criteria);
     public Task<Car?> GetByIdAsync(int id);
+    public Task<IReadOnlyList<Booking>> GetActiveOrUpcomingBookingsAsync(int carId);
     public Task<SaveResult> CreateAsync(CarEditVm vm);
     public Task<SaveResult> UpdateAsync(int id, CarEditVm vm);
     public Task<SaveResult> DeleteAsync(int id);

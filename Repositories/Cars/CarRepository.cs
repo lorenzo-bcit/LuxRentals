@@ -161,6 +161,17 @@ public class CarRepository : ICarRepository
             b.CancelledAt == null &&
             b.EndDateTime > utcNow);
 
+    public Task<List<Booking>> GetActiveOrUpcomingBookingsAsync(int carId, DateTime utcNow) =>
+        _db.Bookings
+            .AsNoTracking()
+            .Include(b => b.FkCustomer)
+            .Where(b =>
+                b.FkCarId == carId &&
+                b.CancelledAt == null &&
+                b.EndDateTime > utcNow)
+            .OrderBy(b => b.StartDateTime)
+            .ToListAsync();
+
     public Task AddAsync(Car car) => _db.Cars.AddAsync(car).AsTask();
 
     public void Remove(Car car) => _db.Cars.Remove(car);
