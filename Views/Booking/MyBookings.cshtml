@@ -1,9 +1,10 @@
-﻿@model IEnumerable<LuxRentals.Models.Booking>
+﻿@using LuxRentals.Utils
+@model IEnumerable<LuxRentals.Models.Booking>
 
 @{
     ViewData["Title"] = "My Bookings";
     var isAdminView = ViewBag.CustomerId != null; // Admin viewing customer's bookings
-    var now = DateTime.UtcNow;
+    var today = BookingClock.Today();
     var isAdminOrEmployee = User.IsInRole("Admin") || User.IsInRole("Employee");
 }
 
@@ -48,19 +49,23 @@
         <div class="row">
             @foreach (var booking in Model)
             {
+                var pickupDate = booking.StartDateTime.Date;
+                var returnDate = booking.EndDateTime.Date;
+                var isUpcoming = pickupDate > today;
+                var isActive = pickupDate <= today && returnDate > today;
+                var isCompleted = returnDate <= today;
+
                 var statusClass = booking.CancelledAt != null ? "danger" :
-                booking.StartDateTime > now ? "success" :
-                booking.EndDateTime > now ? "primary" : "secondary";
+                isUpcoming ? "success" :
+                isActive ? "primary" : "secondary";
 
                 var statusText = booking.CancelledAt != null ? "Cancelled" :
-                booking.StartDateTime > now ? "Upcoming" :
-                booking.EndDateTime > now ? "Active" : "Completed";
+                isUpcoming ? "Upcoming" :
+                isActive ? "Active" : "Completed";
 
-                var timeUntilStart = booking.StartDateTime - now;
-
-                // Check if admin OR if customer can cancel (48hr rule)
+                // Check if admin OR if customer can cancel (2-day date rule)
                 var canCancel = booking.CancelledAt == null &&
-                (isAdminOrEmployee || timeUntilStart.TotalHours >= 48);
+                (isAdminOrEmployee || pickupDate > today.AddDays(1));
 
                 var totalDays = (booking.EndDateTime - booking.StartDateTime).Days;
                 if (totalDays == 0) totalDays = 1;
@@ -147,21 +152,21 @@
                                     <i class="bi bi-x-circle"></i> Already Cancelled
                                 </button>
                             }
-                            else if (timeUntilStart.TotalHours < 48 && timeUntilStart.TotalHours > 0)
+                            else if (!isAdminOrEmployee && isUpcoming)
                             {
-                                <!-- Less than 48 hours (customer only - admin can still cancel) -->
+                                <!-- Less than 2 days before pickup (customer only - admin can still cancel) -->
                                 <button class="btn btn-secondary btn-sm w-100" disabled>
-                                    <i class="bi bi-lock"></i> Cannot Cancel (Less than 48hrs)
+                                    <i class="bi bi-lock"></i> Cannot Cancel (Less than 2 days)
                                 </button>
                             }
-                            else if (booking.EndDateTime < now)
+                            else if (isCompleted)
                             {
                                 <!-- Completed -->
                                 <button class="btn btn-secondary btn-sm w-100" disabled>
                                     <i class="bi bi-check-circle"></i> Completed
                                 </button>
                             }
-                            else if (booking.StartDateTime <= now && booking.EndDateTime > now)
+                            else if (isActive)
                             {
                                 <!-- Active (only shows for customers, admins see cancel button) -->
                                 <button class="btn btn-secondary btn-sm w-100" disabled>
