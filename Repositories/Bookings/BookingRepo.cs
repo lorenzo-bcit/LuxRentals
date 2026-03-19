@@ -93,7 +93,7 @@ namespace LuxRentals.Repositories.Bookings
 
             if (!CanCancelBooking(booking, isAdminOrEmployee))
             {
-                throw new InvalidOperationException("This booking cannot be cancelled. Cancellations must be made at least 48 hours before the start time.");
+                throw new InvalidOperationException("This booking cannot be cancelled. Cancellations must be made at least 2 days before the pickup date.");
             }
 
             booking.CancelledAt = DateTime.UtcNow;
@@ -160,8 +160,8 @@ namespace LuxRentals.Repositories.Bookings
                 return true;
             }
 
-            var timeUntilStart = booking.StartDateTime - DateTime.UtcNow;
-            return timeUntilStart.TotalHours >= 48;
+            var pickupDate = booking.StartDateTime.Date;
+            return pickupDate > BookingClock.Today().AddDays(1);
         }
 
         // Check if car is available for date range

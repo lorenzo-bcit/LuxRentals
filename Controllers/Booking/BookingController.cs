@@ -133,6 +133,7 @@ namespace LuxRentals.Controllers.Booking
             try
             {
                 var customers = await _bookingRepo.GetAllCustomersWithBookings();
+                var today = BookingClock.Today();
 
                 var viewModel = customers.Select(c => new CustomerListViewModel
                 {
@@ -143,8 +144,8 @@ namespace LuxRentals.Controllers.Booking
                     TotalBookings = c.Bookings.Count,
                     ActiveBookings = c.Bookings.Count(b =>
                         b.CancelledAt == null &&
-                        b.StartDateTime <= DateTime.UtcNow &&
-                        b.EndDateTime > DateTime.UtcNow)
+                        b.StartDateTime.Date <= today &&
+                        b.EndDateTime.Date > today)
                 }).ToList();
 
                 return View(viewModel);
@@ -219,7 +220,7 @@ namespace LuxRentals.Controllers.Booking
                 {
                     message = booking.CancelledAt != null
                         ? "This booking has already been cancelled."
-                        : "Cannot cancel within 48 hours of start date.";
+                        : "Cannot cancel less than 2 days before the pickup date.";
                 }
 
                 var viewModel = new BookingCancellationViewModel

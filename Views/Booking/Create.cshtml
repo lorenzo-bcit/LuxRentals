@@ -5,6 +5,7 @@
     ViewData["Title"] = "Book Your Vehicle";
     var carId = ViewBag.CarId;
     var minBookingDate = (string)ViewBag.MinBookingDate;
+    var minReturnDate = Model.StartDateTime.Date.AddDays(1).ToString("yyyy-MM-dd");
 }
 
 <div class="container mt-5">
@@ -50,7 +51,7 @@
                             <input asp-for="EndDateTime"
                                    type="date"
                                    class="form-control form-control-lg"
-                                   min="@minBookingDate"
+                                   min="@minReturnDate"
                                    value="@Model.EndDateTime.ToString("yyyy-MM-dd")"
                                    required />
                             <span asp-validation-for="EndDateTime" class="text-danger"></span>
@@ -64,7 +65,7 @@
                                 <li>Rental must start at least one day in the future</li>
                                 <li>Return date must be after pickup date</li>
                                 <li>You cannot have overlapping bookings</li>
-                                <li>Cancellations must be made at least 48 hours before pickup</li>
+                                <li>Cancellations must be made at least 2 days before pickup</li>
                             </ul>
                         </div>
 
@@ -96,21 +97,32 @@
         document.addEventListener('DOMContentLoaded', function() {
             const startInput = document.querySelector('input[name="StartDateTime"]');
             const endInput = document.querySelector('input[name="EndDateTime"]');
-            const minBookingDate = '@minBookingDate';
 
-            if (endInput) {
-                endInput.min = startInput?.value || minBookingDate;
+            if (!startInput || !endInput) {
+                return;
             }
 
-            startInput?.addEventListener('change', function() {
-                if (endInput && this.value) {
-                    endInput.min = this.value;
+            const addOneDay = (dateString) => {
+                const date = new Date(`${dateString}T00:00:00Z`);
+                date.setUTCDate(date.getUTCDate() + 1);
+                return date.toISOString().split('T')[0];
+            };
 
-                    if (endInput.value && endInput.value < this.value) {
-                        endInput.value = this.value;
-                    }
+            const syncEndDateMinimum = () => {
+                if (!startInput.value) {
+                    return;
                 }
-            });
+
+                const minimumEndDate = addOneDay(startInput.value);
+                endInput.min = minimumEndDate;
+
+                if (!endInput.value || endInput.value < minimumEndDate) {
+                    endInput.value = minimumEndDate;
+                }
+            };
+
+            syncEndDateMinimum();
+            startInput.addEventListener('change', syncEndDateMinimum);
         });
     </script>
 }
