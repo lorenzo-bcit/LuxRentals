@@ -49,6 +49,13 @@
                         <select asp-for="MakeId" asp-items="Model.MakeOptions" class="form-select"></select>
                     </div>
                     <div class="col-md-6 col-lg-3">
+                        <label asp-for="HasActiveOrUpcomingBookingsOnly" class="form-label"></label>
+                        <select asp-for="HasActiveOrUpcomingBookingsOnly" class="form-select">
+                            <option value="false">All cars</option>
+                            <option value="true">Has active/upcoming bookings</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
                         <label asp-for="SortBy" class="form-label"></label>
                         <select asp-for="SortBy" asp-items="Model.SortOptions" class="form-select"></select>
                     </div>

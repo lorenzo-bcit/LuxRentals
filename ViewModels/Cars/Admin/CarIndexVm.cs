@@ -19,6 +19,9 @@ public class CarIndexVm
     [Display(Name = "Make")]
     public int? MakeId { get; set; }
 
+    [Display(Name = "Bookings")]
+    public bool HasActiveOrUpcomingBookingsOnly { get; set; }
+
     [Display(Name = "Sort By")]
     public string SortBy { get; set; } = "id_desc";
 
