@@ -25,6 +25,9 @@ public class CarService : ICarService
 
     public Task<Car?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
 
+    public async Task<IReadOnlyList<Booking>> GetActiveOrUpcomingBookingsAsync(int carId) =>
+        await _repo.GetActiveOrUpcomingBookingsAsync(carId, DateTime.UtcNow);
+
     public async Task<SaveResult> CreateAsync(CarEditVm vm)
     {
         var errors = await ValidateAsync(vm);

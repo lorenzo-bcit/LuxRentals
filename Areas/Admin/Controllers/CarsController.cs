@@ -70,7 +70,7 @@ public class CarsController : Controller
             return NotFound();
 
         var vm = CarEditVm.FromEntity(car);
-
+        await PopulateActiveOrUpcomingBookingsAsync(vm, id);
         await PopulateOptionsAsync(vm);
         return View(vm);
     }
@@ -84,6 +84,7 @@ public class CarsController : Controller
 
         if (!ModelState.IsValid)
         {
+            await PopulateActiveOrUpcomingBookingsAsync(vm, id);
             await PopulateOptionsAsync(vm);
             return View(vm);
         }
@@ -92,6 +93,7 @@ public class CarsController : Controller
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
+            await PopulateActiveOrUpcomingBookingsAsync(vm, id);
             await PopulateOptionsAsync(vm);
             return View(vm);
         }
@@ -158,6 +160,15 @@ public class CarsController : Controller
             new SelectListItem("Manual", "0", vm.TransmissionType == 0),
             new SelectListItem("Automatic", "1", vm.TransmissionType == 1)
         ];
+    }
+
+    private async Task PopulateActiveOrUpcomingBookingsAsync(CarEditVm vm, int carId)
+    {
+        var utcNow = DateTime.UtcNow;
+        var bookings = await _carService.GetActiveOrUpcomingBookingsAsync(carId);
+        vm.ActiveOrUpcomingBookings = bookings
+            .Select(b => CarBookingSummaryVm.FromEntity(b, utcNow))
+            .ToList();
     }
 
     private static void NormalizePage(CarIndexVm vm)

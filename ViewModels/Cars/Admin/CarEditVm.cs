@@ -66,6 +66,7 @@ public class CarEditVm
     public IReadOnlyList<SelectListItem> VehicleClassOptions { get; set; } = [];
     public IReadOnlyList<SelectListItem> CarStatusOptions { get; set; } = [];
     public IReadOnlyList<SelectListItem> ModelOptions { get; set; } = [];
+    public IReadOnlyList<CarBookingSummaryVm> ActiveOrUpcomingBookings { get; set; } = [];
 
     public bool IsEditMode => CarId.HasValue;
 
