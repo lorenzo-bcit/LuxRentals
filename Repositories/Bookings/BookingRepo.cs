@@ -211,6 +211,23 @@ namespace LuxRentals.Repositories.Bookings
             return car.DailyRate * days;
         }
 
+        public bool CheckBooking(int customerId, DateTime start, DateTime end, int carId)
+        {
+            var hasBooking = HasConflictingBooking(customerId, start, end);
+            if (!hasBooking)
+            {
+                return false;
+            }
+
+            var avalible = IsCarAvailable(carId, start, end);
+            if (!avalible)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public void SaveChanges()
         {
             _context.SaveChanges();

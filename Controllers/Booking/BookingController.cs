@@ -55,6 +55,13 @@ namespace LuxRentals.Controllers.Booking
                     model.StartDateTime,
                     model.EndDateTime);
 
+                var canOrder = _bookingRepo.CheckBooking(customerId, model.StartDateTime, model.EndDateTime, carId);
+                if (!canOrder)
+                {
+                    TempData["PaymentError"] = "Car is unavaible or you have conflicting booking.";
+                    return RedirectToAction("Create", carId);
+                }
+
                 HttpContext.Session.SetInt32("CarId", carId);
                 HttpContext.Session.SetInt32("CustomerId", customerId);
                 HttpContext.Session.SetString("StartDate", model.StartDateTime.ToString());
