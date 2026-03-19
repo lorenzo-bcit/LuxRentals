@@ -4,13 +4,15 @@
 
 <script src="https://www.paypal.com/sdk/js?client-id=@ViewBag.PayPalClientId&currency=CAD"></script>
 
-
 <div class="checkout-page">
 
     <div class="checkout-header mb-4">
         <h1><i class="bi bi-credit-card-fill"></i> Checkout</h1>
         <p class="text-muted">Complete your booking payment</p>
     </div>
+
+    <!-- ✅ Error display -->
+    <div id="payment-error" class="alert alert-danger d-none"></div>
 
     @if (TempData["Error"] != null)
     {
@@ -41,12 +43,14 @@
 
                     <p><strong>Start Date:</strong> @ViewBag.StartDate</p>
                     <p><strong>End Date:</strong> @ViewBag.EndDate</p>
-                    <p><strong>Total Price:</strong> <span class="text-success fw-bold">$@ViewBag.Price CAD</span></p>
+                    <p>
+                        <strong>Total Price:</strong>
+                        <span class="text-success fw-bold">$@ViewBag.Price CAD</span>
+                    </p>
 
                 </div>
             </div>
         </div>
-
 
         <!-- Payment Section -->
         <div class="col-md-6">
@@ -74,15 +78,25 @@
 </div>
 
 <script>
+    let isProcessing = false;
+
     paypal.Buttons({
 
+        // ✅ Fix: wrap in Promise
         createOrder: function (data, actions) {
-            return "@ViewBag.OrderId";
+            return Promise.resolve("@ViewBag.OrderId");
         },
 
         onApprove: function (data, actions) {
 
-                fetch("/Payment/Capture", {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            const errorBox = document.getElementById("payment-error");
+            errorBox.classList.add("d-none");
+            errorBox.innerText = "";
+
+            fetch("/Payment/Capture", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -92,21 +106,40 @@
                 })
             })
             .then(res => res.json())
-               .then(data => {
+            .then(data => {
 
                 if (data.success) {
                     window.location = data.redirectUrl;
                 } else {
-                    alert(data.message || "Payment failed."); 
+                    errorBox.classList.remove("d-none");
+                    errorBox.innerText = data.message || "Payment failed.";
+
+                    if (data.redirectUrl) {
+                        setTimeout(() => {
+                            window.location = data.redirectUrl;
+                        }, 2000);
+                    }
                 }
 
-            });
+            })
+            .catch(err => {
+                console.error("Capture error:", err);
 
+                const errorBox = document.getElementById("payment-error");
+                errorBox.classList.remove("d-none");
+                errorBox.innerText = "Unexpected error occurred during payment.";
+            })
+            .finally(() => {
+                isProcessing = false;
+            });
         },
 
         onError: function (err) {
             console.error("PayPal error:", err);
-            alert("Payment failed. Please try again.");
+
+            const errorBox = document.getElementById("payment-error");
+            errorBox.classList.remove("d-none");
+            errorBox.innerText = "PayPal error. Please try again.";
         }
 
     }).render('#paypal-button-container');

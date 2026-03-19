@@ -78,65 +78,87 @@ namespace LuxRentals.Controllers.Payment
         [HttpPost]
         public async Task<IActionResult> Capture([FromBody] CaptureRequest request)
         {
-            try
-            {
-                var transactionId = await _paymentService.CaptureOrderAsync(request.OrderId);
-
-                if (transactionId == null)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "Payment failed."
-                    });
-                }
-
-                // Get session data
-                var carId = HttpContext.Session.GetInt32("CarId");
-                var customerId = HttpContext.Session.GetInt32("CustomerId");
-                var startDateStr = HttpContext.Session.GetString("StartDate");
-                var endDateStr = HttpContext.Session.GetString("EndDate");
-
-                if (carId == null || customerId == null || startDateStr == null || endDateStr == null)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "Session expired."
-                    });
-                }
-
-                var startDate = DateTime.Parse(startDateStr);
-                var endDate = DateTime.Parse(endDateStr);
-                
-
-                // CREATE BOOKING ONLY AFTER PAYMENT SUCCESS
-                var booking = await _bookingRepo.CreateBooking(
-                    carId.Value,
-                    customerId.Value,
-                    startDate,
-                    endDate,
-                    transactionId);
-
-                // Set status to Paid
-                _bookingStatusRepo.SetBookingStatus(booking, "booked");
-
-                await _db.SaveChangesAsync();
-
-                HttpContext.Session.Clear();
-
-                return Json(new
-                {
-                    success = true,
-                    redirectUrl = Url.Action("MyBookings", "Booking")
-                });
-            }
-            catch (Exception ex)
+            if (string.IsNullOrEmpty(request?.OrderId))
             {
                 return Json(new
                 {
                     success = false,
-                    message = "Booking failed: " + ex.Message
+                    message = "Invalid payment request."
+                });
+            }
+
+            try
+            {
+                // ✅ STEP 1: Capture PayPal payment
+                var captureId = await _paymentService.CaptureOrderAsync(request.OrderId);
+
+                if (captureId == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Payment was not completed. Please try again."
+                    });
+                }
+
+                // ✅ STEP 2: Validate session
+                int? carId = HttpContext.Session.GetInt32("CarId");
+                int? customerId = HttpContext.Session.GetInt32("CustomerId");
+                string startStr = HttpContext.Session.GetString("StartDate");
+                string endStr = HttpContext.Session.GetString("EndDate");
+
+                if (carId == null || customerId == null || startStr == null || endStr == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Session expired. Please try booking again.",
+                        redirectUrl = Url.Action("Create", "Booking")
+                    });
+                }
+
+                DateTime startDate = DateTime.Parse(startStr);
+                DateTime endDate = DateTime.Parse(endStr);
+
+                // ✅ STEP 3: Create booking
+                try
+                {
+                    var booking = await _bookingRepo.CreateBooking(
+                        carId.Value,
+                        customerId.Value,
+                        startDate,
+                        endDate,
+                        captureId
+                    );
+
+                    HttpContext.Session.Clear();
+
+                    return Json(new
+                    {
+                        success = true,
+                        redirectUrl = Url.Action("MyBookings", "Booking")
+                    });
+                }
+                catch (Exception bookingEx)
+                {
+                    _logger.LogError(bookingEx, "Booking failed AFTER successful payment");
+
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Payment succeeded, but booking failed: " + bookingEx.Message,
+                        redirectUrl = Url.Action("Create", "Booking", new { carId = carId })
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Payment capture failed");
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Unexpected error during payment. Please try again."
                 });
             }
         }
