@@ -12,6 +12,7 @@ namespace LuxRentals.Repositories.Bookings
         private const int STATUS_UNBOOKED = 1;
         private const int STATUS_BOOKED = 2;
         private const int STATUS_CANCELLED = 3;
+        private const string CAR_STATUS_AVAILABLE = "Available";
 
         public BookingRepo(LuxRentalsDbContext context)
         {
@@ -65,7 +66,7 @@ namespace LuxRentals.Repositories.Bookings
                 _context.SaveChanges();
 
                 return booking;
-            
+
             }
             catch (Exception ex)
             {
@@ -166,6 +167,15 @@ namespace LuxRentals.Repositories.Bookings
         // Check if car is available for date range
         private bool IsCarAvailable(int carId, DateTime startDate, DateTime endDate)
         {
+            var isCarBookable = _context.Cars
+                .Include(c => c.FkCarStatus)
+                .Any(c =>
+                    c.PkCarId == carId &&
+                    c.FkCarStatus.StatusFlag == CAR_STATUS_AVAILABLE);
+
+            if (!isCarBookable)
+                return false;
+
             // Convert incoming dates to UTC to match how they are stored in DB
             startDate = startDate.ToUniversalTime();
             endDate = endDate.ToUniversalTime();
@@ -175,8 +185,8 @@ namespace LuxRentals.Repositories.Bookings
                 b.FkCarId == carId &&
                 b.CancelledAt == null &&
                 b.FkBookingStatusId == STATUS_BOOKED &&
-                startDate < b.EndDateTime &&    
-                endDate > b.StartDateTime      
+                startDate < b.EndDateTime &&
+                endDate > b.StartDateTime
             );
 
             // Car is available if no overlapping booking exists
