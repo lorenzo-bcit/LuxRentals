@@ -187,6 +187,7 @@ public class CarsController : Controller
             StatusId = vm.StatusId,
             VehicleClassId = vm.VehicleClassId,
             MakeId = vm.MakeId,
+            HasActiveOrUpcomingBookingsOnly = vm.HasActiveOrUpcomingBookingsOnly,
             Page = vm.Page,
             PageSize = PAGE_SIZE
         };

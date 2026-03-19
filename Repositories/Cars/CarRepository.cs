@@ -75,7 +75,19 @@ public class CarRepository : ICarRepository
     private IQueryable<Car> ApplyAvailabilityFilter(IQueryable<Car> cars, CarSearchCriteria criteria)
     {
         if (!criteria.AvailableOnly)
+        {
+            if (criteria.HasActiveOrUpcomingBookingsOnly)
+            {
+                var utcNow = DateTime.UtcNow;
+                cars = cars.Where(c =>
+                    _db.Bookings.Any(b =>
+                        b.FkCarId == c.PkCarId &&
+                        b.CancelledAt == null &&
+                        b.EndDateTime > utcNow));
+            }
+
             return cars;
+        }
 
         cars = cars.Where(c => c.FkCarStatus.StatusFlag == "Available");
 
