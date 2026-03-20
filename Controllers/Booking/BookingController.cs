@@ -80,6 +80,7 @@ namespace LuxRentals.Controllers.Booking
                     TempData["Error"] = "Selected car does not exist.";
                     return RedirectToAction("Index", "Home");
                 }
+
                 // Convert to UTC
                 var startDateTime = DateTime.SpecifyKind(model.StartDateTime.Date, DateTimeKind.Utc);
                 var endDateTime = DateTime.SpecifyKind(model.EndDateTime.Date, DateTimeKind.Utc);
@@ -92,10 +93,10 @@ namespace LuxRentals.Controllers.Booking
 
                 
                 // Check if booking is possible
-                var canOrder = await _bookingRepo.CheckBookingAsync(customerId, model.StartDateTime, model.EndDateTime, carId);
+                var (canOrder, errorMessage) = await _bookingRepo.CheckBookingAsync(customerId, model.StartDateTime, model.EndDateTime, carId);
                 if (!canOrder)
                 {
-                    TempData["PaymentError"] = "Car is unavailable or you have a conflicting booking.";
+                    TempData["PaymentError"] = errorMessage;
                     return RedirectToAction("Create", "Booking", new { carId });
                 }
 

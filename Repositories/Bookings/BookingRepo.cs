@@ -244,15 +244,19 @@ namespace LuxRentals.Repositories.Bookings
         }
 
         // Check if booking is allowed
-        public async Task<bool> CheckBookingAsync(int customerId, DateTime start, DateTime end, int carId)
+        public async Task<(bool IsValid, string? ErrorMessage)> CheckBookingAsync(
+            int customerId,
+            DateTime start,
+            DateTime end,
+            int carId)
         {
             var hasBooking = await HasConflictingBookingAsync(customerId, start, end);
-            if (hasBooking) return false;
+            if (hasBooking) return (false, "You already have a booking that conflicts with these dates.");
 
             var available = await IsCarAvailableAsync(carId, start, end);
-            if (!available) return false;
+            if (!available) return (false, "This car is not available for the selected dates.");
 
-            return true;
+            return (true, null);
         }
 
         // Helper method for car availability (also async)
