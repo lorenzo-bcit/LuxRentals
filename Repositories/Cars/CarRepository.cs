@@ -94,8 +94,8 @@ public class CarRepository : ICarRepository
         if (criteria.StartDate is null || criteria.EndDate is null)
             return cars;
 
-        var start = criteria.StartDate.Value;
-        var end = criteria.EndDate.Value;
+        var start = DateTime.SpecifyKind(criteria.StartDate.Value.Date, DateTimeKind.Utc);
+        var end = DateTime.SpecifyKind(criteria.EndDate.Value.Date, DateTimeKind.Utc);
 
         return cars.Where(c =>
             !_db.Bookings.Any(b =>
