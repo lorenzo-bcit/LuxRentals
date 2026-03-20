@@ -1,5 +1,6 @@
 using LuxRentals.Data;
 using LuxRentals.Models;
+using LuxRentals.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Repositories.Cars;
@@ -78,12 +79,9 @@ public class CarRepository : ICarRepository
         {
             if (criteria.HasActiveOrUpcomingBookingsOnly)
             {
-                var utcNow = DateTime.UtcNow;
+                var activeOrUpcomingBookings = BuildActiveOrUpcomingBookingsQuery();
                 cars = cars.Where(c =>
-                    _db.Bookings.Any(b =>
-                        b.FkCarId == c.PkCarId &&
-                        b.CancelledAt == null &&
-                        b.EndDateTime > utcNow));
+                    activeOrUpcomingBookings.Any(b => b.FkCarId == c.PkCarId));
             }
 
             return cars;
@@ -160,22 +158,27 @@ public class CarRepository : ICarRepository
     public Task<bool> HasBookingsAsync(int carId) =>
         _db.Bookings.AnyAsync(b => b.FkCarId == carId);
 
-    public Task<int> CountActiveOrUpcomingBookingsAsync(int carId, DateTime utcNow) =>
-        _db.Bookings.CountAsync(b =>
-            b.FkCarId == carId &&
-            b.CancelledAt == null &&
-            b.EndDateTime > utcNow);
+    public Task<int> CountActiveOrUpcomingBookingsAsync(int carId) =>
+        BuildActiveOrUpcomingBookingsQuery()
+            .Where(b => b.FkCarId == carId)
+            .CountAsync();
 
-    public Task<List<Booking>> GetActiveOrUpcomingBookingsAsync(int carId, DateTime utcNow) =>
-        _db.Bookings
+    public Task<List<Booking>> GetActiveOrUpcomingBookingsAsync(int carId) =>
+        BuildActiveOrUpcomingBookingsQuery()
+            .Where(b => b.FkCarId == carId)
             .AsNoTracking()
             .Include(b => b.FkCustomer)
-            .Where(b =>
-                b.FkCarId == carId &&
-                b.CancelledAt == null &&
-                b.EndDateTime > utcNow)
             .OrderBy(b => b.StartDateTime)
             .ToListAsync();
+
+    private IQueryable<Booking> BuildActiveOrUpcomingBookingsQuery()
+    {
+        var bookingToday = BookingClock.Today();
+
+        return _db.Bookings.Where(b =>
+            b.CancelledAt == null &&
+            b.EndDateTime > bookingToday);
+    }
 
     public Task AddAsync(Car car) => _db.Cars.AddAsync(car).AsTask();
 

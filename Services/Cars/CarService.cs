@@ -24,7 +24,7 @@ public class CarService : ICarService
     public Task<Car?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
 
     public async Task<IReadOnlyList<Booking>> GetActiveOrUpcomingBookingsAsync(int carId) =>
-        await _repo.GetActiveOrUpcomingBookingsAsync(carId, DateTime.UtcNow);
+        await _repo.GetActiveOrUpcomingBookingsAsync(carId);
 
     public async Task<SaveResult> CreateAsync(CarEditVm vm)
     {
@@ -121,7 +121,7 @@ public class CarService : ICarService
         if (existing is null)
             return SaveResult.Fail("", "Car not found.");
 
-        var activeOrUpcomingBookingCount = await _repo.CountActiveOrUpcomingBookingsAsync(id, DateTime.UtcNow);
+        var activeOrUpcomingBookingCount = await _repo.CountActiveOrUpcomingBookingsAsync(id);
         if (activeOrUpcomingBookingCount > 0)
         {
             return SaveResult.Fail(
@@ -399,7 +399,7 @@ public class CarService : ICarService
         if (previousStatusId != availableStatusId.Value || newStatusId == availableStatusId.Value)
             return SaveResult.Ok(string.Empty);
 
-        var activeOrUpcomingBookingCount = await _repo.CountActiveOrUpcomingBookingsAsync(carId, DateTime.UtcNow);
+        var activeOrUpcomingBookingCount = await _repo.CountActiveOrUpcomingBookingsAsync(carId);
         if (activeOrUpcomingBookingCount == 0)
             return SaveResult.Ok(string.Empty);
 

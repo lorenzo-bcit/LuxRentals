@@ -164,10 +164,10 @@ public class CarsController : Controller
 
     private async Task PopulateActiveOrUpcomingBookingsAsync(CarEditVm vm, int carId)
     {
-        var utcNow = DateTime.UtcNow;
+        var bookingToday = BookingClock.Today();
         var bookings = await _carService.GetActiveOrUpcomingBookingsAsync(carId);
         vm.ActiveOrUpcomingBookings = bookings
-            .Select(b => CarBookingSummaryVm.FromEntity(b, utcNow))
+            .Select(b => CarBookingSummaryVm.FromEntity(b, bookingToday))
             .ToList();
     }
 
