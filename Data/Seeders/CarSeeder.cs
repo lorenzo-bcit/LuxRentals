@@ -1,4 +1,5 @@
 using LuxRentals.Models;
+using LuxRentals.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Data.Seeders;
@@ -82,7 +83,12 @@ public static class CarSeeder
 
     private static async Task<Dictionary<string, int>> EnsureCarStatusesAsync(LuxRentalsDbContext db)
     {
-        var required = new[] { "Available", "Maintenance", "Out of Service" };
+        var required = new[]
+        {
+            CarStatusNames.AVAILABLE,
+            CarStatusNames.MAINTENANCE,
+            CarStatusNames.OUT_OF_SERVICE
+        };
 
         var existing = await db.CarStatuses.ToListAsync();
         var existingNames = existing
@@ -233,40 +239,40 @@ public static class CarSeeder
 
     private static List<DemoCarSeed> GetDemoCars() =>
     [
-        new("Luxury Sedan", "BMW", "5 Series", "Gasoline", "Available", 1, 2025, "Obsidian Black", "1HGBH41JXMN200001", "LUX-2001", 5, 3, 149.90m, null),
-        new("Luxury Sedan", "Mercedes-Benz", "E-Class", "Hybrid", "Available", 1, 2025, "Selenite Grey", "1HGBH41JXMN200002", "LUX-2002", 5, 3, 169.90m, null),
-        new("Luxury Sedan", "Audi", "A6", "Gasoline", "Available", 1, 2024, "Glacier White", "1HGBH41JXMN200003", "LUX-2003", 5, 3, 159.90m, null),
-        new("Luxury Sedan", "Lexus", "ES 350", "Hybrid", "Available", 1, 2024, "Deep Blue", "1HGBH41JXMN200004", "LUX-2004", 5, 3, 139.90m, null),
-        new("Luxury Sedan", "Genesis", "G80", "Gasoline", "Available", 1, 2024, "Matte Grey", "1HGBH41JXMN200005", "LUX-2005", 5, 3, 154.90m, null),
-        new("Luxury Sedan", "Porsche", "Panamera", "Gasoline", "Available", 1, 2024, "Jet Black", "1HGBH41JXMN200006", "LUX-2006", 4, 3, 249.90m, null),
-        new("Premium EV", "Audi", "e-tron GT", "Electric", "Available", 1, 2025, "Daytona Grey", "1HGBH41JXMN200007", "LUX-2007", 4, 2, 279.90m, null),
-        new("Premium EV", "Mercedes-Benz", "EQS", "Electric", "Available", 1, 2025, "Polar White", "1HGBH41JXMN200008", "LUX-2008", 5, 3, 299.90m, null),
-        new("Premium EV", "Tesla", "Model S", "Electric", "Available", 1, 2025, "Pearl White", "1HGBH41JXMN200009", "LUX-2009", 5, 3, 269.90m, null),
-        new("Grand Touring Coupe", "BMW", "8 Series", "Gasoline", "Available", 1, 2024, "Carbon Black", "1HGBH41JXMN200010", "LUX-2010", 4, 2, 259.90m, null),
+        new("Luxury Sedan", "BMW", "5 Series", "Gasoline", CarStatusNames.AVAILABLE, 1, 2025, "Obsidian Black", "1HGBH41JXMN200001", "LUX-2001", 5, 3, 149.90m, null),
+        new("Luxury Sedan", "Mercedes-Benz", "E-Class", "Hybrid", CarStatusNames.AVAILABLE, 1, 2025, "Selenite Grey", "1HGBH41JXMN200002", "LUX-2002", 5, 3, 169.90m, null),
+        new("Luxury Sedan", "Audi", "A6", "Gasoline", CarStatusNames.AVAILABLE, 1, 2024, "Glacier White", "1HGBH41JXMN200003", "LUX-2003", 5, 3, 159.90m, null),
+        new("Luxury Sedan", "Lexus", "ES 350", "Hybrid", CarStatusNames.AVAILABLE, 1, 2024, "Deep Blue", "1HGBH41JXMN200004", "LUX-2004", 5, 3, 139.90m, null),
+        new("Luxury Sedan", "Genesis", "G80", "Gasoline", CarStatusNames.AVAILABLE, 1, 2024, "Matte Grey", "1HGBH41JXMN200005", "LUX-2005", 5, 3, 154.90m, null),
+        new("Luxury Sedan", "Porsche", "Panamera", "Gasoline", CarStatusNames.AVAILABLE, 1, 2024, "Jet Black", "1HGBH41JXMN200006", "LUX-2006", 4, 3, 249.90m, null),
+        new("Premium EV", "Audi", "e-tron GT", "Electric", CarStatusNames.AVAILABLE, 1, 2025, "Daytona Grey", "1HGBH41JXMN200007", "LUX-2007", 4, 2, 279.90m, null),
+        new("Premium EV", "Mercedes-Benz", "EQS", "Electric", CarStatusNames.AVAILABLE, 1, 2025, "Polar White", "1HGBH41JXMN200008", "LUX-2008", 5, 3, 299.90m, null),
+        new("Premium EV", "Tesla", "Model S", "Electric", CarStatusNames.AVAILABLE, 1, 2025, "Pearl White", "1HGBH41JXMN200009", "LUX-2009", 5, 3, 269.90m, null),
+        new("Grand Touring Coupe", "BMW", "8 Series", "Gasoline", CarStatusNames.AVAILABLE, 1, 2024, "Carbon Black", "1HGBH41JXMN200010", "LUX-2010", 4, 2, 259.90m, null),
 
-        new("Luxury SUV", "BMW", "X5", "Hybrid", "Available", 1, 2025, "Mineral White", "1HGBH41JXMN200011", "LUX-2011", 5, 4, 199.90m, null),
-        new("Luxury SUV", "Mercedes-Benz", "GLE 450", "Gasoline", "Available", 1, 2025, "Graphite", "1HGBH41JXMN200012", "LUX-2012", 5, 4, 214.90m, null),
-        new("Luxury SUV", "Audi", "Q7", "Diesel", "Available", 1, 2024, "Navarra Blue", "1HGBH41JXMN200013", "LUX-2013", 7, 5, 209.90m, null),
-        new("Luxury SUV", "Lexus", "RX 500h", "Hybrid", "Available", 1, 2025, "Caviar", "1HGBH41JXMN200014", "LUX-2014", 5, 4, 189.90m, null),
-        new("Luxury SUV", "Jaguar", "F-PACE", "Gasoline", "Available", 1, 2024, "British Racing Green", "1HGBH41JXMN200015", "LUX-2015", 5, 4, 219.90m, null),
-        new("Luxury SUV", "Alfa Romeo", "Stelvio", "Gasoline", "Maintenance", 1, 2023, "Rosso Red", "1HGBH41JXMN200016", "LUX-2016", 5, 4, 179.90m, null),
-        new("Luxury SUV", "Volvo", "XC90", "Hybrid", "Available", 1, 2024, "Onyx Black", "1HGBH41JXMN200017", "LUX-2017", 7, 5, 194.90m, null),
-        new("Luxury SUV", "Porsche", "Cayenne", "Gasoline", "Available", 1, 2025, "Carrara White", "1HGBH41JXMN200018", "LUX-2018", 5, 4, 259.90m, null),
-        new("Executive SUV", "Land Rover", "Range Rover Sport", "Diesel", "Available", 1, 2024, "Santorini Black", "1HGBH41JXMN200019", "LUX-2019", 5, 5, 289.90m, null),
-        new("Executive SUV", "Cadillac", "Escalade", "Gasoline", "Available", 1, 2024, "Crystal White", "1HGBH41JXMN200020", "LUX-2020", 7, 6, 309.90m, null),
+        new("Luxury SUV", "BMW", "X5", "Hybrid", CarStatusNames.AVAILABLE, 1, 2025, "Mineral White", "1HGBH41JXMN200011", "LUX-2011", 5, 4, 199.90m, null),
+        new("Luxury SUV", "Mercedes-Benz", "GLE 450", "Gasoline", CarStatusNames.AVAILABLE, 1, 2025, "Graphite", "1HGBH41JXMN200012", "LUX-2012", 5, 4, 214.90m, null),
+        new("Luxury SUV", "Audi", "Q7", "Diesel", CarStatusNames.AVAILABLE, 1, 2024, "Navarra Blue", "1HGBH41JXMN200013", "LUX-2013", 7, 5, 209.90m, null),
+        new("Luxury SUV", "Lexus", "RX 500h", "Hybrid", CarStatusNames.AVAILABLE, 1, 2025, "Caviar", "1HGBH41JXMN200014", "LUX-2014", 5, 4, 189.90m, null),
+        new("Luxury SUV", "Jaguar", "F-PACE", "Gasoline", CarStatusNames.AVAILABLE, 1, 2024, "British Racing Green", "1HGBH41JXMN200015", "LUX-2015", 5, 4, 219.90m, null),
+        new("Luxury SUV", "Alfa Romeo", "Stelvio", "Gasoline", CarStatusNames.MAINTENANCE, 1, 2023, "Rosso Red", "1HGBH41JXMN200016", "LUX-2016", 5, 4, 179.90m, null),
+        new("Luxury SUV", "Volvo", "XC90", "Hybrid", CarStatusNames.AVAILABLE, 1, 2024, "Onyx Black", "1HGBH41JXMN200017", "LUX-2017", 7, 5, 194.90m, null),
+        new("Luxury SUV", "Porsche", "Cayenne", "Gasoline", CarStatusNames.AVAILABLE, 1, 2025, "Carrara White", "1HGBH41JXMN200018", "LUX-2018", 5, 4, 259.90m, null),
+        new("Executive SUV", "Land Rover", "Range Rover Sport", "Diesel", CarStatusNames.AVAILABLE, 1, 2024, "Santorini Black", "1HGBH41JXMN200019", "LUX-2019", 5, 5, 289.90m, null),
+        new("Executive SUV", "Cadillac", "Escalade", "Gasoline", CarStatusNames.AVAILABLE, 1, 2024, "Crystal White", "1HGBH41JXMN200020", "LUX-2020", 7, 6, 309.90m, null),
 
-        new("Premium EV", "Tesla", "Model X", "Electric", "Available", 1, 2025, "Solid Black", "1HGBH41JXMN200021", "LUX-2021", 6, 5, 319.90m, null),
-        new("Executive SUV", "Bentley", "Bentayga", "Gasoline", "Out of Service", 1, 2023, "Moonbeam Silver", "1HGBH41JXMN200022", "LUX-2022", 5, 4, 449.90m, null),
-        new("Luxury SUV", "BMW", "X5", "Gasoline", "Available", 1, 2023, "Dark Graphite", "1HGBH41JXMN200023", "LUX-2023", 5, 4, 189.90m, null),
-        new("Luxury SUV", "Mercedes-Benz", "GLE 450", "Hybrid", "Available", 1, 2024, "Diamond White", "1HGBH41JXMN200024", "LUX-2024", 5, 4, 224.90m, null),
-        new("Luxury SUV", "Audi", "Q7", "Gasoline", "Available", 1, 2023, "Mythos Black", "1HGBH41JXMN200025", "LUX-2025", 7, 5, 199.90m, null),
-        new("Luxury SUV", "Porsche", "Cayenne", "Hybrid", "Available", 1, 2024, "Arctic Grey", "1HGBH41JXMN200026", "LUX-2026", 5, 4, 269.90m, null),
-        new("Premium EV", "Tesla", "Model S", "Electric", "Maintenance", 1, 2024, "Midnight Silver", "1HGBH41JXMN200027", "LUX-2027", 5, 3, 259.90m, null),
-        new("Premium EV", "Mercedes-Benz", "EQS", "Electric", "Available", 1, 2024, "Nautical Blue", "1HGBH41JXMN200028", "LUX-2028", 5, 3, 289.90m, null),
-        new("Luxury Sedan", "BMW", "5 Series", "Diesel", "Available", 1, 2023, "Frozen Grey", "1HGBH41JXMN200029", "LUX-2029", 5, 3, 144.90m, null),
-        new("Luxury Sedan", "Lexus", "ES 350", "Gasoline", "Available", 1, 2023, "Atomic Silver", "1HGBH41JXMN200030", "LUX-2030", 5, 3, 134.90m, null),
-        new("Luxury Sedan", "Genesis", "G80", "Hybrid", "Available", 1, 2025, "Makalu Grey", "1HGBH41JXMN200031", "LUX-2031", 5, 3, 164.90m, null),
-        new("Executive SUV", "Cadillac", "Escalade", "Diesel", "Available", 1, 2025, "Black Raven", "1HGBH41JXMN200032", "LUX-2032", 7, 6, 324.90m, null)
+        new("Premium EV", "Tesla", "Model X", "Electric", CarStatusNames.AVAILABLE, 1, 2025, "Solid Black", "1HGBH41JXMN200021", "LUX-2021", 6, 5, 319.90m, null),
+        new("Executive SUV", "Bentley", "Bentayga", "Gasoline", CarStatusNames.OUT_OF_SERVICE, 1, 2023, "Moonbeam Silver", "1HGBH41JXMN200022", "LUX-2022", 5, 4, 449.90m, null),
+        new("Luxury SUV", "BMW", "X5", "Gasoline", CarStatusNames.AVAILABLE, 1, 2023, "Dark Graphite", "1HGBH41JXMN200023", "LUX-2023", 5, 4, 189.90m, null),
+        new("Luxury SUV", "Mercedes-Benz", "GLE 450", "Hybrid", CarStatusNames.AVAILABLE, 1, 2024, "Diamond White", "1HGBH41JXMN200024", "LUX-2024", 5, 4, 224.90m, null),
+        new("Luxury SUV", "Audi", "Q7", "Gasoline", CarStatusNames.AVAILABLE, 1, 2023, "Mythos Black", "1HGBH41JXMN200025", "LUX-2025", 7, 5, 199.90m, null),
+        new("Luxury SUV", "Porsche", "Cayenne", "Hybrid", CarStatusNames.AVAILABLE, 1, 2024, "Arctic Grey", "1HGBH41JXMN200026", "LUX-2026", 5, 4, 269.90m, null),
+        new("Premium EV", "Tesla", "Model S", "Electric", CarStatusNames.MAINTENANCE, 1, 2024, "Midnight Silver", "1HGBH41JXMN200027", "LUX-2027", 5, 3, 259.90m, null),
+        new("Premium EV", "Mercedes-Benz", "EQS", "Electric", CarStatusNames.AVAILABLE, 1, 2024, "Nautical Blue", "1HGBH41JXMN200028", "LUX-2028", 5, 3, 289.90m, null),
+        new("Luxury Sedan", "BMW", "5 Series", "Diesel", CarStatusNames.AVAILABLE, 1, 2023, "Frozen Grey", "1HGBH41JXMN200029", "LUX-2029", 5, 3, 144.90m, null),
+        new("Luxury Sedan", "Lexus", "ES 350", "Gasoline", CarStatusNames.AVAILABLE, 1, 2023, "Atomic Silver", "1HGBH41JXMN200030", "LUX-2030", 5, 3, 134.90m, null),
+        new("Luxury Sedan", "Genesis", "G80", "Hybrid", CarStatusNames.AVAILABLE, 1, 2025, "Makalu Grey", "1HGBH41JXMN200031", "LUX-2031", 5, 3, 164.90m, null),
+        new("Executive SUV", "Cadillac", "Escalade", "Diesel", CarStatusNames.AVAILABLE, 1, 2025, "Black Raven", "1HGBH41JXMN200032", "LUX-2032", 7, 6, 324.90m, null)
     ];
 
     private sealed record DemoCarSeed(
