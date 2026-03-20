@@ -10,12 +10,6 @@ namespace LuxRentals.Repositories.Bookings
         private readonly LuxRentalsDbContext _context;
         private readonly ILogger<BookingRepo> _logger;
 
-        // Booking Status IDs
-        private const int STATUS_UNBOOKED = 1;
-        private const int STATUS_BOOKED = 2;
-        private const int STATUS_CANCELLED = 3;
-        private const string CAR_STATUS_AVAILABLE = "Available";
-
         public BookingRepo(LuxRentalsDbContext context, ILogger<BookingRepo> logger)
         {
             _context = context;
@@ -62,7 +56,7 @@ namespace LuxRentals.Repositories.Bookings
                 StartDateTime = startDate,
                 EndDateTime = endDate,
                 CreatedAt = DateTime.UtcNow,
-                FkBookingStatusId = STATUS_BOOKED,
+                FkBookingStatusId = BookingStatusIds.BOOKED,
                 CancelledAt = null,
                 TransactionId = transactionId
             };
@@ -97,7 +91,7 @@ namespace LuxRentals.Repositories.Bookings
             }
 
             booking.CancelledAt = DateTime.UtcNow;
-            booking.FkBookingStatusId = STATUS_CANCELLED;
+            booking.FkBookingStatusId = BookingStatusIds.CANCELLED;
 
             await _context.SaveChangesAsync();
         }
@@ -167,15 +161,9 @@ namespace LuxRentals.Repositories.Bookings
         // Check if car is available for date range
         private async Task<bool> IsCarAvailable(int carId, DateTime startDate, DateTime endDate)
         {
-            var overlappingBookingExists = await _context.Bookings.AnyAsync(b =>
-                b.FkCarId == carId &&
-                b.CancelledAt == null &&
-                b.FkBookingStatusId == STATUS_BOOKED &&
-                startDate < b.EndDateTime &&
-                endDate > b.StartDateTime
-            );
-
-            return !overlappingBookingExists;
+            return await _context.Cars
+                .AsNoTracking()
+                .IsBookableForWindowAsync(_context.Bookings, carId, startDate, endDate);
         }
 
         // Check if customer has conflicting booking
@@ -184,7 +172,7 @@ namespace LuxRentals.Repositories.Bookings
             return await _context.Bookings.AnyAsync(b =>
                 b.FkCustomerId == customerId &&
                 b.CancelledAt == null &&
-                b.FkBookingStatusId == STATUS_BOOKED &&
+                b.FkBookingStatusId == BookingStatusIds.BOOKED &&
                 startDate < b.EndDateTime &&
                 endDate > b.StartDateTime
             );
