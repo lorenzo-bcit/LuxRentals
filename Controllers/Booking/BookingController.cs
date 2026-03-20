@@ -1,5 +1,6 @@
 ﻿using LuxRentals.Repositories.Bookings;
 using LuxRentals.Services.Payment;
+using LuxRentals.Utils;
 using LuxRentals.ViewModels.Bookings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,23 +24,24 @@ namespace LuxRentals.Controllers.Booking
         [HttpGet]
         public IActionResult Create(int carId, DateOnly? startDate, DateOnly? endDate)
         {
-            ViewBag.CarId = carId;
-
+            SetCreateViewState(carId);
             var model = new BookingCreateViewModel();
+            var minBookingDate = BookingClock.Tomorrow();
+            var requestedStartDate = startDate?.ToDateTime(TimeOnly.MinValue);
+            var requestedEndDate = endDate?.ToDateTime(TimeOnly.MinValue);
 
-            // Use dates from query params OR set defaults
-            if (startDate.HasValue && endDate.HasValue)
+            if (requestedStartDate.HasValue &&
+                requestedEndDate.HasValue &&
+                requestedStartDate.Value.Date >= minBookingDate &&
+                requestedEndDate.Value.Date > requestedStartDate.Value.Date)
             {
-                // Convert DateOnly from query params to DateTime (date only, no time)
-                model.StartDateTime = startDate.Value.ToDateTime(TimeOnly.MinValue);
-                model.EndDateTime = endDate.Value.ToDateTime(TimeOnly.MinValue);
+                model.StartDateTime = requestedStartDate.Value;
+                model.EndDateTime = requestedEndDate.Value;
             }
             else
             {
-                // Default: today + 7 days
-                var today = DateTime.Today;
-                model.StartDateTime = today;
-                model.EndDateTime = today.AddDays(7);
+                model.StartDateTime = minBookingDate;
+                model.EndDateTime = minBookingDate.AddDays(7);
             }
 
             return View(model);
@@ -53,7 +55,7 @@ namespace LuxRentals.Controllers.Booking
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.CarId = carId;
+                SetCreateViewState(carId);
                 return View(model);
             }
 
@@ -78,7 +80,7 @@ namespace LuxRentals.Controllers.Booking
 
                 HttpContext.Session.SetInt32("CarId", carId);
                 HttpContext.Session.SetInt32("CustomerId", customerId);
-                HttpContext.Session.SetString("StartDate", startDateTime.ToString("o")); 
+                HttpContext.Session.SetString("StartDate", startDateTime.ToString("o"));
                 HttpContext.Session.SetString("EndDate", endDateTime.ToString("o"));
 
                 var orderId = await _paymentService.CreateOrderAsync(price, "CAD");
@@ -94,7 +96,7 @@ namespace LuxRentals.Controllers.Booking
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                ViewBag.CarId = carId;
+                SetCreateViewState(carId);
                 return View(model);
             }
         }
@@ -303,6 +305,12 @@ namespace LuxRentals.Controllers.Booking
             }
 
             return 0;
+        }
+
+        private void SetCreateViewState(int carId)
+        {
+            ViewBag.CarId = carId;
+            ViewBag.MinBookingDate = BookingClock.Tomorrow().ToString("yyyy-MM-dd");
         }
     }
 }

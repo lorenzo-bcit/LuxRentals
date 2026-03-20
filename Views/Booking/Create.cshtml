@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = "Book Your Vehicle";
     var carId = ViewBag.CarId;
+    var minBookingDate = (string)ViewBag.MinBookingDate;
 }
 
 <div class="container mt-5">
@@ -37,6 +38,7 @@
                             <input asp-for="StartDateTime"
                                    type="date"
                                    class="form-control form-control-lg"
+                                   min="@minBookingDate"
                                    value="@Model.StartDateTime.ToString("yyyy-MM-dd")"
                                    required />
                             <span asp-validation-for="StartDateTime" class="text-danger"></span>
@@ -48,6 +50,7 @@
                             <input asp-for="EndDateTime"
                                    type="date"
                                    class="form-control form-control-lg"
+                                   min="@minBookingDate"
                                    value="@Model.EndDateTime.ToString("yyyy-MM-dd")"
                                    required />
                             <span asp-validation-for="EndDateTime" class="text-danger"></span>
@@ -90,32 +93,22 @@
     }
 
     <script>
-        // Set minimum date to tomorrow for both date pickers
         document.addEventListener('DOMContentLoaded', function() {
-            // Get TOMORROW's date in USER'S LOCAL TIMEZONE
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-
-            const year = tomorrow.getFullYear();
-            const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
-            const day = String(tomorrow.getDate()).padStart(2, '0');
-            const tomorrowLocal = `${year}-${month}-${day}`; // e.g., "2026-03-20"
-
             const startInput = document.querySelector('input[name="StartDateTime"]');
             const endInput = document.querySelector('input[name="EndDateTime"]');
-
-            if (startInput) {
-                startInput.min = tomorrowLocal;
-            }
+            const minBookingDate = '@minBookingDate';
 
             if (endInput) {
-                endInput.min = tomorrowLocal;
+                endInput.min = startInput?.value || minBookingDate;
             }
 
-            // When start date changes, update end date minimum
             startInput?.addEventListener('change', function() {
                 if (endInput && this.value) {
                     endInput.min = this.value;
+
+                    if (endInput.value && endInput.value < this.value) {
+                        endInput.value = this.value;
+                    }
                 }
             });
         });
