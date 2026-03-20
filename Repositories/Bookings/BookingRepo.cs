@@ -1,5 +1,6 @@
 ﻿using LuxRentals.Data;
 using LuxRentals.Models;
+using LuxRentals.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Repositories.Bookings
@@ -28,8 +29,7 @@ namespace LuxRentals.Repositories.Bookings
             startDate = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
             endDate = DateTime.SpecifyKind(endDate.Date, DateTimeKind.Utc);
 
-            // Get tomorrow's date in UTC
-            var tomorrowUtc = DateTime.SpecifyKind(DateTime.UtcNow.Date.AddDays(1), DateTimeKind.Utc);
+            var tomorrow = BookingClock.Tomorrow();
 
             // Validation checks (date-only comparison)
             if (endDate <= startDate)
@@ -37,7 +37,7 @@ namespace LuxRentals.Repositories.Bookings
                 throw new ArgumentException("End date must be after start date.");
             }
 
-            if (startDate < tomorrowUtc)
+            if (startDate.Date < tomorrow)
             {
                 throw new ArgumentException("Start date must be at least one day in the future.");
             }
