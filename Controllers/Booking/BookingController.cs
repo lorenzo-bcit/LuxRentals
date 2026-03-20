@@ -62,10 +62,10 @@ namespace LuxRentals.Controllers.Booking
                 }
 
                 // Calculate price
-                var price = _bookingRepo.CalculateBookingPrice(carId, model.StartDateTime, model.EndDateTime);
+                var price = await _bookingRepo.CalculateBookingPriceAsync(carId, model.StartDateTime, model.EndDateTime);
 
                 // Check if booking is possible
-                var canOrder = _bookingRepo.CheckBooking(customerId, model.StartDateTime, model.EndDateTime, carId);
+                var canOrder = await _bookingRepo.CheckBookingAsync(customerId, model.StartDateTime, model.EndDateTime, carId);
                 if (!canOrder)
                 {
                     TempData["PaymentError"] = "Car is unavailable or you have a conflicting booking.";

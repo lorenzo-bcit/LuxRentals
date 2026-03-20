@@ -44,7 +44,7 @@ namespace LuxRentals.Repositories.Bookings
                     throw new InvalidOperationException("The car is not available for the selected dates.");
                 }
 
-                bool hasConflictingBooking = HasConflictingBooking(customerId, startDate, endDate);
+                bool hasConflictingBooking = await HasConflictingBookingAsync(customerId, startDate, endDate);
                 if (hasConflictingBooking)
                 {
                     throw new InvalidOperationException("You have another booking that conflicts with the selected dates.");
@@ -187,47 +187,54 @@ namespace LuxRentals.Repositories.Bookings
         }
 
         // Check if customer has conflicting booking
-        private bool HasConflictingBooking(int customerId, DateTime startDate, DateTime endDate)
+        private async Task<bool> HasConflictingBookingAsync(int customerId, DateTime startDate, DateTime endDate)
         {
-            return _context.Bookings.Any(b =>
-            b.FkCustomerId == customerId &&
-            b.CancelledAt == null &&
-            b.FkBookingStatusId == STATUS_BOOKED && startDate < b.EndDateTime && endDate > b.StartDateTime
-    );
+            return await _context.Bookings.AnyAsync(b =>
+                b.FkCustomerId == customerId &&
+                b.CancelledAt == null &&
+                b.FkBookingStatusId == STATUS_BOOKED &&
+                startDate < b.EndDateTime &&
+                endDate > b.StartDateTime
+            );
         }
 
-        public decimal CalculateBookingPrice(int carId, DateTime start, DateTime end)
+        // 2️⃣ Calculate booking price
+        public async Task<decimal> CalculateBookingPriceAsync(int carId, DateTime start, DateTime end)
         {
-            var car = _context.Cars.FirstOrDefault(c => c.PkCarId == carId);
+            var car = await _context.Cars.FirstOrDefaultAsync(c => c.PkCarId == carId);
 
             if (car == null)
                 throw new Exception("Car not found.");
 
             int days = (end.Date - start.Date).Days;
-
-            if (days <= 0)
-                days = 1;
+            if (days <= 0) days = 1;
 
             return car.DailyRate * days;
         }
 
-        public bool CheckBooking(int customerId, DateTime start, DateTime end, int carId)
+        // 3️⃣ Check if booking is allowed
+        public async Task<bool> CheckBookingAsync(int customerId, DateTime start, DateTime end, int carId)
         {
-            var hasBooking = HasConflictingBooking(customerId, start, end);
-            if (hasBooking == true)
-            {
-                return false;
-            }
+            var hasBooking = await HasConflictingBookingAsync(customerId, start, end);
+            if (hasBooking) return false;
 
-            var avalible = IsCarAvailable(carId, start, end);
-            if (!avalible)
-            {
-                return false;
-            }
+            var available = await IsCarAvailableAsync(carId, start, end);
+            if (!available) return false;
 
             return true;
         }
 
+        // Helper method for car availability (also async)
+        private async Task<bool> IsCarAvailableAsync(int carId, DateTime start, DateTime end)
+        {
+            return !await _context.Bookings.AnyAsync(b =>
+                b.FkCarId == carId &&
+                b.CancelledAt == null &&
+                b.FkBookingStatusId == STATUS_BOOKED &&
+                start < b.EndDateTime &&
+                end > b.StartDateTime
+            );
+        }
         public void SaveChanges()
         {
             _context.SaveChanges();

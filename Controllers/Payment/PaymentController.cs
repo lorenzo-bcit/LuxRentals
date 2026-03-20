@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 
 namespace LuxRentals.Controllers.Payment
 {
@@ -37,7 +38,7 @@ namespace LuxRentals.Controllers.Payment
         }
 
         [Authorize]
-        public IActionResult Checkout(string orderId, int? carId)
+        public async Task<IActionResult> Checkout(string orderId, int? carId)
         {
             if (string.IsNullOrEmpty(orderId))
             {
@@ -72,7 +73,7 @@ namespace LuxRentals.Controllers.Payment
                 return RedirectToAction("Create", "Booking");
             }
 
-            var price = _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
+            var price = await _bookingRepo.CalculateBookingPriceAsync(carId.Value, startDate, endDate);
 
             ViewBag.Price = price;
             ViewBag.CarId = carId.Value;
@@ -153,7 +154,7 @@ namespace LuxRentals.Controllers.Payment
                     return Json(new { success = true, redirectUrl = Url.Action("MyBookings", "Booking") });
 
                 // Validate payment amount
-                var expectedAmount = _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
+                var expectedAmount = await _bookingRepo.CalculateBookingPriceAsync(carId.Value, startDate, endDate);
                 if (amountPaid != expectedAmount)
                 {
                     _logger.LogWarning("Payment mismatch: expected {expected}, got {actual}", expectedAmount, amountPaid);
