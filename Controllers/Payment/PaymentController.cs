@@ -19,7 +19,7 @@ namespace LuxRentals.Controllers.Payment
             BookingRepo bookingRepo,
             LuxRentalsDbContext context,
             IOptions<PaypalOptions> paypalOptions,
-            ILogger<IPaymentService> logger)   
+            ILogger<IPaymentService> logger)
         {
             _paymentService = paymentService;
             _bookingRepo = bookingRepo;
@@ -28,7 +28,7 @@ namespace LuxRentals.Controllers.Payment
             _logger = logger;
         }
 
-        public IActionResult Checkout(string orderId)
+        public async Task<IActionResult> Checkout(string orderId)
         {
             if (string.IsNullOrEmpty(orderId))
             {
@@ -46,7 +46,6 @@ namespace LuxRentals.Controllers.Payment
             }
 
             var clientId = _paypalOptions.ClientId;
-
             if (string.IsNullOrEmpty(clientId))
             {
                 throw new Exception("PayPal ClientId not configured.");
@@ -54,18 +53,19 @@ namespace LuxRentals.Controllers.Payment
 
             ViewBag.PayPalClientId = clientId;
 
-            if (!DateTime.TryParse(startDateStr, out DateTime startDate) ||
-                !DateTime.TryParse(endDateStr, out DateTime endDate))
+            // Parse dates with RoundtripKind to preserve UTC
+            if (!DateTime.TryParse(startDateStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime startDate) ||
+                !DateTime.TryParse(endDateStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime endDate))
             {
                 TempData["Error"] = "Invalid booking dates.";
                 return RedirectToAction("Index", "Home");
             }
 
-            var price = _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
+            var price = await _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
 
             ViewBag.OrderId = orderId;
-            ViewBag.StartDate = startDate.ToShortDateString();
-            ViewBag.EndDate = endDate.ToShortDateString();
+            ViewBag.StartDate = startDate.ToString("MMM dd, yyyy");
+            ViewBag.EndDate = endDate.ToString("MMM dd, yyyy");
             ViewBag.Price = price;
 
             return View();
@@ -87,10 +87,18 @@ namespace LuxRentals.Controllers.Payment
                 int carId = HttpContext.Session.GetInt32("CarId").Value;
                 int customerId = HttpContext.Session.GetInt32("CustomerId").Value;
 
-                DateTime startDate = DateTime.Parse(HttpContext.Session.GetString("StartDate"));
-                DateTime endDate = DateTime.Parse(HttpContext.Session.GetString("EndDate"));
+                // FIXED: Parse dates with RoundtripKind to preserve UTC from session
+                DateTime startDate = DateTime.Parse(
+                    HttpContext.Session.GetString("StartDate"),
+                    null,
+                    System.Globalization.DateTimeStyles.RoundtripKind);
 
-                var booking = _bookingRepo.CreateBooking(carId, customerId, startDate, endDate, request.OrderId);
+                DateTime endDate = DateTime.Parse(
+                    HttpContext.Session.GetString("EndDate"),
+                    null,
+                    System.Globalization.DateTimeStyles.RoundtripKind);
+
+                var booking = await _bookingRepo.CreateBooking(carId, customerId, startDate, endDate, request.OrderId);
 
                 HttpContext.Session.Clear();
 
@@ -102,6 +110,7 @@ namespace LuxRentals.Controllers.Payment
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error during payment capture");
                 return Json(new { success = false, message = ex.Message });
             }
         }

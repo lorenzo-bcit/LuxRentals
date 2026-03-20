@@ -3,6 +3,8 @@
 
 @{
     ViewData["Title"] = "Cancel Booking";
+    var isAdminOrEmployee = ViewBag.IsAdminOrEmployee ?? false;
+    var bookingCustomerId = ViewBag.BookingCustomerId;
 }
 
 <div class="container mt-5">
@@ -37,11 +39,11 @@
                         <div class="p-3 bg-light rounded">
                             <p class="mb-2">
                                 <i class="bi bi-calendar-event text-primary"></i>
-                                <strong>Pickup:</strong> @Model.StartDateTime.ToString("MMMM dd, yyyy 'at' hh:mm tt")
+                                <strong>Pickup:</strong> @Model.StartDateTime.ToString("MMMM dd, yyyy")
                             </p>
                             <p class="mb-0">
                                 <i class="bi bi-calendar-x text-primary"></i>
-                                <strong>Return:</strong> @Model.EndDateTime.ToString("MMMM dd, yyyy 'at' hh:mm tt")
+                                <strong>Return:</strong> @Model.EndDateTime.ToString("MMMM dd, yyyy")
                             </p>
                         </div>
                     </div>
@@ -60,7 +62,7 @@
                         <div class="mb-4">
                             <h6 class="text-muted">Cancellation Policy</h6>
                             <ul class="small">
-                                <li>Cancellations can be made at least 48 hours before pickup</li>
+                                <li>Cancellations can be made at least 2 days before pickup</li>
                                 <li>Once cancelled, this booking cannot be restored</li>
                                 <li>You will receive a confirmation email</li>
                             </ul>
@@ -75,9 +77,23 @@
                                 <button type="submit" class="btn btn-danger btn-lg">
                                     <i class="bi bi-x-circle-fill"></i> Yes, Cancel This Booking
                                 </button>
-                                <a asp-action="MyBookings" class="btn btn-outline-secondary btn-lg">
-                                    <i class="bi bi-arrow-left"></i> No, Keep This Booking
-                                </a>
+
+                                @if (isAdminOrEmployee)
+                                {
+                                    <!-- Admin: Go back to customer's bookings -->
+                                    <a asp-action="ViewCustomerBookings"
+                                       asp-route-customerId="@bookingCustomerId"
+                                       class="btn btn-outline-secondary btn-lg">
+                                        <i class="bi bi-arrow-left"></i> No, Keep This Booking
+                                    </a>
+                                }
+                                else
+                                {
+                                    <!-- Customer: Go back to their own bookings -->
+                                    <a asp-action="MyBookings" class="btn btn-outline-secondary btn-lg">
+                                        <i class="bi bi-arrow-left"></i> No, Keep This Booking
+                                    </a>
+                                }
                             </div>
                         </form>
                     }
@@ -88,9 +104,23 @@
                             <button type="button" class="btn btn-secondary btn-lg" disabled>
                                 <i class="bi bi-lock-fill"></i> Cancellation Not Available
                             </button>
-                            <a asp-action="MyBookings" class="btn btn-primary btn-lg">
-                                <i class="bi bi-arrow-left"></i> Back to My Bookings
-                            </a>
+
+                            @if (isAdminOrEmployee)
+                            {
+                                <!-- Admin: Go back to customer's bookings -->
+                                <a asp-action="ViewCustomerBookings"
+                                   asp-route-customerId="@bookingCustomerId"
+                                   class="btn btn-primary btn-lg">
+                                    <i class="bi bi-arrow-left"></i> Back to Customer Bookings
+                                </a>
+                            }
+                            else
+                            {
+                                <!-- Customer: Go back to their own bookings -->
+                                <a asp-action="MyBookings" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-arrow-left"></i> Back to My Bookings
+                                </a>
+                            }
                         </div>
                     }
 

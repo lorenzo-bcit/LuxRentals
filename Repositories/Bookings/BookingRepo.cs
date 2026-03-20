@@ -1,5 +1,6 @@
 ﻿using LuxRentals.Data;
 using LuxRentals.Models;
+using LuxRentals.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Repositories.Bookings
@@ -7,79 +8,78 @@ namespace LuxRentals.Repositories.Bookings
     public class BookingRepo
     {
         private readonly LuxRentalsDbContext _context;
+        private readonly ILogger<BookingRepo> _logger;
 
         // Booking Status IDs
         private const int STATUS_UNBOOKED = 1;
         private const int STATUS_BOOKED = 2;
         private const int STATUS_CANCELLED = 3;
 
-        public BookingRepo(LuxRentalsDbContext context)
+        public BookingRepo(LuxRentalsDbContext context, ILogger<BookingRepo> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // Create booking
-        public Booking CreateBooking(int carId, int customerId,
+        public async Task<Booking> CreateBooking(int carId, int customerId,
             DateTime startDate, DateTime endDate, string transactionId)
         {
-            try
+            // Normalize to midnight UTC
+            startDate = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
+            endDate = DateTime.SpecifyKind(endDate.Date, DateTimeKind.Utc);
+
+            var tomorrow = BookingClock.Tomorrow();
+
+            // Validation checks (date-only comparison)
+            if (endDate <= startDate)
             {
-                // Validation checks
-                if (endDate <= startDate)
-                {
-                    throw new ArgumentException("End date must be after start date.");
-                }
-
-                if (startDate <= DateTime.Now)
-                {
-                    throw new ArgumentException("Start date must be in the future.");
-                }
-
-                bool isCarAvailable = IsCarAvailable(carId, startDate, endDate);
-                if (!isCarAvailable)
-                {
-                    throw new InvalidOperationException("The car is not available for the selected dates.");
-                }
-
-                bool hasConflictingBooking = HasConflictingBooking(customerId, startDate, endDate);
-                if (hasConflictingBooking)
-                {
-                    throw new InvalidOperationException("You have another booking that conflicts with the selected dates.");
-                }
-
-                var booking = new Booking
-                {
-                    FkCarId = carId,
-                    FkCustomerId = customerId,
-                    StartDateTime = startDate,
-                    EndDateTime = endDate,
-                    CreatedAt = DateTime.UtcNow,
-                    FkBookingStatusId = STATUS_BOOKED,
-                    CancelledAt = null,
-                    TransactionId = transactionId
-                };
-
-                Console.WriteLine($"Creating booking for Car ID {carId} from {startDate} to {endDate} for Customer ID {customerId}.");
-
-                _context.Bookings.Add(booking);
-                _context.SaveChanges();
-
-                return booking;
-            
+                throw new ArgumentException("End date must be after start date.");
             }
-            catch (Exception ex)
+
+            if (startDate.Date < tomorrow)
             {
-                Console.WriteLine("An error occurred: " + ex.Message);
-                Console.WriteLine("Exception: ", ex);
-                throw;
+                throw new ArgumentException("Start date must be at least one day in the future.");
             }
+
+            bool isCarAvailable = await IsCarAvailable(carId, startDate, endDate);
+            if (!isCarAvailable)
+            {
+                throw new InvalidOperationException("The car is not available for the selected dates.");
+            }
+
+            bool hasConflictingBooking = await HasConflictingBooking(customerId, startDate, endDate);
+            if (hasConflictingBooking)
+            {
+                throw new InvalidOperationException("You have another booking that conflicts with the selected dates.");
+            }
+
+            var booking = new Booking
+            {
+                FkCarId = carId,
+                FkCustomerId = customerId,
+                StartDateTime = startDate,
+                EndDateTime = endDate,
+                CreatedAt = DateTime.UtcNow,
+                FkBookingStatusId = STATUS_BOOKED,
+                CancelledAt = null,
+                TransactionId = transactionId
+            };
+
+            _logger.LogInformation(
+                "Creating booking for Car ID {CarId} from {StartDate} to {EndDate} for Customer ID {CustomerId}",
+                carId, startDate, endDate, customerId);
+
+            await _context.Bookings.AddAsync(booking);
+            await _context.SaveChangesAsync();
+
+            return booking;
         }
 
-// Cancel Booking
-    public void CancelBooking(int bookingId, int customerId, bool isAdminOrEmployee)
-    {
-
-            var booking = GetBookingById(bookingId);
+        // Cancel Booking
+        public async Task CancelBooking(int bookingId, int customerId, bool isAdminOrEmployee)
+        {
+            var booking = await GetBookingById(bookingId);
             if (booking == null)
             {
                 throw new ArgumentException("Booking not found.");
@@ -92,56 +92,56 @@ namespace LuxRentals.Repositories.Bookings
 
             if (!CanCancelBooking(booking, isAdminOrEmployee))
             {
-                throw new InvalidOperationException("This booking cannot be cancelled. Cancellations must be made at least 48 hours before the start time.");
+                throw new InvalidOperationException("This booking cannot be cancelled. Cancellations must be made at least 2 days before the pickup date.");
             }
 
             booking.CancelledAt = DateTime.UtcNow;
             booking.FkBookingStatusId = STATUS_CANCELLED;
 
-            _context.SaveChanges();
-    }
+            await _context.SaveChangesAsync();
+        }
 
         // Get booking by ID
-        public Booking? GetBookingById(int bookingId)
+        public async Task<Booking?> GetBookingById(int bookingId)
         {
-            return _context.Bookings
+            return await _context.Bookings
                 .Include(b => b.FkBookingStatus)
                 .Include(b => b.FkCar)
                     .ThenInclude(c => c.FkModel)
                         .ThenInclude(m => m.FkMake)
                 .Include(b => b.FkCustomer)
-                .FirstOrDefault(b => b.PkBookingId == bookingId);
+                .FirstOrDefaultAsync(b => b.PkBookingId == bookingId);
         }
 
         // Get customer ID by email
-        public int GetCustomerIdByEmail(string email)
+        public async Task<int> GetCustomerIdByEmail(string email)
         {
-            var customer = _context.Customers.FirstOrDefault(c => c.Email == email);
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Email == email);
             return customer?.PkCustomerId ?? 0;
         }
 
         // Get all bookings for a customer
-        public List<Booking> GetBookingsForCustomer(int customerId)
+        public async Task<List<Booking>> GetBookingsForCustomer(int customerId)
         {
-            return _context.Bookings
+            return await _context.Bookings
                 .Include(b => b.FkBookingStatus)
                 .Include(b => b.FkCar)
                     .ThenInclude(c => c.FkModel)
                         .ThenInclude(m => m.FkMake)
                 .Where(b => b.FkCustomerId == customerId)
                 .OrderByDescending(b => b.CreatedAt)
-                .ToList();
+                .ToListAsync();
         }
 
         // Get all customers who have made bookings
-        public List<Customer> GetAllCustomersWithBookings()
+        public async Task<List<Customer>> GetAllCustomersWithBookings()
         {
-            return _context.Customers
+            return await _context.Customers
                 .Include(c => c.Bookings)
                 .Where(c => c.Bookings.Any())
                 .OrderBy(c => c.LastName)
                 .ThenBy(c => c.FirstName)
-                .ToList();
+                .ToListAsync();
         }
 
         // Helper Methods
@@ -159,43 +159,40 @@ namespace LuxRentals.Repositories.Bookings
                 return true;
             }
 
-            var timeUntilStart = booking.StartDateTime - DateTime.UtcNow;
-            return timeUntilStart.TotalHours >= 48;
+            var pickupDate = booking.StartDateTime.Date;
+            return pickupDate > BookingClock.Today().AddDays(1);
         }
 
         // Check if car is available for date range
-        private bool IsCarAvailable(int carId, DateTime startDate, DateTime endDate)
+        private async Task<bool> IsCarAvailable(int carId, DateTime startDate, DateTime endDate)
         {
-            // Convert incoming dates to UTC to match how they are stored in DB
-            startDate = startDate.ToUniversalTime();
-            endDate = endDate.ToUniversalTime();
-
-            // Check if any booking overlaps this date range
-            var overlappingBookingExists = _context.Bookings.Any(b =>
+            var overlappingBookingExists = await _context.Bookings.AnyAsync(b =>
                 b.FkCarId == carId &&
                 b.CancelledAt == null &&
                 b.FkBookingStatusId == STATUS_BOOKED &&
-                startDate < b.EndDateTime &&    
-                endDate > b.StartDateTime      
+                startDate < b.EndDateTime &&
+                endDate > b.StartDateTime
             );
 
-            // Car is available if no overlapping booking exists
             return !overlappingBookingExists;
         }
 
         // Check if customer has conflicting booking
-        private bool HasConflictingBooking(int customerId, DateTime startDate, DateTime endDate)
+        private async Task<bool> HasConflictingBooking(int customerId, DateTime startDate, DateTime endDate)
         {
-            return _context.Bookings.Any(b =>
-            b.FkCustomerId == customerId &&
-            b.CancelledAt == null &&
-            b.FkBookingStatusId == STATUS_BOOKED && startDate < b.EndDateTime && endDate > b.StartDateTime
-    );
+            return await _context.Bookings.AnyAsync(b =>
+                b.FkCustomerId == customerId &&
+                b.CancelledAt == null &&
+                b.FkBookingStatusId == STATUS_BOOKED &&
+                startDate < b.EndDateTime &&
+                endDate > b.StartDateTime
+            );
         }
 
-        public decimal CalculateBookingPrice(int carId, DateTime start, DateTime end)
+        // Calculate booking price
+        public async Task<decimal> CalculateBookingPrice(int carId, DateTime start, DateTime end)
         {
-            var car = _context.Cars.FirstOrDefault(c => c.PkCarId == carId);
+            var car = await _context.Cars.FirstOrDefaultAsync(c => c.PkCarId == carId);
 
             if (car == null)
                 throw new Exception("Car not found.");
@@ -208,9 +205,9 @@ namespace LuxRentals.Repositories.Bookings
             return car.DailyRate * days;
         }
 
-        public void SaveChanges()
+        public async Task SaveChanges()
         {
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 }
