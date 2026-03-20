@@ -67,8 +67,8 @@ namespace LuxRentals.Controllers.Payment
             string endStr = HttpContext.Session.GetString("EndDate");
 
             // Parse dates with RoundtripKind to preserve UTC
-            if (!DateTime.TryParse(startDateStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime startDate) ||
-                !DateTime.TryParse(endDateStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime endDate))
+            if (!DateTime.TryParse(startStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime startDate) ||
+                !DateTime.TryParse(endStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime endDate))
             {
                 TempData["Error"] = "Invalid booking dates.";
                 return RedirectToAction("Create", "Booking");
@@ -165,17 +165,17 @@ namespace LuxRentals.Controllers.Payment
                 }
 
                 // FIXED: Parse dates with RoundtripKind to preserve UTC from session
-                DateTime startDate = DateTime.Parse(
+                DateTime startDateUtc = DateTime.Parse(
                     HttpContext.Session.GetString("StartDate"),
                     null,
                     System.Globalization.DateTimeStyles.RoundtripKind);
 
-                DateTime endDate = DateTime.Parse(
+                DateTime endDateUtc = DateTime.Parse(
                     HttpContext.Session.GetString("EndDate"),
                     null,
                     System.Globalization.DateTimeStyles.RoundtripKind);
 
-                var booking = await _bookingRepo.CreateBooking(carId, customerId, startDate, endDate, request.OrderId);
+                var booking = await _bookingRepo.CreateBooking((int)carId, (int)customerId, startDateUtc, endDateUtc, request.OrderId);
 
                 HttpContext.Session.Clear();
 

@@ -84,14 +84,13 @@ namespace LuxRentals.Controllers.Booking
                 var startDateTime = DateTime.SpecifyKind(model.StartDateTime.Date, DateTimeKind.Utc);
                 var endDateTime = DateTime.SpecifyKind(model.EndDateTime.Date, DateTimeKind.Utc);
 
-                var price = await _bookingRepo.CalculateBookingPrice(
+                // Calculate price
+                var price = await _bookingRepo.CalculateBookingPriceAsync(
                     carId,
                     startDateTime,
                     endDateTime);
 
-                // Calculate price
-                var price = await _bookingRepo.CalculateBookingPriceAsync(carId, model.StartDateTime, model.EndDateTime);
-
+                
                 // Check if booking is possible
                 var canOrder = await _bookingRepo.CheckBookingAsync(customerId, model.StartDateTime, model.EndDateTime, carId);
                 if (!canOrder)

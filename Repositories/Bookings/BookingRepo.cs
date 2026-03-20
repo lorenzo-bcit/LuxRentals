@@ -45,14 +45,13 @@ namespace LuxRentals.Repositories.Bookings
                     throw new ArgumentException("Start date must be in the future.");
                 }
 
-                bool isCarAvailable = IsCarAvailable(carId, startDate, endDate);
-                if (!isCarAvailable)
+                if (!(bool)await IsCarAvailable(carId, startDate, endDate))
                 {
                     throw new InvalidOperationException("The car is not available for the selected dates.");
                 }
 
-                bool hasConflictingBooking = await HasConflictingBookingAsync(customerId, startDate, endDate);
-                if (hasConflictingBooking)
+                bool hasConflictingBookingInner = await HasConflictingBookingAsync(customerId, startDate, endDate);
+                if (hasConflictingBookingInner)
                 {
                     throw new InvalidOperationException("You have another booking that conflicts with the selected dates.");
                 }
@@ -89,13 +88,13 @@ namespace LuxRentals.Repositories.Bookings
                 throw new InvalidOperationException("The car is not available for the selected dates.");
             }
 
-            bool hasConflictingBooking = await HasConflictingBooking(customerId, startDate, endDate);
+            bool hasConflictingBooking = await HasConflictingBookingAsync(customerId, startDate, endDate);
             if (hasConflictingBooking)
             {
                 throw new InvalidOperationException("You have another booking that conflicts with the selected dates.");
             }
 
-            var booking = new Booking
+            var bookingFinal = new Booking
             {
                 FkCarId = carId,
                 FkCustomerId = customerId,
@@ -111,10 +110,10 @@ namespace LuxRentals.Repositories.Bookings
                 "Creating booking for Car ID {CarId} from {StartDate} to {EndDate} for Customer ID {CustomerId}",
                 carId, startDate, endDate, customerId);
 
-            await _context.Bookings.AddAsync(booking);
+            await _context.Bookings.AddAsync(bookingFinal);
             await _context.SaveChangesAsync();
 
-            return booking;
+            return bookingFinal;
         }
 
         // Cancel Booking
@@ -267,7 +266,7 @@ namespace LuxRentals.Repositories.Bookings
                 end > b.StartDateTime
             );
         }
-        public void SaveChanges()
+        public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
