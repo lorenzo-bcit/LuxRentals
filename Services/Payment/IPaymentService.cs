@@ -15,7 +15,7 @@ namespace LuxRentals.Services.Payment
     {
         Task<string> CreateOrderAsync(decimal amount, string currency);
 
-        Task<string?> CaptureOrderAsync(string orderId);
+        Task<(string? CaptureId, decimal Amount)> CaptureOrderAsync(string orderId);
     }
 
     public class PayPalPaymentService : IPaymentService
@@ -137,8 +137,7 @@ namespace LuxRentals.Services.Payment
             }
         }
 
-        // Create a PayPal order
-        public async Task<string?> CaptureOrderAsync(string orderId)
+        public async Task<(string? CaptureId, decimal Amount)> CaptureOrderAsync(string orderId)
         {
             var token = await GetAccessTokenAsync();
 
@@ -152,49 +151,47 @@ namespace LuxRentals.Services.Payment
             request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
 
             var response = await _httpClient.SendAsync(request);
-
             var json = await response.Content.ReadAsStringAsync();
 
-            _logger.LogInformation("PayPal capture response: {json}", json);
+            _logger.LogInformation("PayPal capture response");
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("PayPal capture failed: {Status} - {Body}",
-                    response.StatusCode, json);
-                return null;
+                _logger.LogError("PayPal capture failed: {Status}", response.StatusCode);
+                return (null, 0);
             }
 
             try
             {
                 using var doc = JsonDocument.Parse(json);
-                var root = doc.RootElement;
 
-                var capture = root
+                var capture = doc.RootElement
                     .GetProperty("purchase_units")[0]
                     .GetProperty("payments")
                     .GetProperty("captures")[0];
 
                 var captureId = capture.GetProperty("id").GetString();
-                var status = capture.GetProperty("status").GetString();
 
-                if (string.IsNullOrEmpty(captureId))
-                {
-                    _logger.LogWarning("CaptureId is null or empty");
-                    return null;
-                }
+                var amount = decimal.Parse(
+                    capture.GetProperty("amount")
+                        .GetProperty("value")
+                        .GetString()!,
+                    CultureInfo.InvariantCulture
+                );
+
+                var status = capture.GetProperty("status").GetString();
 
                 if (status == "COMPLETED")
                 {
-                    _logger.LogInformation("Payment successful. CaptureId: {id}", captureId);
-                    return captureId;
+                    return (captureId, amount);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to parse PayPal capture response");
+                _logger.LogError(ex, "Failed to parse PayPal response");
             }
 
-            return null;
+            return (null, 0);
         }
     }
 }

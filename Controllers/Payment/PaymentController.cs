@@ -2,8 +2,12 @@
 using LuxRentals.Repositories.Bookings;
 using LuxRentals.Repositories.BookingStatus;
 using LuxRentals.Services.Payment;
+using LuxRentals.ViewModels.Bookings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.ComponentModel.DataAnnotations;
 
 namespace LuxRentals.Controllers.Payment
 {
@@ -13,158 +17,177 @@ namespace LuxRentals.Controllers.Payment
         private readonly BookingRepo _bookingRepo;
         private readonly LuxRentalsDbContext _db;
         private readonly PaypalOptions _paypalOptions;
-        private readonly ILogger<IPaymentService> _logger;
+        private readonly ILogger<PaymentController> _logger;
         private readonly BookingStatusRepo _bookingStatusRepo;
 
         public PaymentController(
             IPaymentService paymentService,
             BookingRepo bookingRepo,
-            LuxRentalsDbContext context,
+            LuxRentalsDbContext db,
             IOptions<PaypalOptions> paypalOptions,
-            ILogger<IPaymentService> logger,
+            ILogger<PaymentController> logger,
             BookingStatusRepo bookingStatusRepo)
         {
             _paymentService = paymentService;
             _bookingRepo = bookingRepo;
-            _db = context;
+            _db = db;
             _paypalOptions = paypalOptions.Value;
             _logger = logger;
             _bookingStatusRepo = bookingStatusRepo;
         }
 
-        public IActionResult Checkout(string orderId)
+        [Authorize]
+        public IActionResult Checkout(string orderId, int? carId)
         {
             if (string.IsNullOrEmpty(orderId))
             {
+                TempData["Error"] = "Invalid order.";
                 return RedirectToAction("Index", "Home");
             }
 
-            int? carId = HttpContext.Session.GetInt32("CarId");
-            string startDateStr = HttpContext.Session.GetString("StartDate");
-            string endDateStr = HttpContext.Session.GetString("EndDate");
+            // Try session fallback if carId not in query
+            if (carId == null)
+                carId = HttpContext.Session.GetInt32("CarId");
 
-            if (carId == null || startDateStr == null || endDateStr == null)
+            if (carId == null)
             {
                 TempData["Error"] = "Booking session expired.";
+                return RedirectToAction("Create", "Booking");
+            }
+
+            var car = _db.Cars.FirstOrDefault(c => c.PkCarId == carId.Value);
+            if (car == null)
+            {
+                TempData["Error"] = "Selected car does not exist.";
                 return RedirectToAction("Index", "Home");
             }
 
-            var clientId = _paypalOptions.ClientId;
+            string startStr = HttpContext.Session.GetString("StartDate");
+            string endStr = HttpContext.Session.GetString("EndDate");
 
-            if (string.IsNullOrEmpty(clientId))
-            {
-                throw new Exception("PayPal ClientId not configured.");
-            }
-
-            ViewBag.PayPalClientId = clientId;
-
-            if (!DateTime.TryParse(startDateStr, out DateTime startDate) ||
-                !DateTime.TryParse(endDateStr, out DateTime endDate))
+            if (!DateTime.TryParse(startStr, out DateTime startDate) ||
+                !DateTime.TryParse(endStr, out DateTime endDate))
             {
                 TempData["Error"] = "Invalid booking dates.";
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Create", "Booking");
             }
 
             var price = _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
 
+            ViewBag.Price = price;
+            ViewBag.CarId = carId.Value;
             ViewBag.OrderId = orderId;
             ViewBag.StartDate = startDate.ToShortDateString();
             ViewBag.EndDate = endDate.ToShortDateString();
-            ViewBag.Price = price;
+            ViewBag.PayPalClientId = _paypalOptions.ClientId;
 
             return View();
         }
-
         [HttpPost]
-        public async Task<IActionResult> Capture([FromBody] CaptureRequest request)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
         {
-            if (string.IsNullOrEmpty(request?.OrderId))
+            if (request == null)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = "Invalid payment request."
-                });
+                return BadRequest(new { error = "Request body is missing." });
             }
 
             try
             {
-                // ✅ STEP 1: Capture PayPal payment
-                var captureId = await _paymentService.CaptureOrderAsync(request.OrderId);
+                var orderId = await _paymentService.CreateOrderAsync(request.Amount, "CAD");
+
+                // Store pending info
+                HttpContext.Session.SetInt32("CarId", request.CarId);
+                HttpContext.Session.SetString("PendingOrderId", orderId);
+
+                return Json(new { id = orderId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create PayPal order");
+                return StatusCode(500, new { error = "Failed to create PayPal order" });
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Capture([FromBody] CaptureRequest request)
+        {
+            if (string.IsNullOrEmpty(request?.OrderId))
+                return Json(new { success = false, message = "Invalid order." });
+
+            try
+            {
+                var (captureId, amountPaid) = await _paymentService.CaptureOrderAsync(request.OrderId);
 
                 if (captureId == null)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "Payment was not completed. Please try again."
-                    });
-                }
+                    return Json(new { success = false, message = "Payment failed." });
 
-                // ✅ STEP 2: Validate session
+                // Retrieve booking info from session
                 int? carId = HttpContext.Session.GetInt32("CarId");
                 int? customerId = HttpContext.Session.GetInt32("CustomerId");
                 string startStr = HttpContext.Session.GetString("StartDate");
                 string endStr = HttpContext.Session.GetString("EndDate");
 
-                if (carId == null || customerId == null || startStr == null || endStr == null)
+                if (carId == null || customerId == null ||
+                    string.IsNullOrEmpty(startStr) || string.IsNullOrEmpty(endStr))
                 {
                     return Json(new
                     {
                         success = false,
-                        message = "Session expired. Please try booking again.",
+                        message = "Booking session expired. Please try again.",
                         redirectUrl = Url.Action("Create", "Booking")
                     });
                 }
 
-                DateTime startDate = DateTime.Parse(startStr);
-                DateTime endDate = DateTime.Parse(endStr);
-
-                // ✅ STEP 3: Create booking
-                try
+                if (!DateTime.TryParse(startStr, out DateTime startDate) ||
+                    !DateTime.TryParse(endStr, out DateTime endDate))
                 {
-                    var booking = await _bookingRepo.CreateBooking(
-                        carId.Value,
-                        customerId.Value,
-                        startDate,
-                        endDate,
-                        captureId
-                    );
-
-                    HttpContext.Session.Clear();
-
-                    return Json(new
-                    {
-                        success = true,
-                        redirectUrl = Url.Action("MyBookings", "Booking")
-                    });
+                    return Json(new { success = false, message = "Invalid booking dates." });
                 }
-                catch (Exception bookingEx)
+
+                // Prevent duplicate booking
+                var existingBooking = _db.Bookings.FirstOrDefault(b => b.TransactionId == captureId);
+                if (existingBooking != null)
+                    return Json(new { success = true, redirectUrl = Url.Action("MyBookings", "Booking") });
+
+                // Validate payment amount
+                var expectedAmount = _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
+                if (amountPaid != expectedAmount)
                 {
-                    _logger.LogError(bookingEx, "Booking failed AFTER successful payment");
-
-                    return Json(new
-                    {
-                        success = false,
-                        message = "Payment succeeded, but booking failed: " + bookingEx.Message,
-                        redirectUrl = Url.Action("Create", "Booking", new { carId = carId })
-                    });
+                    _logger.LogWarning("Payment mismatch: expected {expected}, got {actual}", expectedAmount, amountPaid);
+                    return Json(new { success = false, message = "Payment verification failed." });
                 }
+
+                // Create booking
+                var booking = await _bookingRepo.CreateBooking(carId.Value, customerId.Value, startDate, endDate, captureId);
+
+                HttpContext.Session.Clear();
+
+                return Json(new { success = true, redirectUrl = Url.Action("MyBookings", "Booking") });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Payment capture failed");
-
-                return Json(new
-                {
-                    success = false,
-                    message = "Unexpected error during payment. Please try again."
-                });
+                _logger.LogError(ex, "PayPal capture failed");
+                return Json(new { success = false, message = "Payment capture error." });
             }
         }
+
+        public class CreateOrderRequest
+        {
+            public int CarId { get; set; }
+            public decimal Amount { get; set; }
+        }
+
         public class CaptureRequest
         {
+            [Required]
             public string OrderId { get; set; }
+        }
+        private int GetCustomerId()
+        {
+            return HttpContext.Session.GetInt32("CustomerId") ?? 0;
         }
     }
 }

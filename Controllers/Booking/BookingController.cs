@@ -1,4 +1,5 @@
-﻿using LuxRentals.Repositories.Bookings;
+﻿using LuxRentals.Data;
+using LuxRentals.Repositories.Bookings;
 using LuxRentals.Services.Payment;
 using LuxRentals.ViewModels.Bookings;
 using Microsoft.AspNetCore.Authorization;
@@ -10,11 +11,15 @@ namespace LuxRentals.Controllers.Booking
     {
         private readonly BookingRepo _bookingRepo;
         private readonly IPaymentService _paymentService;
+        private readonly LuxRentalsDbContext _db;
+        private readonly ILogger<BookingController> _logger;
 
-        public BookingController(BookingRepo bookingRepo, IPaymentService paymentService)
+        public BookingController(BookingRepo bookingRepo, IPaymentService paymentService, LuxRentalsDbContext db, ILogger<BookingController> logger)
         {
             _bookingRepo = bookingRepo;
             _paymentService = paymentService;
+            _db = db;
+            _logger = logger;
         }
 
 
@@ -28,7 +33,6 @@ namespace LuxRentals.Controllers.Booking
             return View(new BookingCreateViewModel());
         }
 
-        // Creates the booking
         [Authorize(Roles = "Customer")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -42,43 +46,47 @@ namespace LuxRentals.Controllers.Booking
 
             try
             {
-               
                 int customerId = GetCustomerId();
-
                 if (customerId == 0)
                 {
                     TempData["Error"] = "You must be logged in to make a booking.";
                     return RedirectToAction("Login", "Account");
-                };
-                var price = _bookingRepo.CalculateBookingPrice(
-                    carId,
-                    model.StartDateTime,
-                    model.EndDateTime);
+                }
 
+                // Validate car exists
+                var car = _db.Cars.FirstOrDefault(c => c.PkCarId == carId);
+                if (car == null)
+                {
+                    TempData["Error"] = "Selected car does not exist.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                // Calculate price
+                var price = _bookingRepo.CalculateBookingPrice(carId, model.StartDateTime, model.EndDateTime);
+
+                // Check if booking is possible
                 var canOrder = _bookingRepo.CheckBooking(customerId, model.StartDateTime, model.EndDateTime, carId);
                 if (!canOrder)
                 {
-                    TempData["PaymentError"] = "Car is unavaible or you have conflicting booking.";
-                    return RedirectToAction("Create", carId);
+                    TempData["PaymentError"] = "Car is unavailable or you have a conflicting booking.";
+                    return RedirectToAction("Create", "Booking", new { carId });
                 }
 
+                // Store session info (optional, fallback for Checkout)
                 HttpContext.Session.SetInt32("CarId", carId);
                 HttpContext.Session.SetInt32("CustomerId", customerId);
-                HttpContext.Session.SetString("StartDate", model.StartDateTime.ToString());
-                HttpContext.Session.SetString("EndDate", model.EndDateTime.ToString());
+                HttpContext.Session.SetString("StartDate", model.StartDateTime.ToString("o")); // ISO format
+                HttpContext.Session.SetString("EndDate", model.EndDateTime.ToString("o"));
 
+                // Create PayPal order
                 var orderId = await _paymentService.CreateOrderAsync(price, "CAD");
 
-                return RedirectToAction(
-                    "Checkout",
-                    "Payment",
-                    new
-                    {
-                        orderId = orderId
-                    });
+                // Redirect to Checkout, pass carId as query param
+                return RedirectToAction("Checkout", "Payment", new { orderId, carId });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to create booking");
                 ModelState.AddModelError(string.Empty, ex.Message);
                 ViewBag.CarId = carId;
                 return View(model);

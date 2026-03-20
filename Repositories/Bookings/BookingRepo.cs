@@ -214,7 +214,7 @@ namespace LuxRentals.Repositories.Bookings
         public bool CheckBooking(int customerId, DateTime start, DateTime end, int carId)
         {
             var hasBooking = HasConflictingBooking(customerId, start, end);
-            if (!hasBooking)
+            if (hasBooking == true)
             {
                 return false;
             }

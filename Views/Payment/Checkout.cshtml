@@ -27,7 +27,6 @@
         <div class="col-md-6">
             <div class="card admin-card shadow-sm h-100">
                 <div class="card-body">
-
                     <div class="d-flex align-items-center mb-3">
                         <div class="admin-card-icon bg-primary bg-opacity-10 text-primary me-3">
                             <i class="bi bi-car-front-fill"></i>
@@ -68,7 +67,9 @@
                     <hr />
 
                     <div id="paypal-button-container"></div>
-
+                    <div id="anti-forgery-container">
+                        @Html.AntiForgeryToken()
+                    </div>
                 </div>
             </div>
         </div>
@@ -81,15 +82,43 @@
 
     paypal.Buttons({
 
+        // 1️⃣ Create PayPal order
         createOrder: function (data, actions) {
-            return Promise.resolve("@ViewBag.OrderId");
+            const token = document.querySelector("input[name='__RequestVerificationToken']").value;
+
+            return fetch("/Payment/CreateOrder", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
+                },
+                body: JSON.stringify({
+                    carId: @ViewBag.CarId,
+                    amount: @ViewBag.Price
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.id) {
+                    throw new Error("Failed to create PayPal order.");
+                }
+                return data.id; // this is the PayPal order ID
+            })
+            .catch(err => {
+                console.error("CreateOrder error:", err);
+                const errorBox = document.getElementById("payment-error");
+                errorBox.classList.remove("d-none");
+                errorBox.innerText = "Failed to create order. Please refresh the page.";
+                throw err;
+            });
         },
 
+        // 2️⃣ Capture payment after approval
         onApprove: function (data, actions) {
-
             if (isProcessing) return;
             isProcessing = true;
 
+            const token = document.querySelector("input[name='__RequestVerificationToken']").value;
             const errorBox = document.getElementById("payment-error");
             errorBox.classList.add("d-none");
             errorBox.innerText = "";
@@ -97,7 +126,8 @@
             fetch("/Payment/Capture", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
                 },
                 body: JSON.stringify({
                     orderId: data.orderID
@@ -105,25 +135,18 @@
             })
             .then(res => res.json())
             .then(data => {
-
                 if (data.success) {
                     window.location = data.redirectUrl;
                 } else {
                     errorBox.classList.remove("d-none");
                     errorBox.innerText = data.message || "Payment failed.";
-
                     if (data.redirectUrl) {
-                        setTimeout(() => {
-                            window.location = data.redirectUrl;
-                        }, 2000);
+                        window.location = data.redirectUrl;
                     }
                 }
-
             })
             .catch(err => {
                 console.error("Capture error:", err);
-
-                const errorBox = document.getElementById("payment-error");
                 errorBox.classList.remove("d-none");
                 errorBox.innerText = "Unexpected error occurred during payment.";
             })
@@ -134,7 +157,6 @@
 
         onError: function (err) {
             console.error("PayPal error:", err);
-
             const errorBox = document.getElementById("payment-error");
             errorBox.classList.remove("d-none");
             errorBox.innerText = "PayPal error. Please try again.";
