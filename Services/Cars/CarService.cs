@@ -8,8 +8,6 @@ namespace LuxRentals.Services.Cars;
 
 public class CarService : ICarService
 {
-    private const string AVAILABLE_STATUS = "Available";
-    private const string OUT_OF_SERVICE_STATUS = "Out of Service";
     private const string IMAGE_UPLOAD_FAILED_MESSAGE = "Image upload failed. Please try again.";
 
     private readonly ICarRepository _repo;
@@ -133,7 +131,7 @@ public class CarService : ICarService
 
         if (await _repo.HasBookingsAsync(id))
         {
-            var outOfServiceStatusId = await _repo.GetCarStatusIdByNameAsync(OUT_OF_SERVICE_STATUS);
+            var outOfServiceStatusId = await _repo.GetCarStatusIdByNameAsync(CarStatusNames.OUT_OF_SERVICE);
             if (outOfServiceStatusId is null)
                 return SaveResult.Fail("", "Out of Service status is missing. Seed car statuses and try again.");
 
@@ -394,7 +392,7 @@ public class CarService : ICarService
         if (previousStatusId == newStatusId)
             return SaveResult.Ok(string.Empty);
 
-        var availableStatusId = await _repo.GetCarStatusIdByNameAsync(AVAILABLE_STATUS);
+        var availableStatusId = await _repo.GetCarStatusIdByNameAsync(CarStatusNames.AVAILABLE);
         if (availableStatusId is null)
             return SaveResult.Fail(nameof(CarEditVm.FkCarStatusId), "Available status is missing. Seed car statuses and try again.");
 

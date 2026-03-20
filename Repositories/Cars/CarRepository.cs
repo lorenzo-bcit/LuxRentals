@@ -89,20 +89,13 @@ public class CarRepository : ICarRepository
             return cars;
         }
 
-        cars = cars.Where(c => c.FkCarStatus.StatusFlag == "Available");
-
         if (criteria.StartDate is null || criteria.EndDate is null)
-            return cars;
+            return cars.Where(c => c.FkCarStatus.StatusFlag == CarStatusNames.AVAILABLE);
 
-        var start = DateTime.SpecifyKind(criteria.StartDate.Value.Date, DateTimeKind.Utc);
-        var end = DateTime.SpecifyKind(criteria.EndDate.Value.Date, DateTimeKind.Utc);
-
-        return cars.Where(c =>
-            !_db.Bookings.Any(b =>
-                b.FkCarId == c.PkCarId &&
-                b.CancelledAt == null &&
-                b.StartDateTime < end &&
-                b.EndDateTime > start));
+        return cars.WhereBookableForWindow(
+            _db.Bookings,
+            criteria.StartDate.Value,
+            criteria.EndDate.Value);
     }
 
     private static IQueryable<Car> ApplySorting(IQueryable<Car> cars, CarSearchCriteria criteria)
