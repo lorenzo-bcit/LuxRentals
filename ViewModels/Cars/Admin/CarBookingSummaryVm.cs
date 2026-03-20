@@ -11,13 +11,13 @@ public class CarBookingSummaryVm
     public DateTime EndDate { get; set; }
     public bool IsActive { get; set; }
 
-    public static CarBookingSummaryVm FromEntity(Booking booking, DateTime utcNow) => new()
+    public static CarBookingSummaryVm FromEntity(Booking booking, DateTime bookingToday) => new()
     {
         BookingId = booking.PkBookingId,
         CustomerId = booking.FkCustomerId,
         CustomerName = $"{booking.FkCustomer.FirstName} {booking.FkCustomer.LastName}".Trim(),
         StartDate = booking.StartDateTime,
         EndDate = booking.EndDateTime,
-        IsActive = booking.StartDateTime <= utcNow && booking.EndDateTime > utcNow
+        IsActive = booking.StartDateTime.Date <= bookingToday && booking.EndDateTime.Date > bookingToday
     };
 }
