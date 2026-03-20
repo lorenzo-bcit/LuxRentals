@@ -1,6 +1,7 @@
 ﻿using LuxRentals.Data;
 using LuxRentals.Repositories.Bookings;
 using LuxRentals.Services.Payment;
+using LuxRentals.Utils;
 using LuxRentals.ViewModels.Bookings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,27 +27,46 @@ namespace LuxRentals.Controllers.Booking
         // Shows booking creation form
         [Authorize(Roles = "Customer")]
         [HttpGet]
-        public IActionResult Create(int carId)
+        public IActionResult Create(int carId, DateOnly? startDate, DateOnly? endDate)
         {
-            ViewBag.CarId = carId;
+            SetCreateViewState(carId);
+            var model = new BookingCreateViewModel();
+            var minBookingDate = BookingClock.Tomorrow();
+            var requestedStartDate = startDate?.ToDateTime(TimeOnly.MinValue);
+            var requestedEndDate = endDate?.ToDateTime(TimeOnly.MinValue);
 
-            return View(new BookingCreateViewModel());
+            if (requestedStartDate.HasValue &&
+                requestedEndDate.HasValue &&
+                requestedStartDate.Value.Date >= minBookingDate &&
+                requestedEndDate.Value.Date > requestedStartDate.Value.Date)
+            {
+                model.StartDateTime = requestedStartDate.Value;
+                model.EndDateTime = requestedEndDate.Value;
+            }
+            else
+            {
+                model.StartDateTime = minBookingDate;
+                model.EndDateTime = minBookingDate.AddDays(7);
+            }
+
+            return View(model);
         }
 
         [Authorize(Roles = "Customer")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateAsync(int carId, BookingCreateViewModel model)
+        public async Task<IActionResult> Create(int carId, BookingCreateViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.CarId = carId;
+                SetCreateViewState(carId);
                 return View(model);
             }
 
             try
             {
-                int customerId = GetCustomerId();
+                int customerId = await GetCustomerId();
+
                 if (customerId == 0)
                 {
                     TempData["Error"] = "You must be logged in to make a booking.";
@@ -60,6 +80,14 @@ namespace LuxRentals.Controllers.Booking
                     TempData["Error"] = "Selected car does not exist.";
                     return RedirectToAction("Index", "Home");
                 }
+                // Convert to UTC
+                var startDateTime = DateTime.SpecifyKind(model.StartDateTime.Date, DateTimeKind.Utc);
+                var endDateTime = DateTime.SpecifyKind(model.EndDateTime.Date, DateTimeKind.Utc);
+
+                var price = await _bookingRepo.CalculateBookingPrice(
+                    carId,
+                    startDateTime,
+                    endDateTime);
 
                 // Calculate price
                 var price = await _bookingRepo.CalculateBookingPriceAsync(carId, model.StartDateTime, model.EndDateTime);
@@ -75,8 +103,8 @@ namespace LuxRentals.Controllers.Booking
                 // Store session info (optional, fallback for Checkout)
                 HttpContext.Session.SetInt32("CarId", carId);
                 HttpContext.Session.SetInt32("CustomerId", customerId);
-                HttpContext.Session.SetString("StartDate", model.StartDateTime.ToString("o")); // ISO format
-                HttpContext.Session.SetString("EndDate", model.EndDateTime.ToString("o"));
+                HttpContext.Session.SetString("StartDate", startDateTime.ToString("o"));
+                HttpContext.Session.SetString("EndDate", endDateTime.ToString("o"));
 
                 // Create PayPal order
                 var orderId = await _paymentService.CreateOrderAsync(price, "CAD");
@@ -88,27 +116,26 @@ namespace LuxRentals.Controllers.Booking
             {
                 _logger.LogError(ex, "Failed to create booking");
                 ModelState.AddModelError(string.Empty, ex.Message);
-                ViewBag.CarId = carId;
+                SetCreateViewState(carId);
                 return View(model);
             }
         }
 
         // Allows customer to see their OWN bookings
         [HttpGet]
-        public IActionResult MyBookings()
+        public async Task<IActionResult> MyBookings()
         {
             try
             {
-                int customerId = GetCustomerId();
+                int customerId = await GetCustomerId();
 
-                
-               if (customerId == 0)
+                if (customerId == 0)
                 {
                     TempData["Error"] = "You must be logged in to view bookings.";
                     return RedirectToAction("Login", "Account");
                 }
 
-                var bookings = _bookingRepo.GetBookingsForCustomer(customerId);
+                var bookings = await _bookingRepo.GetBookingsForCustomer(customerId);
                 return View(bookings);
             }
             catch (Exception ex)
@@ -121,11 +148,12 @@ namespace LuxRentals.Controllers.Booking
         // Admin/Employee can see list of all customers with bookings
         [Authorize(Roles = "Admin,Employee")]
         [HttpGet]
-        public IActionResult CustomerList()
+        public async Task<IActionResult> CustomerList()
         {
             try
             {
-                var customers = _bookingRepo.GetAllCustomersWithBookings();
+                var customers = await _bookingRepo.GetAllCustomersWithBookings();
+                var today = BookingClock.Today();
 
                 var viewModel = customers.Select(c => new CustomerListViewModel
                 {
@@ -136,8 +164,8 @@ namespace LuxRentals.Controllers.Booking
                     TotalBookings = c.Bookings.Count,
                     ActiveBookings = c.Bookings.Count(b =>
                         b.CancelledAt == null &&
-                        b.StartDateTime <= DateTime.UtcNow &&
-                        b.EndDateTime > DateTime.UtcNow)
+                        b.StartDateTime.Date <= today &&
+                        b.EndDateTime.Date > today)
                 }).ToList();
 
                 return View(viewModel);
@@ -149,32 +177,33 @@ namespace LuxRentals.Controllers.Booking
             }
         }
 
-        
+
         // Admin/Employee can view any customer's booking history
         [Authorize(Roles = "Admin,Employee")]
-        public IActionResult ViewCustomerBookings(int customerId)
+        public async Task<IActionResult> ViewCustomerBookings(int customerId)
         {
             try
             {
-                var bookings = _bookingRepo.GetBookingsForCustomer(customerId);
+                var bookings = await _bookingRepo.GetBookingsForCustomer(customerId);
                 ViewBag.CustomerId = customerId;
                 return View("MyBookings", bookings);
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
 
                 TempData["Error"] = "Unable to load customer bookings.";
                 return View("MyBookings", new List<Models.Booking>());
             }
         }
 
-
         // Show cancellation info (no validation necessary)
         [HttpGet]
-        public IActionResult Cancel(int id)
+        public async Task<IActionResult> Cancel(int id)
         {
             try
             {
-                var booking = _bookingRepo.GetBookingById(id);
+                var booking = await _bookingRepo.GetBookingById(id);
 
                 if (booking == null)
                 {
@@ -187,7 +216,7 @@ namespace LuxRentals.Controllers.Booking
                 // Verify Customer owns Booking (unless Admin/Employee)
                 if (!isAdminOrEmployee)
                 {
-                    int customerId = GetCustomerId();
+                    int customerId = await GetCustomerId();
                     if (booking.FkCustomerId != customerId)
                     {
                         TempData["Error"] = "You are not authorized to view this booking.";
@@ -211,7 +240,7 @@ namespace LuxRentals.Controllers.Booking
                 {
                     message = booking.CancelledAt != null
                         ? "This booking has already been cancelled."
-                        : "Cannot cancel within 48 hours of start date.";
+                        : "Cannot cancel less than 2 days before the pickup date.";
                 }
 
                 var viewModel = new BookingCancellationViewModel
@@ -223,6 +252,10 @@ namespace LuxRentals.Controllers.Booking
                     Message = message
                 };
 
+
+                ViewBag.IsAdminOrEmployee = isAdminOrEmployee;
+                ViewBag.BookingCustomerId = booking.FkCustomerId;
+
                 return View(viewModel);
             }
             catch (Exception ex)
@@ -231,17 +264,18 @@ namespace LuxRentals.Controllers.Booking
                 return RedirectToAction("MyBookings");
             }
         }
+
         // Cancels booking
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CancelConfirmed(int bookingId)
+        public async Task<IActionResult> CancelConfirmed(int bookingId)
         {
             try
             {
-                int customerId = GetCustomerId();
+                int customerId = await GetCustomerId();
                 bool isAdminOrEmployee = User.IsInRole("Admin") || User.IsInRole("Employee");
 
-                var booking = _bookingRepo.GetBookingById(bookingId);
+                var booking = await _bookingRepo.GetBookingById(bookingId);
 
                 if (booking == null)
                 {
@@ -251,41 +285,53 @@ namespace LuxRentals.Controllers.Booking
 
                 int bookingCustomerId = booking.FkCustomerId;
 
-                _bookingRepo.CancelBooking(bookingId, customerId, isAdminOrEmployee);
+                // Verify Customer owns Booking (unless Admin/Employee)
+                int customerIdToPass = isAdminOrEmployee ? bookingCustomerId : customerId;
+
+                await _bookingRepo.CancelBooking(bookingId, customerIdToPass, isAdminOrEmployee);
 
                 TempData["Success"] = "Booking cancelled successfully.";
 
                 if (isAdminOrEmployee)
                 {
-                    return RedirectToAction("ViewCustomerBookings", customerId);
-                } else
+                    // Use bookingCustomerId
+                    return RedirectToAction("ViewCustomerBookings", new { customerId = bookingCustomerId });
+                }
+                else
                 {
                     return RedirectToAction("MyBookings");
                 }
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 TempData["Error"] = ex.Message;
-                return RedirectToAction("Cancel");
+                return RedirectToAction("Cancel", new { id = bookingId });
             }
         }
 
 
         // Helper Methods
-        private int GetCustomerId()
+        private async Task<int> GetCustomerId()
         {
             // Get email of logged-in user
             if (User.Identity?.IsAuthenticated == true)
             {
-                var email = User.Identity.Name; 
+                var email = User.Identity.Name;
 
                 if (!string.IsNullOrEmpty(email))
                 {
-                    return _bookingRepo.GetCustomerIdByEmail(email);
+                    return await _bookingRepo.GetCustomerIdByEmail(email);
                 }
             }
 
             return 0;
+        }
+
+        private void SetCreateViewState(int carId)
+        {
+            ViewBag.CarId = carId;
+            ViewBag.MinBookingDate = BookingClock.Tomorrow().ToString("yyyy-MM-dd");
         }
     }
 }

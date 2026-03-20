@@ -66,8 +66,9 @@ namespace LuxRentals.Controllers.Payment
             string startStr = HttpContext.Session.GetString("StartDate");
             string endStr = HttpContext.Session.GetString("EndDate");
 
-            if (!DateTime.TryParse(startStr, out DateTime startDate) ||
-                !DateTime.TryParse(endStr, out DateTime endDate))
+            // Parse dates with RoundtripKind to preserve UTC
+            if (!DateTime.TryParse(startDateStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime startDate) ||
+                !DateTime.TryParse(endDateStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime endDate))
             {
                 TempData["Error"] = "Invalid booking dates.";
                 return RedirectToAction("Create", "Booking");
@@ -81,6 +82,8 @@ namespace LuxRentals.Controllers.Payment
             ViewBag.StartDate = startDate.ToShortDateString();
             ViewBag.EndDate = endDate.ToShortDateString();
             ViewBag.PayPalClientId = _paypalOptions.ClientId;
+            ViewBag.StartDate = startDate.ToString("MMM dd, yyyy");
+            ViewBag.EndDate = endDate.ToString("MMM dd, yyyy");
 
             return View();
         }
@@ -161,8 +164,18 @@ namespace LuxRentals.Controllers.Payment
                     return Json(new { success = false, message = "Payment verification failed." });
                 }
 
-                // Create booking
-                var booking = await _bookingRepo.CreateBooking(carId.Value, customerId.Value, startDate, endDate, captureId);
+                // FIXED: Parse dates with RoundtripKind to preserve UTC from session
+                DateTime startDate = DateTime.Parse(
+                    HttpContext.Session.GetString("StartDate"),
+                    null,
+                    System.Globalization.DateTimeStyles.RoundtripKind);
+
+                DateTime endDate = DateTime.Parse(
+                    HttpContext.Session.GetString("EndDate"),
+                    null,
+                    System.Globalization.DateTimeStyles.RoundtripKind);
+
+                var booking = await _bookingRepo.CreateBooking(carId, customerId, startDate, endDate, request.OrderId);
 
                 HttpContext.Session.Clear();
 

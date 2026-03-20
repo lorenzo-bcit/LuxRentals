@@ -2,10 +2,11 @@
 
 @{
     ViewData["Title"] = "Cars";
+    var minBrowseDate = Model.MinBrowseDate;
 }
 
 <section class="container py-4">
-    <form method="get" asp-action="Index">
+    <form method="get" asp-action="Index" autocomplete="off">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 p-3 bg-light border rounded">
             <h1 class="cars-toolbar-title">Choose your options below</h1>
             <div class="cars-sort">
@@ -25,6 +26,8 @@
                 <input asp-for="StartDate"
                        type="date"
                        class="form-control"
+                       min="@minBrowseDate"
+                       value="@Model.StartDate?.ToString("yyyy-MM-dd")"
                        onchange="submitIfBothDatesSelected(this.form)" />
             </div>
             <div class="col-md-6">
@@ -32,6 +35,8 @@
                 <input asp-for="EndDate"
                        type="date"
                        class="form-control"
+                       min="@minBrowseDate"
+                       value="@Model.EndDate?.ToString("yyyy-MM-dd")"
                        onchange="submitIfBothDatesSelected(this.form)" />
             </div>
         </div>
@@ -160,6 +165,8 @@
                                     <a asp-controller="Booking"
                                        asp-action="Create"
                                        asp-route-carId="@car.CarId"
+                                       asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+                                       asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
                                        class="btn btn-secondary btn-sm mt-1">
                                         Book
                                     </a>

@@ -36,6 +36,8 @@ public class CarBrowseVm
 
     public string SortBy { get; set; } = "price_asc";
 
+    public string MinBrowseDate { get; set; } = string.Empty;
+
     public IReadOnlyList<CarCardVm> Cars { get; set; } = [];
 
     public IReadOnlyList<SelectListItem> FuelTypeOptions { get; set; } = [];
