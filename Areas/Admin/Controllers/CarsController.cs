@@ -169,6 +169,7 @@ public class CarsController : Controller
         vm.ActiveOrUpcomingBookings = bookings
             .Select(b => CarBookingSummaryVm.FromEntity(b, bookingToday))
             .ToList();
+        vm.LockBookedCarFields = vm.ActiveOrUpcomingBookings.Count > 0;
     }
 
     private static void NormalizePage(CarIndexVm vm)
