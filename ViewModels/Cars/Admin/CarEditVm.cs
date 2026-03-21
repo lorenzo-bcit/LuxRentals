@@ -69,6 +69,7 @@ public class CarEditVm
     public IReadOnlyList<CarBookingSummaryVm> ActiveOrUpcomingBookings { get; set; } = [];
 
     public bool IsEditMode => CarId.HasValue;
+    public bool LockBookedCarFields { get; set; }
 
     public void ApplyToEntity(Car car)
     {
