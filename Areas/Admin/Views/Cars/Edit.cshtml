@@ -13,6 +13,26 @@
         <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Cars" asp-action="Index">Back to Inventory</a>
     </div>
 
+    @if (TempData["StatusMessage"] is string statusMessage)
+    {
+        <div class="alert alert-success">@statusMessage</div>
+    }
+
+    @if (TempData["Success"] is string successMessage)
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+
     <div class="card shadow-sm">
         <div class="card-body p-4">
             <form method="post" enctype="multipart/form-data" asp-area="Admin" asp-controller="Cars" asp-action="Edit" asp-route-id="@Model.CarId">
@@ -42,7 +62,7 @@
                                 <th>Customer</th>
                                 <th>Pickup</th>
                                 <th>Return</th>
-                                <th></th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -54,16 +74,28 @@
                                         @(booking.IsActive ? "Active" : "Upcoming")
                                     </span>
                                 </td>
-                                <td>@booking.CustomerName</td>
+                                <td>
+                                    <a asp-area=""
+                                       asp-controller="Booking"
+                                       asp-action="ViewCustomerBookings"
+                                       asp-route-customerId="@booking.CustomerId"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="text-decoration-none">
+                                        @booking.CustomerName
+                                        <i class="bi bi-box-arrow-up-right ms-1 small"></i>
+                                    </a>
+                                </td>
                                 <td>@booking.StartDate.ToString("yyyy-MM-dd")</td>
                                 <td>@booking.EndDate.ToString("yyyy-MM-dd")</td>
                                 <td class="text-end">
-                                    <a class="btn btn-outline-secondary btn-sm"
+                                    <a class="btn btn-outline-danger btn-sm"
                                        asp-area=""
                                        asp-controller="Booking"
-                                       asp-action="ViewCustomerBookings"
-                                       asp-route-customerId="@booking.CustomerId">
-                                        View Customer Bookings
+                                       asp-action="Cancel"
+                                       asp-route-id="@booking.BookingId"
+                                       asp-route-returnCarId="@Model.CarId">
+                                        Delete Booking
                                     </a>
                                 </td>
                             </tr>
