@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LuxRentals.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     public class RoleController : Controller
     {
         private readonly ILogger<RoleController> _logger;
