@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace LuxRentals.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin,Manager")]
+[Authorize(Roles = "Admin")]
 public class UserRoleController : Controller
 {
     private readonly UserRepo _userRepo;

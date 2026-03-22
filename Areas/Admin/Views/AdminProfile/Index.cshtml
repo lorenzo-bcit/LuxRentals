@@ -57,7 +57,7 @@
     <!-- Quick Actions -->
     <h4 class="mb-3">Quick Actions</h4>
     <div class="row g-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card admin-action-card shadow-sm h-100">
                 <div class="card-body text-center py-4">
                     <div class="mb-3">
@@ -71,7 +71,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card admin-action-card shadow-sm h-100">
                 <div class="card-body text-center py-4">
                     <div class="mb-3">
@@ -81,6 +81,20 @@
                     <p class="card-text text-muted">View users and assign or remove their roles.</p>
                     <a asp-area="Admin" asp-controller="UserRole" asp-action="Index" class="btn btn-success">
                         <i class="bi bi-arrow-right-circle"></i> Go to Users
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card admin-action-card shadow-sm h-100">
+                <div class="card-body text-center py-4">
+                    <div class="mb-3">
+                        <i class="bi bi-car-front-fill display-4 text-warning"></i>
+                    </div>
+                    <h5 class="card-title">Manage Cars</h5>
+                    <p class="card-text text-muted">Add, edit, and remove vehicles from the fleet.</p>
+                    <a asp-area="Admin" asp-controller="Cars" asp-action="Index" class="btn btn-warning">
+                        <i class="bi bi-arrow-right-circle"></i> Go to Cars
                     </a>
                 </div>
             </div>
