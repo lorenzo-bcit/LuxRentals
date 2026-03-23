@@ -8,7 +8,6 @@ namespace LuxRentals.Services.Cars;
 
 public class CarService : ICarService
 {
-    private const string OUT_OF_SERVICE_STATUS = "Out of Service";
     private const string IMAGE_UPLOAD_FAILED_MESSAGE = "Image upload failed. Please try again.";
 
     private readonly ICarRepository _repo;
@@ -23,6 +22,9 @@ public class CarService : ICarService
     public Task<PagedList<Car>> SearchAsync(CarSearchCriteria criteria) => _repo.SearchAsync(criteria);
 
     public Task<Car?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
+
+    public async Task<IReadOnlyList<Booking>> GetActiveOrUpcomingBookingsAsync(int carId) =>
+        await _repo.GetActiveOrUpcomingBookingsAsync(carId);
 
     public async Task<SaveResult> CreateAsync(CarEditVm vm)
     {
@@ -47,7 +49,7 @@ public class CarService : ICarService
 
         await _repo.AddAsync(car);
 
-        var result = await TrySaveAsync("Car created.");
+        var result = await TrySaveAsync($"Car {car.VinNumber} created.");
         if (!result.IsSuccess && uploadedThumbnailPath is not null)
             await _carImageStorage.DeleteAsync(uploadedThumbnailPath);
 
@@ -58,12 +60,20 @@ public class CarService : ICarService
     {
         var existing = await _repo.GetByIdAsync(id);
         if (existing is null)
-            return SaveResult.Fail("", "Car not found.");
+            return SaveResult.Fail("", $"Car {id} was not found.");
 
         var errors = await ValidateAsync(vm, id);
 
         if (errors.Count > 0)
             return SaveResult.FailMany(errors);
+
+        var hasActiveOrUpcomingBookings = await _repo.CountActiveOrUpcomingBookingsAsync(id) > 0;
+        if (hasActiveOrUpcomingBookings && HasProtectedFieldChanges(vm, existing))
+        {
+            return SaveResult.Fail(
+                string.Empty,
+                $"Car {existing.VinNumber} has active or upcoming bookings. Resolve those bookings before changing the car details or status.");
+        }
 
         var previousThumbnailPath = existing.CarThumbnail;
         string? uploadedThumbnailPath = null;
@@ -82,7 +92,7 @@ public class CarService : ICarService
             existing.CarThumbnail = uploadedThumbnailPath;
         }
 
-        var result = await TrySaveAsync("Car updated.");
+        var result = await TrySaveAsync($"Car {existing.VinNumber} updated.");
         if (!result.IsSuccess)
         {
             if (uploadedThumbnailPath is not null)
@@ -105,23 +115,31 @@ public class CarService : ICarService
     {
         var existing = await _repo.GetByIdAsync(id);
         if (existing is null)
-            return SaveResult.Fail("", "Car not found.");
+            return SaveResult.Fail("", $"Car {id} was not found.");
+
+        var activeOrUpcomingBookingCount = await _repo.CountActiveOrUpcomingBookingsAsync(id);
+        if (activeOrUpcomingBookingCount > 0)
+        {
+            return SaveResult.Fail(
+                string.Empty,
+                $"Car {existing.VinNumber} has active or upcoming bookings. Resolve them before deleting it.");
+        }
 
         if (await _repo.HasBookingsAsync(id))
         {
-            var outOfServiceStatusId = await _repo.GetCarStatusIdByNameAsync(OUT_OF_SERVICE_STATUS);
+            var outOfServiceStatusId = await _repo.GetCarStatusIdByNameAsync(CarStatusNames.OUT_OF_SERVICE);
             if (outOfServiceStatusId is null)
                 return SaveResult.Fail("", "Out of Service status is missing. Seed car statuses and try again.");
 
             existing.FkCarStatusId = outOfServiceStatusId.Value;
 
-            return await TrySaveAsync("Car has bookings, so it was marked Out of Service instead of being deleted.");
+            return await TrySaveAsync($"Car {existing.VinNumber} has booking history, so it was marked Out of Service instead of being deleted.");
         }
 
         var thumbnailPath = existing.CarThumbnail;
         _repo.Remove(existing);
 
-        var result = await TrySaveAsync("Car deleted.");
+        var result = await TrySaveAsync($"Car {existing.VinNumber} deleted.");
         if (result.IsSuccess)
             await _carImageStorage.DeleteAsync(thumbnailPath);
 
@@ -379,6 +397,20 @@ public class CarService : ICarService
 
         return errors;
     }
+
+    private static bool HasProtectedFieldChanges(CarEditVm vm, Car car) =>
+        vm.FkCarStatusId != car.FkCarStatusId ||
+        vm.Year != car.Year ||
+        !string.Equals(vm.Colour, car.Colour, StringComparison.Ordinal) ||
+        vm.FkModelId != car.FkModelId ||
+        vm.FkFuelTypeId != car.FkFuelTypeId ||
+        vm.FkVehicleClassId != car.FkVehicleClassId ||
+        vm.TransmissionType != car.TransmissionType ||
+        vm.DailyRate != car.DailyRate ||
+        vm.PersonCap != car.PersonCap ||
+        vm.LuggageCap != car.LuggageCap ||
+        !string.Equals(vm.LicencePlate, car.LicencePlate, StringComparison.Ordinal) ||
+        !string.Equals(vm.VinNumber, car.VinNumber, StringComparison.Ordinal);
 
     private static string NormalizeName(string? value) => value?.Trim() ?? string.Empty;
 }

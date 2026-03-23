@@ -173,13 +173,14 @@ namespace LuxRentals.Controllers.Booking
             {
 
                 TempData["Error"] = "Unable to load customer bookings.";
+                ViewBag.CustomerId = customerId;
                 return View("MyBookings", new List<Models.Booking>());
             }
         }
 
         // Show cancellation info (no validation necessary)
         [HttpGet]
-        public async Task<IActionResult> Cancel(int id)
+        public async Task<IActionResult> Cancel(int id, int? returnCarId)
         {
             try
             {
@@ -188,7 +189,7 @@ namespace LuxRentals.Controllers.Booking
                 if (booking == null)
                 {
                     TempData["Error"] = "Booking not found.";
-                    return RedirectToAction("MyBookings");
+                    return RedirectToBookingList(returnCarId, null);
                 }
 
                 bool isAdminOrEmployee = User.IsInRole("Admin") || User.IsInRole("Employee");
@@ -235,20 +236,21 @@ namespace LuxRentals.Controllers.Booking
 
                 ViewBag.IsAdminOrEmployee = isAdminOrEmployee;
                 ViewBag.BookingCustomerId = booking.FkCustomerId;
+                ViewBag.ReturnCarId = returnCarId;
 
                 return View(viewModel);
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Unable to load cancellation page.";
-                return RedirectToAction("MyBookings");
+                return RedirectToBookingList(returnCarId, null);
             }
         }
 
         // Cancels booking
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CancelConfirmed(int bookingId)
+        public async Task<IActionResult> CancelConfirmed(int bookingId, int? returnCarId)
         {
             try
             {
@@ -260,7 +262,7 @@ namespace LuxRentals.Controllers.Booking
                 if (booking == null)
                 {
                     TempData["Error"] = "Booking not found.";
-                    return RedirectToAction("MyBookings");
+                    return RedirectToBookingList(returnCarId, null);
                 }
 
                 int bookingCustomerId = booking.FkCustomerId;
@@ -274,8 +276,7 @@ namespace LuxRentals.Controllers.Booking
 
                 if (isAdminOrEmployee)
                 {
-                    // Use bookingCustomerId
-                    return RedirectToAction("ViewCustomerBookings", new { customerId = bookingCustomerId });
+                    return RedirectToBookingList(returnCarId, bookingCustomerId);
                 }
                 else
                 {
@@ -286,7 +287,7 @@ namespace LuxRentals.Controllers.Booking
             catch (Exception ex)
             {
                 TempData["Error"] = ex.Message;
-                return RedirectToAction("Cancel", new { id = bookingId });
+                return RedirectToAction("Cancel", new { id = bookingId, returnCarId });
             }
         }
 
@@ -312,6 +313,24 @@ namespace LuxRentals.Controllers.Booking
         {
             ViewBag.CarId = carId;
             ViewBag.MinBookingDate = BookingClock.Tomorrow().ToString("yyyy-MM-dd");
+        }
+
+        private IActionResult RedirectToBookingList(int? returnCarId, int? customerId)
+        {
+            if (returnCarId.HasValue)
+            {
+                return RedirectToAction(
+                    "Edit",
+                    "Cars",
+                    new { area = "Admin", id = returnCarId.Value });
+            }
+
+            if (customerId.HasValue)
+            {
+                return RedirectToAction("ViewCustomerBookings", new { customerId = customerId.Value });
+            }
+
+            return RedirectToAction("MyBookings");
         }
     }
 }

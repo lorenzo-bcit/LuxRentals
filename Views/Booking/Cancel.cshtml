@@ -5,6 +5,7 @@
     ViewData["Title"] = "Cancel Booking";
     var isAdminOrEmployee = ViewBag.IsAdminOrEmployee ?? false;
     var bookingCustomerId = ViewBag.BookingCustomerId;
+    var returnCarId = ViewBag.ReturnCarId;
 }
 
 <div class="container mt-5">
@@ -72,15 +73,28 @@
                         <form asp-action="CancelConfirmed" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="bookingId" value="@Model.PkBookingId" />
+                            @if (returnCarId != null)
+                            {
+                                <input type="hidden" name="returnCarId" value="@returnCarId" />
+                            }
 
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-danger btn-lg">
                                     <i class="bi bi-x-circle-fill"></i> Yes, Cancel This Booking
                                 </button>
 
-                                @if (isAdminOrEmployee)
+                                @if (returnCarId != null)
                                 {
-                                    <!-- Admin: Go back to customer's bookings -->
+                                    <a asp-area="Admin"
+                                       asp-controller="Cars"
+                                       asp-action="Edit"
+                                       asp-route-id="@returnCarId"
+                                       class="btn btn-outline-secondary btn-lg">
+                                        <i class="bi bi-arrow-left"></i> Back to Car
+                                    </a>
+                                }
+                                else if (isAdminOrEmployee)
+                                {
                                     <a asp-action="ViewCustomerBookings"
                                        asp-route-customerId="@bookingCustomerId"
                                        class="btn btn-outline-secondary btn-lg">
@@ -89,7 +103,6 @@
                                 }
                                 else
                                 {
-                                    <!-- Customer: Go back to their own bookings -->
                                     <a asp-action="MyBookings" class="btn btn-outline-secondary btn-lg">
                                         <i class="bi bi-arrow-left"></i> No, Keep This Booking
                                     </a>
@@ -105,18 +118,26 @@
                                 <i class="bi bi-lock-fill"></i> Cancellation Not Available
                             </button>
 
-                            @if (isAdminOrEmployee)
+                            @if (returnCarId != null)
                             {
-                                <!-- Admin: Go back to customer's bookings -->
+                                <a asp-area="Admin"
+                                   asp-controller="Cars"
+                                   asp-action="Edit"
+                                   asp-route-id="@returnCarId"
+                                   class="btn btn-primary btn-lg">
+                                    <i class="bi bi-arrow-left"></i> Back to Car
+                                </a>
+                            }
+                            else if (isAdminOrEmployee)
+                            {
                                 <a asp-action="ViewCustomerBookings"
                                    asp-route-customerId="@bookingCustomerId"
                                    class="btn btn-primary btn-lg">
-                                    <i class="bi bi-arrow-left"></i> Back to Customer Bookings
+                                        <i class="bi bi-arrow-left"></i> Back to Customer Bookings
                                 </a>
                             }
                             else
                             {
-                                <!-- Customer: Go back to their own bookings -->
                                 <a asp-action="MyBookings" class="btn btn-primary btn-lg">
                                     <i class="bi bi-arrow-left"></i> Back to My Bookings
                                 </a>

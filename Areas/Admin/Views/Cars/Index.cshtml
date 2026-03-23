@@ -49,6 +49,13 @@
                         <select asp-for="MakeId" asp-items="Model.MakeOptions" class="form-select"></select>
                     </div>
                     <div class="col-md-6 col-lg-3">
+                        <label asp-for="HasActiveOrUpcomingBookingsOnly" class="form-label"></label>
+                        <select asp-for="HasActiveOrUpcomingBookingsOnly" class="form-select">
+                            <option value="false">All cars</option>
+                            <option value="true">Has active/upcoming bookings</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
                         <label asp-for="SortBy" class="form-label"></label>
                         <select asp-for="SortBy" asp-items="Model.SortOptions" class="form-select"></select>
                     </div>
@@ -132,14 +139,12 @@
                                            asp-controller="Cars"
                                            asp-action="Edit"
                                            asp-route-id="@car.CarId">Edit</a>
-                                        <form method="post"
-                                              asp-area="Admin"
-                                              asp-controller="Cars"
-                                              asp-action="Delete"
-                                              asp-route-id="@car.CarId"
-                                              onsubmit="return confirm('Delete this car? Cars with bookings will be moved Out of Service instead.');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                        </form>
+                                        <button type="submit"
+                                                form="delete-car-@car.CarId"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Delete this car? Cars with bookings will be moved Out of Service instead.');">
+                                            Delete
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -172,4 +177,15 @@
             </button>
         </nav>
     </form>
+
+    @foreach (var car in Model.Cars)
+    {
+        <form id="delete-car-@car.CarId"
+              method="post"
+              asp-area="Admin"
+              asp-controller="Cars"
+              asp-action="Delete"
+              asp-route-id="@car.CarId">
+        </form>
+    }
 </section>

@@ -70,7 +70,7 @@ public class CarsController : Controller
             return NotFound();
 
         var vm = CarEditVm.FromEntity(car);
-
+        await PopulateActiveOrUpcomingBookingsAsync(vm, id);
         await PopulateOptionsAsync(vm);
         return View(vm);
     }
@@ -84,6 +84,7 @@ public class CarsController : Controller
 
         if (!ModelState.IsValid)
         {
+            await PopulateActiveOrUpcomingBookingsAsync(vm, id);
             await PopulateOptionsAsync(vm);
             return View(vm);
         }
@@ -92,6 +93,7 @@ public class CarsController : Controller
         if (!result.IsSuccess)
         {
             AddErrorsToModelState(result);
+            await PopulateActiveOrUpcomingBookingsAsync(vm, id);
             await PopulateOptionsAsync(vm);
             return View(vm);
         }
@@ -160,6 +162,16 @@ public class CarsController : Controller
         ];
     }
 
+    private async Task PopulateActiveOrUpcomingBookingsAsync(CarEditVm vm, int carId)
+    {
+        var bookingToday = BookingClock.Today();
+        var bookings = await _carService.GetActiveOrUpcomingBookingsAsync(carId);
+        vm.ActiveOrUpcomingBookings = bookings
+            .Select(b => CarBookingSummaryVm.FromEntity(b, bookingToday))
+            .ToList();
+        vm.LockBookedCarFields = vm.ActiveOrUpcomingBookings.Count > 0;
+    }
+
     private static void NormalizePage(CarIndexVm vm)
     {
         vm.Page = Math.Max(1, vm.Page);
@@ -176,6 +188,7 @@ public class CarsController : Controller
             StatusId = vm.StatusId,
             VehicleClassId = vm.VehicleClassId,
             MakeId = vm.MakeId,
+            HasActiveOrUpcomingBookingsOnly = vm.HasActiveOrUpcomingBookingsOnly,
             Page = vm.Page,
             PageSize = PAGE_SIZE
         };

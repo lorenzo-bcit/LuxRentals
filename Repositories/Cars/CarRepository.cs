@@ -1,5 +1,6 @@
 using LuxRentals.Data;
 using LuxRentals.Models;
+using LuxRentals.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Repositories.Cars;
@@ -75,22 +76,24 @@ public class CarRepository : ICarRepository
     private IQueryable<Car> ApplyAvailabilityFilter(IQueryable<Car> cars, CarSearchCriteria criteria)
     {
         if (!criteria.AvailableOnly)
-            return cars;
+        {
+            if (criteria.HasActiveOrUpcomingBookingsOnly)
+            {
+                var activeOrUpcomingBookings = BuildActiveOrUpcomingBookingsQuery();
+                cars = cars.Where(c =>
+                    activeOrUpcomingBookings.Any(b => b.FkCarId == c.PkCarId));
+            }
 
-        cars = cars.Where(c => c.FkCarStatus.StatusFlag == "Available");
+            return cars;
+        }
 
         if (criteria.StartDate is null || criteria.EndDate is null)
-            return cars;
+            return cars.Where(c => c.FkCarStatus.StatusFlag == CarStatusNames.AVAILABLE);
 
-        var start = DateTime.SpecifyKind(criteria.StartDate.Value.Date, DateTimeKind.Utc);
-        var end = DateTime.SpecifyKind(criteria.EndDate.Value.Date, DateTimeKind.Utc);
-
-        return cars.Where(c =>
-            !_db.Bookings.Any(b =>
-                b.FkCarId == c.PkCarId &&
-                b.CancelledAt == null &&
-                b.StartDateTime < end &&
-                b.EndDateTime > start));
+        return cars.WhereBookableForWindow(
+            _db.Bookings,
+            criteria.StartDate.Value,
+            criteria.EndDate.Value);
     }
 
     private static IQueryable<Car> ApplySorting(IQueryable<Car> cars, CarSearchCriteria criteria)
@@ -154,6 +157,28 @@ public class CarRepository : ICarRepository
 
     public Task<bool> HasBookingsAsync(int carId) =>
         _db.Bookings.AnyAsync(b => b.FkCarId == carId);
+
+    public Task<int> CountActiveOrUpcomingBookingsAsync(int carId) =>
+        BuildActiveOrUpcomingBookingsQuery()
+            .Where(b => b.FkCarId == carId)
+            .CountAsync();
+
+    public Task<List<Booking>> GetActiveOrUpcomingBookingsAsync(int carId) =>
+        BuildActiveOrUpcomingBookingsQuery()
+            .Where(b => b.FkCarId == carId)
+            .AsNoTracking()
+            .Include(b => b.FkCustomer)
+            .OrderBy(b => b.StartDateTime)
+            .ToListAsync();
+
+    private IQueryable<Booking> BuildActiveOrUpcomingBookingsQuery()
+    {
+        var bookingToday = BookingClock.Today();
+
+        return _db.Bookings.Where(b =>
+            b.CancelledAt == null &&
+            b.EndDateTime > bookingToday);
+    }
 
     public Task AddAsync(Car car) => _db.Cars.AddAsync(car).AsTask();
 
