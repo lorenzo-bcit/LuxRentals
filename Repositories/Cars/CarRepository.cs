@@ -75,25 +75,22 @@ public class CarRepository : ICarRepository
 
     private IQueryable<Car> ApplyAvailabilityFilter(IQueryable<Car> cars, CarSearchCriteria criteria)
     {
-        if (!criteria.AvailableOnly)
+        if (criteria.OnlyBookableCars)
         {
-            if (criteria.HasActiveOrUpcomingBookingsOnly)
-            {
-                var activeOrUpcomingBookings = BuildActiveOrUpcomingBookingsQuery();
-                cars = cars.Where(c =>
-                    activeOrUpcomingBookings.Any(b => b.FkCarId == c.PkCarId));
-            }
-
-            return cars;
+            return cars.WhereBookableForWindow(
+                _db.Bookings,
+                criteria.StartDate,
+                criteria.EndDate);
         }
 
-        if (criteria.StartDate is null || criteria.EndDate is null)
-            return cars.Where(c => c.FkCarStatus.StatusFlag == CarStatusNames.AVAILABLE);
+        if (criteria.HasActiveOrUpcomingBookingsOnly)
+        {
+            var activeOrUpcomingBookings = BuildActiveOrUpcomingBookingsQuery();
+            cars = cars.Where(c =>
+                activeOrUpcomingBookings.Any(b => b.FkCarId == c.PkCarId));
+        }
 
-        return cars.WhereBookableForWindow(
-            _db.Bookings,
-            criteria.StartDate.Value,
-            criteria.EndDate.Value);
+        return cars;
     }
 
     private static IQueryable<Car> ApplySorting(IQueryable<Car> cars, CarSearchCriteria criteria)

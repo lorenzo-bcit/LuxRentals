@@ -2,7 +2,7 @@ namespace LuxRentals.Repositories.Cars;
 
 public class CarSearchCriteria
 {
-    public bool AvailableOnly { get; set; }
+    public bool OnlyBookableCars { get; set; }
 
     public string? SearchTerm { get; set; }
     public int? StatusId { get; set; }
