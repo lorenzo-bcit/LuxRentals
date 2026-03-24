@@ -246,6 +246,15 @@
 
             dateInputs.forEach(input => {
                 input.addEventListener('keydown', event => {
+                    if (
+                        event.key === 'Tab' ||
+                        event.key === 'Enter' ||
+                        event.key === 'Escape' ||
+                        event.key.startsWith('Arrow')
+                    ) {
+                        return;
+                    }
+
                     event.preventDefault();
                 });
             });
