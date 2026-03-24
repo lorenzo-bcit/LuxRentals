@@ -28,7 +28,7 @@
                        class="form-control"
                        min="@minBrowseDate"
                        value="@Model.StartDate?.ToString("yyyy-MM-dd")"
-                       onchange="submitIfBothDatesSelected(this.form)" />
+                       onchange="updateDateBounds(this.form); submitIfBothDatesSelected(this.form)" />
             </div>
             <div class="col-md-6">
                 <label asp-for="EndDate" class="form-label">Drop-off</label>
@@ -37,7 +37,7 @@
                        class="form-control"
                        min="@minBrowseDate"
                        value="@Model.EndDate?.ToString("yyyy-MM-dd")"
-                       onchange="submitIfBothDatesSelected(this.form)" />
+                       onchange="updateDateBounds(this.form); submitIfBothDatesSelected(this.form)" />
             </div>
         </div>
         <div class="row g-3">
@@ -203,6 +203,30 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
+        function addDays(dateString, days) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const date = new Date(Date.UTC(year, month - 1, day));
+            date.setUTCDate(date.getUTCDate() + days);
+            return date.toISOString().split('T')[0];
+        }
+
+        function updateDateBounds(form) {
+            const start = form.querySelector('[name=StartDate]');
+            const end = form.querySelector('[name=EndDate]');
+
+            if (start.value) {
+                end.min = addDays(start.value, 1);
+            } else {
+                end.min = start.min;
+            }
+
+            if (end.value) {
+                start.max = addDays(end.value, -1);
+            } else {
+                start.removeAttribute('max');
+            }
+        }
+
         function submitIfBothDatesSelected(form) {
             const start = form.querySelector('[name=StartDate]').value;
             const end = form.querySelector('[name=EndDate]').value;
@@ -211,5 +235,20 @@
                 form.submit();
             }
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form[method="get"]');
+            const dateInputs = form?.querySelectorAll('input[type="date"]') ?? [];
+
+            if (form) {
+                updateDateBounds(form);
+            }
+
+            dateInputs.forEach(input => {
+                input.addEventListener('keydown', event => {
+                    event.preventDefault();
+                });
+            });
+        });
     </script>
 }
