@@ -3,8 +3,9 @@ using LuxRentals.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LuxRentals.Controllers;
+namespace LuxRentals.Areas.Admin.Controllers;
 
+[Area("Admin")]
 [Authorize(Roles = "Admin")]
 public class AdminProfileController : Controller
 {
