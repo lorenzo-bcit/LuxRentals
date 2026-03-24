@@ -10,9 +10,9 @@ public class CarsController : Controller
 {
     private const int PAGE_SIZE = 5;
     private const int DEFAULT_BOOKING_WINDOW_DAYS = 7;
-    private const int MAX_SEATS_FILTER = 10;
-    private const int MAX_LUGGAGE_FILTER = 10;
-    private const decimal MAX_RATE_FILTER = 500m;
+    private const int MAX_SELECTABLE_SEATS = 10;
+    private const int MAX_SELECTABLE_LUGGAGE = 10;
+    private const decimal MAX_SELECTABLE_RATE = 500m;
 
     private readonly ICarService _carService;
 
@@ -21,55 +21,48 @@ public class CarsController : Controller
     [HttpGet]
     public async Task<IActionResult> Index([FromQuery] CarBrowseVm vm)
     {
-        NormalizeBrowseState(vm);
-        vm.MaxSeatsFilter = MAX_SEATS_FILTER;
-        vm.MaxLuggageFilter = MAX_LUGGAGE_FILTER;
-        vm.MaxRateFilter = MAX_RATE_FILTER;
-        vm.MinBrowseDate = BookingClock.Tomorrow().ToString("yyyy-MM-dd");
+        var tomorrow = BookingClock.Tomorrow();
 
-        var hasInvalidDateRange =
-            vm.StartDate.HasValue &&
-            vm.EndDate.HasValue &&
-            vm.EndDate.Value <= vm.StartDate.Value;
+        NormalizeBrowseState(vm, tomorrow);
+        vm.MaxSelectableSeats = MAX_SELECTABLE_SEATS;
+        vm.MaxSelectableLuggage = MAX_SELECTABLE_LUGGAGE;
+        vm.MaxSelectableRate = MAX_SELECTABLE_RATE;
+        vm.MinBrowseDate = tomorrow.ToString("yyyy-MM-dd");
 
-        if (hasInvalidDateRange)
-            ModelState.AddModelError(nameof(vm.EndDate), "Drop-off date must be after pick-up date.");
+        var hasInvalidBrowseDates = HasInvalidBrowseDates(vm, tomorrow);
+        vm.EmptyStateMessage = hasInvalidBrowseDates
+            ? "Adjust the date range to see available cars."
+            : "No cars match your filters.";
 
-        var criteria = ToCriteria(vm, hasInvalidDateRange);
+        var criteria = ToCriteria(vm, hasInvalidBrowseDates);
         var pagedCars = await _carService.SearchAsync(criteria);
 
         vm.ApplyPagedResult(pagedCars);
-        vm.MaxRate ??= MAX_RATE_FILTER;
+        vm.MaxRate ??= MAX_SELECTABLE_RATE;
 
         await PopulateLookupOptionsAsync(vm);
 
         return View(vm);
     }
 
-    private void NormalizeBrowseState(CarBrowseVm vm)
+    private static void NormalizeBrowseState(CarBrowseVm vm, DateTime tomorrow)
     {
         vm.Page = Math.Max(1, vm.Page);
-
-        var tomorrow = BookingClock.Tomorrow();
 
         if (!vm.StartDate.HasValue && !vm.EndDate.HasValue)
         {
             vm.StartDate = tomorrow;
             vm.EndDate = tomorrow.AddDays(DEFAULT_BOOKING_WINDOW_DAYS);
-            return;
         }
-
-        if (!vm.StartDate.HasValue)
-            vm.StartDate = vm.EndDate?.Date.AddDays(-DEFAULT_BOOKING_WINDOW_DAYS) ?? tomorrow;
-
-        if (vm.StartDate.Value.Date < tomorrow)
-            vm.StartDate = tomorrow;
-
-        if (!vm.EndDate.HasValue || vm.EndDate.Value.Date <= vm.StartDate.Value.Date)
-            vm.EndDate = vm.StartDate.Value.Date.AddDays(DEFAULT_BOOKING_WINDOW_DAYS);
     }
 
-    private static CarSearchCriteria ToCriteria(CarBrowseVm vm, bool hasInvalidDateRange)
+    private static bool HasInvalidBrowseDates(CarBrowseVm vm, DateTime tomorrow) =>
+        vm.StartDate.HasValue && vm.StartDate.Value.Date < tomorrow ||
+        vm.StartDate.HasValue &&
+        vm.EndDate.HasValue &&
+        vm.EndDate.Value.Date <= vm.StartDate.Value.Date;
+
+    private static CarSearchCriteria ToCriteria(CarBrowseVm vm, bool hasInvalidBrowseDates)
     {
         var criteria = new CarSearchCriteria
         {
@@ -80,9 +73,9 @@ public class CarsController : Controller
             MinSeats = vm.MinSeats,
             MinLuggage = vm.MinLuggage,
             MaxRate = vm.MaxRate,
-            AvailableOnly = true, // this controller is public-facing, we only want to show available
-            StartDate = hasInvalidDateRange ? null : vm.StartDate,
-            EndDate = hasInvalidDateRange ? null : vm.EndDate,
+            OnlyBookableCars = true, // public browse only shows cars that can be booked
+            StartDate = hasInvalidBrowseDates ? null : vm.StartDate,
+            EndDate = hasInvalidBrowseDates ? null : vm.EndDate,
             Page = vm.Page,
             PageSize = PAGE_SIZE
         };
