@@ -8,11 +8,14 @@ public static class CarAvailabilityQueryExtensions
     public static IQueryable<Car> WhereBookableForWindow(
         this IQueryable<Car> cars,
         IQueryable<Booking> bookings,
-        DateTime startDate,
-        DateTime endDate)
+        DateTime? startDate,
+        DateTime? endDate)
     {
-        var start = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
-        var end = DateTime.SpecifyKind(endDate.Date, DateTimeKind.Utc);
+        if (!startDate.HasValue || !endDate.HasValue || endDate.Value.Date <= startDate.Value.Date)
+            return cars.Where(_ => false);
+
+        var start = DateTime.SpecifyKind(startDate.Value.Date, DateTimeKind.Utc);
+        var end = DateTime.SpecifyKind(endDate.Value.Date, DateTimeKind.Utc);
 
         return cars
             .Where(c => c.FkCarStatus.StatusFlag == CarStatusNames.AVAILABLE)
@@ -29,8 +32,8 @@ public static class CarAvailabilityQueryExtensions
         this IQueryable<Car> cars,
         IQueryable<Booking> bookings,
         int carId,
-        DateTime startDate,
-        DateTime endDate)
+        DateTime? startDate,
+        DateTime? endDate)
     {
         return cars
             .Where(c => c.PkCarId == carId)

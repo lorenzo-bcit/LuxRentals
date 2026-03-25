@@ -20,13 +20,11 @@ public class CarBrowseVm
 
     public decimal? MaxRate { get; set; }
 
-    public decimal MaxRateFilter { get; set; }
+    public decimal MaxSelectableRate { get; set; }
 
-    public int MaxSeatsFilter { get; set; }
+    public int MaxSelectableSeats { get; set; }
 
-    public int MaxLuggageFilter { get; set; }
-
-    public bool AvailableOnly { get; set; } = true;
+    public int MaxSelectableLuggage { get; set; }
 
     public int Page { get; set; } = 1;
 
@@ -37,6 +35,8 @@ public class CarBrowseVm
     public string SortBy { get; set; } = "price_asc";
 
     public string MinBrowseDate { get; set; } = string.Empty;
+
+    public string EmptyStateMessage { get; set; } = "No cars match your filters.";
 
     public IReadOnlyList<CarCardVm> Cars { get; set; } = [];
 

@@ -183,7 +183,7 @@ public class CarsController : Controller
     {
         var criteria = new CarSearchCriteria
         {
-            AvailableOnly = false,
+            OnlyBookableCars = false,
             SearchTerm = vm.SearchTerm,
             StatusId = vm.StatusId,
             VehicleClassId = vm.VehicleClassId,
