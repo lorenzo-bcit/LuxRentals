@@ -12,14 +12,12 @@ namespace LuxRentals.Controllers.Booking
     {
         private readonly BookingRepo _bookingRepo;
         private readonly IPaymentService _paymentService;
-        private readonly LuxRentalsDbContext _db;
         private readonly ILogger<BookingController> _logger;
 
-        public BookingController(BookingRepo bookingRepo, IPaymentService paymentService, LuxRentalsDbContext db, ILogger<BookingController> logger)
+        public BookingController(BookingRepo bookingRepo, IPaymentService paymentService, ILogger<BookingController> logger)
         {
             _bookingRepo = bookingRepo;
             _paymentService = paymentService;
-            _db = db;
             _logger = logger;
         }
 
@@ -74,7 +72,7 @@ namespace LuxRentals.Controllers.Booking
                 }
 
                 // Validate car exists
-                var car = _db.Cars.FirstOrDefault(c => c.PkCarId == carId);
+                var car = _bookingRepo.CarExists(carId);
                 if (car == null)
                 {
                     TempData["Error"] = "Selected car does not exist.";

@@ -270,6 +270,11 @@ namespace LuxRentals.Repositories.Bookings
                 end > b.StartDateTime
             );
         }
+
+        public async Task<bool> CarExists(int carId)
+        {
+            return await _context.Cars.AnyAsync(c => c.PkCarId == carId);
+        }
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
