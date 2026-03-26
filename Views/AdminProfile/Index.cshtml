@@ -56,14 +56,21 @@
 
     <!-- Quick Actions -->
     <h4 class="mb-3">Quick Actions</h4>
-    <a class="btn text-white fw-bold rounded-pill px-4 py-2"
-           style="background-color: #ff4fa3; border: 1px solid #ff4fa3;"
-           asp-controller="Profile"
-           asp-action="Index">
-        List All Profiles
-    </a>
-
     <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card admin-action-card shadow-sm h-100">
+                <div class="card-body text-center py-4">
+                    <div class="mb-3">
+                        <i class="bi bi-person-vcard display-4" style="color: #e83e8c;"></i>
+                    </div>
+                    <h5 class="card-title">Manage Profiles</h5>
+                    <p class="card-text text-muted">Edit customer profiles in the system.</p>
+                    <a asp-controller="Profile" asp-action="Index" class="btn text-white" style="background-color: #e83e8c; border-color: #e83e8c;">
+                        <i class="bi bi-arrow-right-circle"></i> Go to Customer Profiles
+                    </a>
+                </div>
+            </div>
+        </div>
         <div class="col-md-6">
             <div class="card admin-action-card shadow-sm h-100">
                 <div class="card-body text-center py-4">

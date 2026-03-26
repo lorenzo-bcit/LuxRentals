@@ -1,7 +1,7 @@
 ﻿@model LuxRentals.ViewModels.Roles.ProfileVM
-
 @{
     ViewData["Title"] = "Edit Profile";
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <div class="container mt-4">
@@ -11,9 +11,24 @@
                 <div class="card-header bg-primary text-white">
                     <h3 class="mb-0">Edit Profile</h3>
                 </div>
-
                 <div class="card-body">
                     <p class="text-muted mb-4">Update your personal information below.</p>
+
+                    <!-- Success/Error Messages -->
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
                     <form asp-action="Edit" asp-route-id="@Model.PkCustomerId" method="post">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
@@ -36,7 +51,8 @@
 
                         <div class="mb-3">
                             <label asp-for="Email" class="form-label fw-semibold"></label>
-                            <input asp-for="Email" class="form-control" placeholder="Enter email address" />
+                            <input asp-for="Email" class="form-control" placeholder="Enter email address" readonly />
+                            <small class="form-text text-muted">Email cannot be changed. Contact support if needed.</small>
                             <span asp-validation-for="Email" class="text-danger small"></span>
                         </div>
 
@@ -51,12 +67,18 @@
                             <input asp-for="DriverLicenceNo" class="form-control" placeholder="Enter driver licence number" />
                             <span asp-validation-for="DriverLicenceNo" class="text-danger small"></span>
                         </div>
-                        @if (User.IsInRole("Admin") ){
+
                         <div class="d-flex justify-content-between">
-                            <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                            @if (isAdmin)
+                            {
+                                <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                            }
+                            else
+                            {
+                                <a asp-action="Details" class="btn btn-outline-secondary">Cancel</a>
+                            }
                             <button type="submit" class="btn btn-primary px-4">Save Changes</button>
-                            </div>
-                        }
+                        </div>
                     </form>
                 </div>
             </div>

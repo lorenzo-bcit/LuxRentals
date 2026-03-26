@@ -1,66 +1,69 @@
 ﻿@model IEnumerable<LuxRentals.ViewModels.Roles.ProfileVM>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Customer Profiles";
 }
 
-<h1>Index</h1>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Customer Profiles</h1>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.PkCustomerId)
-            </th>
-            
-            <th>
-                @Html.DisplayNameFor(model => model.FirstName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PhoneNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DriverLicenceNo)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.PkCustomerId)
-            </td>
-            
-            <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DriverLicenceNo)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new {  id=item.Email}) |
-                @Html.ActionLink("Details", "Details", new { id=item.Email }) 
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Driver Licence</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.PkCustomerId</td>
+                            <td>@item.FirstName</td>
+                            <td>@item.LastName</td>
+                            <td>@item.Email</td>
+                            <td>@item.PhoneNumber</td>
+                            <td>@item.DriverLicenceNo</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.PkCustomerId" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <a asp-action="Details" asp-route-id="@item.Email" class="btn btn-sm btn-secondary">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="mt-3">
+        <a asp-controller="AdminProfile" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
