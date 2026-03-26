@@ -10,20 +10,17 @@ namespace LuxRentals.Controllers.Payment
     {
         private readonly IPaymentService _paymentService;
         private readonly BookingRepo _bookingRepo;
-        private readonly LuxRentalsDbContext _db;
         private readonly PaypalOptions _paypalOptions;
         private readonly ILogger<IPaymentService> _logger;
 
         public PaymentController(
             IPaymentService paymentService,
             BookingRepo bookingRepo,
-            LuxRentalsDbContext context,
             IOptions<PaypalOptions> paypalOptions,
             ILogger<IPaymentService> logger)
         {
             _paymentService = paymentService;
             _bookingRepo = bookingRepo;
-            _db = context;
             _paypalOptions = paypalOptions.Value;
             _logger = logger;
         }
