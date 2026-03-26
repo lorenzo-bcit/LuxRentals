@@ -64,61 +64,55 @@ namespace LuxRentals.Controllers.Booking
             try
             {
                 int customerId = await GetCustomerId();
-
                 if (customerId == 0)
                 {
                     TempData["Error"] = "You must be logged in to make a booking.";
                     return RedirectToAction("Login", "Account");
                 }
 
-                // Validate car exists
-                var car = _bookingRepo.CarExists(carId);
-                if (car == null)
+                // Load car asynchronously to avoid context conflicts
+                var car = await _bookingRepo.CarExists(carId);
+                if (!car)
                 {
                     TempData["Error"] = "Selected car does not exist.";
                     return RedirectToAction("Index", "Home");
                 }
 
-                // Convert to UTC
+                // Convert dates to UTC
                 var startDateTime = DateTime.SpecifyKind(model.StartDateTime.Date, DateTimeKind.Utc);
                 var endDateTime = DateTime.SpecifyKind(model.EndDateTime.Date, DateTimeKind.Utc);
 
-                // Calculate price
-                var price = await _bookingRepo.CalculateBookingPriceAsync(
-                    carId,
-                    startDateTime,
-                    endDateTime);
-
-                
-                // Check if booking is possible
-                var (canOrder, errorMessage) = await _bookingRepo.CheckBookingAsync(customerId, model.StartDateTime, model.EndDateTime, carId);
-                if (!canOrder)
+                // Check booking availability
+                var (canBook, errorMessage) = await _bookingRepo.CheckBookingAsync(customerId, startDateTime, endDateTime, carId);
+                if (!canBook)
                 {
                     TempData["PaymentError"] = errorMessage;
                     return RedirectToAction("Create", "Booking", new { carId });
                 }
 
-                // Store session info (optional, fallback for Checkout)
+                // Calculate price
+                var price = await _bookingRepo.CalculateBookingPriceAsync(carId, startDateTime, endDateTime);
+
+                // Create PayPal order
+                var orderId = await _paymentService.CreateOrderAsync(price, "CAD");
+
+                // Store session info for checkout fallback
                 HttpContext.Session.SetInt32("CarId", carId);
                 HttpContext.Session.SetInt32("CustomerId", customerId);
                 HttpContext.Session.SetString("StartDate", startDateTime.ToString("o"));
                 HttpContext.Session.SetString("EndDate", endDateTime.ToString("o"));
 
-                // Create PayPal order
-                var orderId = await _paymentService.CreateOrderAsync(price, "CAD");
-
-                // Redirect to Checkout, pass carId as query param
+                // Redirect to PaymentController checkout with query params
                 return RedirectToAction("Checkout", "Payment", new { orderId, carId });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to create booking");
-                ModelState.AddModelError(string.Empty, ex.Message);
+                ModelState.AddModelError(string.Empty, "Error creating booking. Please try again.");
                 SetCreateViewState(carId);
                 return View(model);
             }
         }
-
         // Allows customer to see their OWN bookings
         [HttpGet]
         public async Task<IActionResult> MyBookings()

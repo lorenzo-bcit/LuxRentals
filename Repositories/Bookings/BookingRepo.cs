@@ -232,10 +232,7 @@ namespace LuxRentals.Repositories.Bookings
         // Calculate booking price
         public async Task<decimal> CalculateBookingPriceAsync(int carId, DateTime start, DateTime end)
         {
-            var car = await _context.Cars.FirstOrDefaultAsync(c => c.PkCarId == carId);
-
-            if (car == null)
-                throw new Exception("Car not found.");
+            var car = await _context.Cars.FirstOrDefaultAsync(c => c.PkCarId == carId) ?? throw new Exception("Car not found.");
 
             int days = (end.Date - start.Date).Days;
             if (days <= 0) days = 1;

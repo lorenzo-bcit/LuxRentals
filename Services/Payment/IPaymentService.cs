@@ -23,7 +23,6 @@ namespace LuxRentals.Services.Payment
         private readonly HttpClient _httpClient;
         private readonly PaypalOptions _options;
         private readonly ILogger<PayPalPaymentService> _logger;
-        private readonly LuxRentalsDbContext _db;
         private readonly BookingStatusRepo _bookingStatusRepo;
 
         private string? _accessToken;
@@ -33,13 +32,11 @@ namespace LuxRentals.Services.Payment
             HttpClient httpClient,
             IOptions<PaypalOptions> options,
             ILogger<PayPalPaymentService> logger,
-            LuxRentalsDbContext db,
             BookingStatusRepo bookingStatusRepo)
         {
             _httpClient = httpClient;
             _options = options.Value;
             _logger = logger;
-            _db = db;
             _bookingStatusRepo = bookingStatusRepo;
 
             var baseUrl = _options.Environment.ToLower() == "live"

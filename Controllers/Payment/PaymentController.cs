@@ -1,10 +1,12 @@
 ﻿using LuxRentals.Data;
+using LuxRentals.Models;
 using LuxRentals.Repositories.Bookings;
 using LuxRentals.Repositories.BookingStatus;
 using LuxRentals.Services.Payment;
 using LuxRentals.ViewModels.Bookings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
@@ -46,29 +48,28 @@ namespace LuxRentals.Controllers.Payment
                 return RedirectToAction("Index", "Home");
             }
 
-            // Try session fallback if carId not in query
-            if (carId == null)
-                carId = HttpContext.Session.GetInt32("CarId");
-
+            // Use session fallback if carId missing
+            carId ??= HttpContext.Session.GetInt32("CarId");
             if (carId == null)
             {
                 TempData["Error"] = "Booking session expired.";
                 return RedirectToAction("Create", "Booking");
             }
 
-            var car = _db.Cars.FirstOrDefault(c => c.PkCarId == carId.Value);
-            if (car == null)
+            // Load car async
+            var car = await _bookingRepo.CarExists((int)carId);
+            if (!car)
             {
                 TempData["Error"] = "Selected car does not exist.";
                 return RedirectToAction("Index", "Home");
             }
 
+            // Parse dates from session
             string startStr = HttpContext.Session.GetString("StartDate");
             string endStr = HttpContext.Session.GetString("EndDate");
 
-            // Parse dates with RoundtripKind to preserve UTC
-            if (!DateTime.TryParse(startStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime startDate) ||
-                !DateTime.TryParse(endStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime endDate))
+            if (!DateTime.TryParse(startStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out var startDate) ||
+                !DateTime.TryParse(endStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out var endDate))
             {
                 TempData["Error"] = "Invalid booking dates.";
                 return RedirectToAction("Create", "Booking");
@@ -76,31 +77,73 @@ namespace LuxRentals.Controllers.Payment
 
             var price = await _bookingRepo.CalculateBookingPriceAsync(carId.Value, startDate, endDate);
 
-            ViewBag.Price = price;
-            ViewBag.CarId = carId.Value;
             ViewBag.OrderId = orderId;
-            ViewBag.StartDate = startDate.ToShortDateString();
-            ViewBag.EndDate = endDate.ToShortDateString();
-            ViewBag.PayPalClientId = _paypalOptions.ClientId;
+            ViewBag.CarId = carId.Value;
+            ViewBag.Price = price;
             ViewBag.StartDate = startDate.ToString("MMM dd, yyyy");
             ViewBag.EndDate = endDate.ToString("MMM dd, yyyy");
+            ViewBag.PayPalClientId = _paypalOptions.ClientId;
 
             return View();
         }
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
         {
             if (request == null)
-            {
                 return BadRequest(new { error = "Request body is missing." });
-            }
 
             try
             {
-                var orderId = await _paymentService.CreateOrderAsync(request.Amount, "CAD");
+                int customerId = await GetCustomerId();
 
-                // Store pending info
+                if (customerId == 0)
+                {
+                    return Json(new
+                    {
+                        error = "You must be logged in.",
+                        redirectUrl = Url.Action("Login", "Account")
+                    });
+                }
+
+                var startStr = HttpContext.Session.GetString("StartDate");
+                var endStr = HttpContext.Session.GetString("EndDate");
+
+                if (string.IsNullOrEmpty(startStr) || string.IsNullOrEmpty(endStr))
+                {
+                    return Json(new { error = "Session expired. Please restart booking." });
+                }
+
+                if (!DateTime.TryParse(startStr, out var startDate) ||
+                    !DateTime.TryParse(endStr, out var endDate))
+                {
+                    return Json(new { error = "Invalid booking dates." });
+                }
+
+                var car = await _db.Cars.FindAsync(request.CarId);
+                if (car == null)
+                {
+                    return Json(new { error = "Car does not exist." });
+                }
+
+                var (canOrder, errorMessage) =
+                    await _bookingRepo.CheckBookingAsync(customerId, startDate, endDate, request.CarId);
+
+                if (!canOrder)
+                {
+                    return Json(new
+                    {
+                        error = errorMessage,
+                        redirectUrl = Url.Action("Create", "Booking", new { carId = request.CarId })
+                    });
+                }
+
+                var amount = await _bookingRepo.CalculateBookingPriceAsync(
+                    request.CarId, startDate, endDate);
+
+                var orderId = await _paymentService.CreateOrderAsync(amount, "CAD");
+
                 HttpContext.Session.SetInt32("CarId", request.CarId);
                 HttpContext.Session.SetString("PendingOrderId", orderId);
 
@@ -123,12 +166,12 @@ namespace LuxRentals.Controllers.Payment
 
             try
             {
+
                 var (captureId, amountPaid) = await _paymentService.CaptureOrderAsync(request.OrderId);
 
                 if (captureId == null)
                     return Json(new { success = false, message = "Payment failed." });
 
-                // Retrieve booking info from session
                 int? carId = HttpContext.Session.GetInt32("CarId");
                 int? customerId = HttpContext.Session.GetInt32("CustomerId");
                 string startStr = HttpContext.Session.GetString("StartDate");
@@ -140,44 +183,46 @@ namespace LuxRentals.Controllers.Payment
                     return Json(new
                     {
                         success = false,
-                        message = "Booking session expired. Please try again.",
+                        message = "Booking session expired.",
                         redirectUrl = Url.Action("Create", "Booking")
                     });
                 }
 
-                if (!DateTime.TryParse(startStr, out DateTime startDate) ||
-                    !DateTime.TryParse(endStr, out DateTime endDate))
-                {
-                    return Json(new { success = false, message = "Invalid booking dates." });
-                }
+                DateTime startDateUtc = DateTime.Parse(startStr, null, System.Globalization.DateTimeStyles.RoundtripKind);
+                DateTime endDateUtc = DateTime.Parse(endStr, null, System.Globalization.DateTimeStyles.RoundtripKind);
 
-                // Prevent duplicate booking
                 var existingBooking = _db.Bookings.FirstOrDefault(b => b.TransactionId == captureId);
                 if (existingBooking != null)
                     return Json(new { success = true, redirectUrl = Url.Action("MyBookings", "Booking") });
 
-                // Validate payment amount
-                var expectedAmount = await _bookingRepo.CalculateBookingPriceAsync(carId.Value, startDate, endDate);
+                var expectedAmount = await _bookingRepo.CalculateBookingPriceAsync(carId.Value, startDateUtc, endDateUtc);
+
                 if (amountPaid != expectedAmount)
                 {
                     _logger.LogWarning("Payment mismatch: expected {expected}, got {actual}", expectedAmount, amountPaid);
                     return Json(new { success = false, message = "Payment verification failed." });
                 }
 
-                // FIXED: Parse dates with RoundtripKind to preserve UTC from session
-                DateTime startDateUtc = DateTime.Parse(
-                    HttpContext.Session.GetString("StartDate"),
-                    null,
-                    System.Globalization.DateTimeStyles.RoundtripKind);
+                var (canStillBook, _) =
+                    await _bookingRepo.CheckBookingAsync(customerId.Value, startDateUtc, endDateUtc, carId.Value);
 
-                DateTime endDateUtc = DateTime.Parse(
-                    HttpContext.Session.GetString("EndDate"),
-                    null,
-                    System.Globalization.DateTimeStyles.RoundtripKind);
+                if (!canStillBook)
+                {
+                    return Json(new { success = false, message = "Car is no longer available." });
+                }
 
-                var booking = await _bookingRepo.CreateBooking((int)carId, (int)customerId, startDateUtc, endDateUtc, request.OrderId);
+                var booking = await _bookingRepo.CreateBooking(
+                    carId.Value,
+                    customerId.Value,
+                    startDateUtc,
+                    endDateUtc,
+                    captureId
+                );
 
-                HttpContext.Session.Clear();
+                HttpContext.Session.Remove("CarId");
+                HttpContext.Session.Remove("StartDate");
+                HttpContext.Session.Remove("EndDate");
+                HttpContext.Session.Remove("PendingOrderId");
 
                 return Json(new { success = true, redirectUrl = Url.Action("MyBookings", "Booking") });
             }
@@ -199,9 +244,20 @@ namespace LuxRentals.Controllers.Payment
             [Required]
             public string OrderId { get; set; }
         }
-        private int GetCustomerId()
+        private async Task<int> GetCustomerId()
         {
-            return HttpContext.Session.GetInt32("CustomerId") ?? 0;
+            // Get email of logged-in user
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var email = User.Identity.Name;
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    return await _bookingRepo.GetCustomerIdByEmail(email);
+                }
+            }
+
+            return 0;
         }
     }
 }
