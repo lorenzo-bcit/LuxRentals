@@ -1,4 +1,5 @@
 ﻿using LuxRentals.Repositories.Bookings;
+using LuxRentals.Repositories.Cars;
 using LuxRentals.Services.Payment;
 using LuxRentals.Utils;
 using LuxRentals.ViewModels.Bookings;
@@ -11,11 +12,13 @@ namespace LuxRentals.Controllers.Booking
     {
         private readonly BookingRepo _bookingRepo;
         private readonly IPaymentService _paymentService;
+        private readonly CarRepository _carRepo;
 
-        public BookingController(BookingRepo bookingRepo, IPaymentService paymentService)
+        public BookingController(BookingRepo bookingRepo, IPaymentService paymentService, CarRepository carRepo)
         {
             _bookingRepo = bookingRepo;
             _paymentService = paymentService;
+            _carRepo = carRepo;
         }
 
 
@@ -69,9 +72,25 @@ namespace LuxRentals.Controllers.Booking
                     return RedirectToAction("Login", "Account");
                 }
 
+                var carCanBook = await _carRepo.HasBookingsAsync(carId);
+                if (carCanBook == true)
+                {
+                    TempData["Error"] = "This car is allready booked.";
+                    SetCreateViewState(carId);
+                    return View(model);
+                }
+
                 // Convert to UTC
                 var startDateTime = DateTime.SpecifyKind(model.StartDateTime.Date, DateTimeKind.Utc);
                 var endDateTime = DateTime.SpecifyKind(model.EndDateTime.Date, DateTimeKind.Utc);
+
+                var customerCanBook = await _bookingRepo.CheckBooking(customerId, carId, startDateTime, endDateTime);
+                if (!customerCanBook.Success)
+                {
+                    TempData["Error"] = customerCanBook.Message;
+                    SetCreateViewState(carId);
+                    return View(model);
+                }
 
                 var price = await _bookingRepo.CalculateBookingPrice(
                     carId,
