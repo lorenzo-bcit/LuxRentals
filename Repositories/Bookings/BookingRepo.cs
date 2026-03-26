@@ -194,6 +194,28 @@ namespace LuxRentals.Repositories.Bookings
             return car.DailyRate * days;
         }
 
+        // Helper method to check booking availability and conflicts before creating a booking
+        public async Task<(bool Success, string? Message)> CheckBooking(int customerId, int carId, DateTime startDate, DateTime endDate)
+        {
+            // Normalize to midnight UTC
+            startDate = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
+            endDate = DateTime.SpecifyKind(endDate.Date, DateTimeKind.Utc);
+
+            bool isCarAvailable = await IsCarAvailable(carId, startDate, endDate);
+            if (!isCarAvailable)
+            {
+                return (false, "Car is not avalible.");
+            }
+
+            bool hasConflictingBooking = await HasConflictingBooking(customerId, startDate, endDate);
+            if(hasConflictingBooking)
+            {
+                return (false, "You have a conflicting booking.");
+            }
+            return (true, null);
+        }
+
+
         public async Task SaveChanges()
         {
             await _context.SaveChangesAsync();
