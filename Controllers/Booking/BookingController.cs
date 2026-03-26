@@ -12,13 +12,11 @@ namespace LuxRentals.Controllers.Booking
     {
         private readonly BookingRepo _bookingRepo;
         private readonly IPaymentService _paymentService;
-        private readonly CarRepository _carRepo;
 
-        public BookingController(BookingRepo bookingRepo, IPaymentService paymentService, CarRepository carRepo)
+        public BookingController(BookingRepo bookingRepo, IPaymentService paymentService)
         {
             _bookingRepo = bookingRepo;
             _paymentService = paymentService;
-            _carRepo = carRepo;
         }
 
 
@@ -70,14 +68,6 @@ namespace LuxRentals.Controllers.Booking
                 {
                     TempData["Error"] = "You must be logged in to make a booking.";
                     return RedirectToAction("Login", "Account");
-                }
-
-                var carCanBook = await _carRepo.HasBookingsAsync(carId);
-                if (carCanBook == true)
-                {
-                    TempData["Error"] = "This car is allready booked.";
-                    SetCreateViewState(carId);
-                    return View(model);
                 }
 
                 // Convert to UTC
