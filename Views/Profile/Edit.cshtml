@@ -1,4 +1,5 @@
 ﻿@model LuxRentals.ViewModels.Roles.ProfileVm
+
 @{
     ViewData["Title"] = "Edit Profile";
     bool isAdmin = User.IsInRole("Admin");
@@ -26,9 +27,24 @@
                 <div class="card-header bg-primary text-white">
                     <h3 class="mb-0">Edit Profile</h3>
                 </div>
-
                 <div class="card-body">
                     <p class="text-muted mb-4">Update your personal information below.</p>
+
+                    <!-- Success/Error Messages -->
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
 
                     <form asp-action="Edit" asp-route-id="@Model.PkCustomerId" method="post">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
@@ -68,18 +84,15 @@
                             <span asp-validation-for="DriverLicenceNo" class="text-danger small"></span>
                         </div>
 
-                        <div class="d-flex justify-content-between">
-                            @if (isAdmin)
-                            {
+                        @if (isAdmin)
+                        {
                             <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
-                            }
-                            else
-                            {
-                                <a asp-action="Details" class="btn btn-outline-secondary">Cancel</a>
-                            }
-                            <button type="submit" class="btn btn-primary px-4">Save Changes</button>
-                            </div>
                         }
+                        else
+                        {
+                            <a asp-action="Details" class="btn btn-outline-secondary">Cancel</a>
+                        }
+                        <button type="submit" class="btn btn-primary px-4">Save Changes</button>
                     </form>
                 </div>
             </div>
