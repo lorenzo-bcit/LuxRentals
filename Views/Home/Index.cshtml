@@ -1,8 +1,189 @@
-﻿@{
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- 1. Dramatic Hero Section -->
+<section class="relative h-screen w-full flex items-center overflow-hidden bg-black mt-[-8rem]">
+    <div class="absolute inset-0 z-0">
+        <img class="w-full h-full object-cover opacity-60 grayscale" data-alt="Monochrome close-up of a high-end luxury sports car" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSU06cBGouSdKumdbSFBTzF12IHt7iOCyYz3afwOwvf2f33LpjSudbC9Uj8lOvV7k589iDE60cqsFhC5Ya2POqM1HhONG7kVDvUE3MayewWQ_5Y55Nmci6JlQrU9fhasUPVOZU28tay-SVkuiffz6yVz_o5nShQEA0F3NlW55yOkFH1TX6H6ODlkPS6q9WpDdWreK5WSrYCm12g8Xo2ATmnSMIg5oUD9cJ7PJFu671Jna0_Gliq88hXq7H9Azh9YiKLj5Vq6cNLL0"/>
+    </div>
+    <div class="relative z-10 px-6 md:px-12 lg:px-24 max-w-7xl">
+        <p class="text-secondary tracking-[0.4em] text-xs font-semibold mb-6 uppercase">VANCOUVER'S PREMIER DESTINATION</p>
+        <h1 class="text-white font-serif italic text-6xl md:text-8xl leading-tight mb-8">
+            DEFINE YOUR <br/>PRESENCE
+        </h1>
+        <p class="text-white/60 font-body text-lg md:text-xl max-w-xl mb-12 leading-relaxed">
+            Experience the pinnacle of automotive excellence at our Downtown Vancouver location. A curated collection of the world's most sought-after vehicles, reserved for those who demand more.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-6">
+            <a asp-area="" asp-controller="Cars" asp-action="Index" class="bg-gold-gradient text-on-tertiary-fixed px-12 py-5 font-bold tracking-widest text-xs uppercase transition-transform hover:-translate-y-1 text-center inline-block">
+                VIEW COLLECTION
+            </a>
+            <button class="border border-white/20 text-white px-12 py-5 font-bold tracking-widest text-xs uppercase hover:bg-white hover:text-black transition-all">
+                OUR PHILOSOPHY
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- 2. The Luxrentals Collection -->
+<section class="py-32 px-6 md:px-12 max-w-[1920px] mx-auto bg-surface">
+    <div class="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
+        <div class="max-w-2xl">
+            <span class="text-secondary font-label text-xs tracking-[0.2em] font-bold uppercase mb-4 block">SELECTION 2026</span>
+            <h2 class="text-5xl font-serif italic leading-tight">The Luxrentals Collection</h2>
+        </div>
+        <div class="h-px flex-grow bg-outline-variant/30 mx-12 hidden md:block mb-4"></div>
+        <p class="text-on-surface-variant font-body max-w-sm text-sm uppercase tracking-widest leading-loose">
+            Explore our seasonal selection of high-performance masterpieces available exclusively at our Vancouver HQ.
+        </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <!-- Vehicle 1 -->
+        <div class="group cursor-pointer">
+            <div class="aspect-[4/5] overflow-hidden mb-8 bg-surface-container-low">
+                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Sleek silver Porsche 911 parked in a minimalist garage" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4x-WN_6Q7u7EQoz7i6eyK4PXHNV27BbHaoHLbVRkgVeEXFbSR8OvWzrjAmrSNkbkUVBlf1HBrIsh8D1xUpI0Vx17R4NmFG_i9puCW1WxqFbwXz7c_cuaiHy4HQxH92yQM9AqW2LF48CsXp2XOOBITu1KEykTb34EYcB9ZcMD8UeWXkdSI8e4GC1j5TNzTTgbq8b08XePBOP4Ls9FuDBF_UQjn9uaebSAyRI2ftIaKSEX1mfWqMDYRaFTiFqmYnjxNlP-dXKAFY7A"/>
+            </div>
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-label tracking-[0.1em] text-on-surface-variant uppercase mb-2">GERMAN PRECISION</p>
+                    <h3 class="text-2xl font-serif">Porsche 911 GT3</h3>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-label tracking-widest text-secondary font-bold mb-1">FROM</p>
+                    <p class="text-2xl font-serif italic">$850/DAY</p>
+                </div>
+            </div>
+        </div>
+        <!-- Vehicle 2 -->
+        <div class="group cursor-pointer md:mt-16">
+            <div class="aspect-[4/5] overflow-hidden mb-8 bg-surface-container-low">
+                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Black Rolls Royce Phantom with iconic grill detail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCU48BImaHU1LS1XoLEYuhGKozYTq8mNjMHvmNHQxDmRv9XGF60blvwX2DSZXQTAvC1emSXJXYA1Ae4nR1FPnccpokynG3gVULsdKe3yftY_J3ISZyJ4BxNkmhHCUKGlIdOfVr1eGwcdiA1miK_5O5pm-4xtkWUpCUDLzSIINjIfMaZLVve0aGdCrrN49CGUYOA4jUY7UgFAi2OKXGmAKsR9HLHMRgqd6JCO-eBNmGR0PB0DFq_7zbL2tckQbsYqUM0IoN3x-VueeY"/>
+            </div>
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-label tracking-[0.1em] text-on-surface-variant uppercase mb-2">BRITISH LUXURY</p>
+                    <h3 class="text-2xl font-serif">Rolls-Royce Phantom</h3>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-label tracking-widest text-secondary font-bold mb-1">FROM</p>
+                    <p class="text-2xl font-serif italic">$1,200/DAY</p>
+                </div>
+            </div>
+        </div>
+        <!-- Vehicle 3 -->
+        <div class="group cursor-pointer">
+            <div class="aspect-[4/5] overflow-hidden mb-8 bg-surface-container-low">
+                <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Red Ferrari F8 Tributo side profile in studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMe1MoxCXobpjqAvLFFQIkW1EnoQnMwwEt1iDm5I2mgkI3k3AO4NdV6lxUwHERbYaIGkcNKd_ukDe86i7plMlyEo2FvGFRn6JDbqP0svy2B_TuVVasJJfuJHFSQAZLNjvE1ozKVPz-lHP01AdXo_1mP2Qsvjt2p8g9YmJJooPxNoeSxEqnFxMnd-Q2d71D_hFDDhrYBK92NUikRbPvg0M5BPcZiA5YutdN2VUq10DX6AkbyNwWYb-pBX2UjKiY_0QdeJSAoT2mXEA"/>
+            </div>
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-label tracking-[0.1em] text-on-surface-variant uppercase mb-2">ITALIAN PASSION</p>
+                    <h3 class="text-2xl font-serif">Ferrari F8 Tributo</h3>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-label tracking-widest text-secondary font-bold mb-1">FROM</p>
+                    <p class="text-2xl font-serif italic">$950/DAY</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3. The Luxrentals Experience (Philosophy) -->
+<section class="py-40 bg-surface-container-lowest overflow-hidden">
+    <div class="px-6 md:px-12 max-w-[1920px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+        <div class="relative">
+            <div class="aspect-square w-full max-w-lg bg-surface-container-high relative overflow-hidden">
+                <img class="w-full h-full object-cover grayscale brightness-75" data-alt="A man in a luxury suit handling high-end car keys" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFCH07mboO7XVVFDMrhcoTDt89OHys8V8xCLOxv6sQLtux1pHMb_YPhZQpv9PeppNqgjGCoW4PlA9byACQeqS2RU2FL5P6iNKpJGxbLV-XUvBisWBElC6gK4Rg2cB0U5E2Nu5zPd_69jNDsKVytDt1IS0zs7BvSepbW8_JQnEsEJVDs2Pgh0C6MEBUguy4ti_kJ1o-jY1v4AqJ5DEErp7s6x9DtEP-vlzdy-5LPiH8fuF2p7_imIckOYtwpiW81O5D10aT659jMLQ"/>
+            </div>
+            <div class="absolute -bottom-12 -right-12 md:right-12 bg-black p-12 max-w-xs hidden md:block">
+                <p class="text-white font-serif italic text-2xl leading-tight">"Luxury is defined by the experience you never forget."</p>
+            </div>
+        </div>
+        <div class="space-y-16">
+            <div>
+                <span class="text-secondary font-label text-xs tracking-[0.2em] font-bold uppercase mb-4 block">THE PHILOSOPHY</span>
+                <h2 class="text-5xl font-serif italic mb-8">The Luxrentals Standard</h2>
+            </div>
+            <div class="grid grid-cols-1 gap-12">
+                <!-- Value Prop 1 -->
+                <div class="flex gap-8 group">
+                    <div class="flex-shrink-0 w-16 h-16 flex items-center justify-center border border-secondary/20 transition-colors group-hover:bg-secondary/5">
+                        <span class="material-symbols-outlined text-secondary text-3xl">verified</span>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold tracking-widest uppercase mb-2">Pristine Standards</h4>
+                        <p class="text-on-surface-variant leading-relaxed text-sm">Every vehicle undergoes a 200-point inspection and artisan-level detailing before every reservation. Perfection is our baseline.</p>
+                    </div>
+                </div>
+                <!-- Value Prop 2 -->
+                <div class="flex gap-8 group">
+                    <div class="flex-shrink-0 w-16 h-16 flex items-center justify-center border border-secondary/20 transition-colors group-hover:bg-secondary/5">
+                        <span class="material-symbols-outlined text-secondary text-3xl">meeting_room</span>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold tracking-widest uppercase mb-2">The Embassy Lounge</h4>
+                        <p class="text-on-surface-variant leading-relaxed text-sm">Collect your vehicle in our private sanctuary. Enjoy a curated espresso while our specialists walk you through the nuances of your chosen machine.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 4. The Vancouver Embassy (Location Focus) -->
+<section class="py-32 px-6 md:px-12 bg-black text-white">
+    <div class="max-w-[1920px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+        <div class="lg:col-span-5 space-y-12">
+            <div>
+                <span class="text-secondary font-label text-xs tracking-[0.2em] font-bold uppercase mb-4 block">OUR EXCLUSIVE HQ</span>
+                <h2 class="text-5xl font-serif italic mb-8">The Vancouver Embassy</h2>
+                <p class="text-white/60 leading-relaxed text-lg font-light max-w-md">
+                    Our Downtown Embassy is the sole gateway to the Luxrentals fleet. More than a rental house, it is a sanctuary for the modern driver.
+                </p>
+            </div>
+            <div class="space-y-6 pt-8 border-t border-white/10">
+                <div>
+                    <p class="text-xs font-label tracking-widest text-secondary font-bold mb-2 uppercase">ADDRESS</p>
+                    <p class="text-2xl font-serif">1100 Melville Street, <br/>Vancouver, BC</p>
+                </div>
+                <div>
+                    <p class="text-xs font-label tracking-widest text-secondary font-bold mb-2 uppercase">OPERATING HOURS</p>
+                    <p class="text-xl font-light opacity-80">Daily: 08:00 — 22:00</p>
+                </div>
+            </div>
+            <button class="flex items-center gap-4 group text-white tracking-widest text-xs uppercase font-bold">
+                <span>VIEW ON MAP</span>
+                <div class="w-12 h-px bg-secondary group-hover:w-20 transition-all"></div>
+            </button>
+        </div>
+        <div class="lg:col-span-7 h-[600px] w-full bg-surface-container-highest relative overflow-hidden border border-white/5">
+            <img class="w-full h-full object-cover grayscale opacity-50" data-alt="Dark aesthetic aerial map of downtown Vancouver city blocks" data-location="Downtown Vancouver" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrO3s0h-Lw0dtj68kMC3UACOYTx7lGYXLT_xLbCbMqd7godiCpMvhvy1S6tm0ICNPUoCuDxs1SekOjhg9X8uBaVAgBcfwLtSqFKpEZ2zrqUg4rAS44kQCxaezNcDAadcUkFVNr2lrCbFDwDvaBT8mSuhl8IaM4x7IPbLY9-JTI-4hnHgdNYnXDj93Mc3e8wdNd14iSC_3CAYS5Q2TBWNSGEdxN9qjoZ8AE2wXt6EIan4-w2AbBGVTaJhlr7viXKqjJB3t85Mnkz4I"/>
+            <div class="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div class="w-4 h-4 bg-secondary rounded-full animate-ping absolute"></div>
+                <div class="w-4 h-4 bg-secondary rounded-full"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 5. CTA Section -->
+<section class="py-48 px-6 md:px-12 bg-white text-center">
+    <div class="max-w-4xl mx-auto space-y-12">
+        <span class="text-secondary font-label text-xs tracking-[0.2em] font-bold uppercase block">THE NEXT CHAPTER</span>
+        <h2 class="text-6xl md:text-8xl font-serif italic">Ready to Elevate <br/>Your Drive?</h2>
+        <p class="text-on-surface-variant text-lg font-light max-w-xl mx-auto">
+            Experience luxury without compromise. Reserve your next journey at the Vancouver Embassy today.
+        </p>
+        <div class="flex flex-col md:flex-row justify-center gap-8 pt-8">
+            <a asp-area="" asp-controller="Cars" asp-action="Index" class="bg-black text-white px-16 py-6 text-xs tracking-[0.2em] font-bold uppercase hover:bg-secondary transition-all inline-block">
+                BOOK A VEHICLE
+            </a>
+            <button class="border border-black px-16 py-6 text-xs tracking-[0.2em] font-bold uppercase hover:bg-black hover:text-white transition-all">
+                PRIVATE MEMBERSHIP
+            </button>
+        </div>
+    </div>
+</section>

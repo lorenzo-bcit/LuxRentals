@@ -1,37 +1,30 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
-<ul class="navbar-nav">
-    @if (SignInManager.IsSignedIn(User))
+@if (SignInManager.IsSignedIn(User))
+{
+    @if (!User.IsInRole("Admin"))
     {
-        @if (!User.IsInRole("Admin"))
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark"
-                   asp-controller="Profile"
-                   asp-action="Details"
-                   asp-route-id="@User.Identity?.Name">
-                    My Profile
-                </a>
-            </li>
-        }
-        <li class="nav-item">
-            <span class="nav-link text-dark" >Hello @User.Identity?.Name!</span>
-        </li>
-        <li class="nav-item">
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-            </form>
-        </li>
+        <a asp-controller="Profile" asp-action="Details" asp-route-id="@User.Identity?.Name" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">
+            My Profile
+        </a>
     }
-    else
-    {
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register" >Register</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-        </li>
-    }
-</ul>
+    <a asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">
+        Hello @User.Identity?.Name!
+    </a>
+    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" class="m-0 p-0 inline flex items-center">
+        <button type="submit" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300 bg-transparent border-none cursor-pointer">
+            Logout
+        </button>
+    </form>
+}
+else
+{
+    <a asp-area="Identity" asp-page="/Account/Register" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">
+        Registration
+    </a>
+    <a asp-area="Identity" asp-page="/Account/Login" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">
+        Login
+    </a>
+}

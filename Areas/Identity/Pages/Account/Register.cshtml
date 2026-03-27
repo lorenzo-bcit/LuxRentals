@@ -1,93 +1,75 @@
-﻿@page
+@page
 @model RegisterModel
 @{
     ViewData["Title"] = "Register";
 }
 <script src='https://www.google.com/recaptcha/api.js'></script>
 
-<div class="container">
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow">
-                <div class="card-body p-4">
-                    <h2 class="card-title text-center mb-4">@ViewData["Title"]</h2>
-                    <p class="text-center text-muted mb-4">Create a new account</p>
+<div class="min-h-screen pt-12 pb-24 flex items-center justify-center px-6 bg-surface">
+    <div class="w-full max-w-2xl bg-surface-container-lowest p-12 md:p-16 shadow-[0_40px_80px_rgba(0,0,0,0.03)] border border-outline-variant/10">
+        <div class="mb-12 text-center">
+            <h1 class="font-headline text-5xl font-black tracking-tighter mb-4">@ViewData["Title"]</h1>
+            <p class="font-body text-on-surface-variant text-sm uppercase tracking-[0.2rem]">Join the inner circle of automotive excellence</p>
+        </div>
 
-                    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="space-y-10">
+            <div asp-validation-summary="ModelOnly" class="text-error font-body text-sm mb-4" role="alert"></div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-floating mb-3">
-                                    <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" aria-required="true" placeholder="John" />
-                                    <label asp-for="Input.FirstName">First Name</label>
-                                    <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-floating mb-3">
-                                    <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" aria-required="true" placeholder="Doe" />
-                                    <label asp-for="Input.LastName">Last Name</label>
-                                    <span asp-validation-for="Input.LastName" class="text-danger small"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                            <label asp-for="Input.Email">Email</label>
-                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-floating mb-3">
-                                    <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" aria-required="true" placeholder=""/>
-                                    <label asp-for="Input.PhoneNumber">Phone Number</label>
-                                    <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-floating mb-3">
-                                    <input asp-for="Input.DriversLicenseNumber" class="form-control" aria-required="true"  placeholder="" />
-                                    <label asp-for="Input.DriversLicenseNumber">Driver's License</label>
-                                    <span asp-validation-for="Input.DriversLicenseNumber" class="text-danger small"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="" />
-                            <label asp-for="Input.Password">Password</label>
-                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder=""/>
-                            <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
-                        </div>
-
-                        <div class="g-recaptcha" data-sitekey='@ViewData["SiteKey"]'></div><br />
-
-                        <div class="d-grid mb-3">
-                            <button id="registerSubmit" type="submit" class="btn btn-primary btn-lg">Register</button>
-                        </div>
-
-                        <hr class="my-4" />
-
-                        <div class="text-center">
-                            <p class="mb-0">
-                                Already have an account?
-                                <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none">Log in</a>
-                            </p>
-                        </div>
-                    </form>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="relative">
+                    <label asp-for="Input.FirstName" class="block font-label text-[10px] font-bold uppercase tracking-[0.1rem] text-on-surface-variant mb-2">First Name</label>
+                    <input asp-for="Input.FirstName" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-2 focus:border-tertiary transition-colors duration-300 font-body text-on-surface" autocomplete="given-name" aria-required="true" placeholder="E.G. ALEXANDER" />
+                    <span asp-validation-for="Input.FirstName" class="text-error text-xs block mt-1"></span>
+                </div>
+                <div class="relative">
+                    <label asp-for="Input.LastName" class="block font-label text-[10px] font-bold uppercase tracking-[0.1rem] text-on-surface-variant mb-2">Last Name</label>
+                    <input asp-for="Input.LastName" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-2 focus:border-tertiary transition-colors duration-300 font-body text-on-surface" autocomplete="family-name" aria-required="true" placeholder="E.G. VANCE" />
+                    <span asp-validation-for="Input.LastName" class="text-error text-xs block mt-1"></span>
                 </div>
             </div>
-        </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="relative">
+                    <label asp-for="Input.Email" class="block font-label text-[10px] font-bold uppercase tracking-[0.1rem] text-on-surface-variant mb-2">Email</label>
+                    <input asp-for="Input.Email" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-2 focus:border-tertiary transition-colors duration-300 font-body text-on-surface" autocomplete="username" aria-required="true" placeholder="EMAIL@LUXURY.COM" />
+                    <span asp-validation-for="Input.Email" class="text-error text-xs block mt-1"></span>
+                </div>
+                <div class="relative">
+                    <label asp-for="Input.PhoneNumber" class="block font-label text-[10px] font-bold uppercase tracking-[0.1rem] text-on-surface-variant mb-2">Phone Number</label>
+                    <input asp-for="Input.PhoneNumber" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-2 focus:border-tertiary transition-colors duration-300 font-body text-on-surface" autocomplete="tel" aria-required="true" placeholder="+1 (604) 000-0000" />
+                    <span asp-validation-for="Input.PhoneNumber" class="text-error text-xs block mt-1"></span>
+                </div>
+            </div>
+
+            <div class="relative">
+                <label asp-for="Input.DriversLicenseNumber" class="block font-label text-[10px] font-bold uppercase tracking-[0.1rem] text-on-surface-variant mb-2">Driver's License Number</label>
+                <input asp-for="Input.DriversLicenseNumber" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-2 focus:border-tertiary transition-colors duration-300 font-body text-on-surface" aria-required="true" placeholder="ENTER LICENSE NUMBER" />
+                <span asp-validation-for="Input.DriversLicenseNumber" class="text-error text-xs block mt-1"></span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="relative">
+                    <label asp-for="Input.Password" class="block font-label text-[10px] font-bold uppercase tracking-[0.1rem] text-on-surface-variant mb-2">Password</label>
+                    <input asp-for="Input.Password" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-2 focus:border-tertiary transition-colors duration-300 font-body text-on-surface" autocomplete="new-password" aria-required="true" placeholder="••••••••" />
+                    <span asp-validation-for="Input.Password" class="text-error text-xs block mt-1"></span>
+                </div>
+                <div class="relative">
+                    <label asp-for="Input.ConfirmPassword" class="block font-label text-[10px] font-bold uppercase tracking-[0.1rem] text-on-surface-variant mb-2">Confirm Password</label>
+                    <input asp-for="Input.ConfirmPassword" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-2 focus:border-tertiary transition-colors duration-300 font-body text-on-surface" autocomplete="new-password" aria-required="true" placeholder="••••••••" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-error text-xs block mt-1"></span>
+                </div>
+            </div>
+
+            <div class="g-recaptcha my-6" data-sitekey='@ViewData["SiteKey"]'></div>
+
+            <button id="registerSubmit" type="submit" class="w-full py-6 luxury-gradient text-on-secondary-fixed font-label text-[12px] font-black uppercase tracking-[0.2rem] hover:opacity-90 transition-all duration-300 active:scale-[0.98]">
+                Register Account
+            </button>
+
+            <div class="pt-4 text-center">
+                <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="font-label text-[10px] font-bold uppercase tracking-[0.1rem] text-on-surface-variant hover:text-tertiary transition-colors">Already have an account? Log in</a>
+            </div>
+        </form>
     </div>
 </div>
 
