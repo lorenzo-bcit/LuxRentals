@@ -1,81 +1,76 @@
 @model IEnumerable<LuxRentals.ViewModels.Roles.RoleVm>
 @{
-    ViewData["Title"] = "User Roles";
+    ViewData["Title"] = "User Authority Levels";
 }
 
-<div class="admin-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2><i class="bi bi-person-lines-fill"></i> Roles for User</h2>
-            <p class="text-muted mb-0">
-                <i class="bi bi-envelope"></i> <strong>@ViewBag.UserName</strong>
-            </p>
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface">
+    <!-- Header -->
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-12">
+        <div class="max-w-xl">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Personnel Authority</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Credential Details</h1>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Managing high-level system permissions for <strong class="text-on-surface font-black lowercase">@ViewBag.UserName</strong></p>
         </div>
-        <a asp-action="Create" asp-route-userName="@ViewBag.UserEmail" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Assign Role
-        </a>
+        <div class="text-right">
+             <a asp-action="Create" asp-route-userName="@ViewBag.UserEmail" class="bg-black text-white text-center py-4 px-10 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-2xl">
+                Assign Credentials
+            </a>
+        </div>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <div class="mb-12 p-6 bg-secondary-container/10 border-l-4 border-secondary text-secondary text-xs uppercase tracking-widest font-bold" role="alert">@TempData["SuccessMessage"]</div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert">@TempData["ErrorMessage"]</div>
     }
 
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <table class="table table-hover admin-table mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">Role Name</th>
-                        <th scope="col" class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Any())
+    <div class="bg-surface-container-lowest border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.06)] overflow-hidden">
+        <table class="w-full text-left font-body text-xs border-collapse">
+            <thead>
+                <tr class="border-b border-outline-variant/20 bg-surface-container-low/30 font-label text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
+                    <th class="py-8 px-10">Assigned Privilege</th>
+                    <th class="py-8 px-10 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10">
+                @if (Model.Any())
+                {
+                    @foreach (var role in Model)
                     {
-                        @foreach (var role in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <span class="badge bg-info text-dark me-2">@role.RoleName</span>
-                                </td>
-                                <td class="text-end">
-                                    <a asp-action="Delete"
-                                       asp-route-email="@ViewBag.UserEmail"
-                                       asp-route-role="@role.RoleName"
-                                       class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-x-circle"></i> Remove
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="2" class="text-center text-muted py-4">
-                                This user has no roles assigned.
+                        <tr class="group hover:bg-surface-container-low/20 transition-colors duration-500">
+                            <td class="py-8 px-10">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+                                    <span class="font-headline font-bold text-lg uppercase tracking-tight">@role.RoleName</span>
+                                </div>
+                            </td>
+                            <td class="py-8 px-10 text-right">
+                                <a asp-action="Delete" asp-route-email="@ViewBag.UserEmail" asp-route-role="@role.RoleName" class="inline-flex items-center justify-center p-4 border border-error/20 text-error hover:bg-error hover:text-white transition-all opacity-0 group-hover:opacity-100 duration-500">
+                                    <span class="material-symbols-outlined text-sm">close</span>
+                                </a>
                             </td>
                         </tr>
                     }
-                </tbody>
-            </table>
-        </div>
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="2" class="py-24 text-center">
+                            <span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">This account currently lacks assigned authority levels.</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 
-    <div class="mt-3">
-        <a asp-action="Index" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Users
+    <div class="mt-12 flex justify-start">
+        <a asp-action="Index" class="flex items-center gap-3 border border-on-surface/20 px-8 py-4 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Directory
         </a>
     </div>
-</div>
+</main>
