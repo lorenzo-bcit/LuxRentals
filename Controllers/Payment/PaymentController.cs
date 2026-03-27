@@ -1,6 +1,7 @@
 ﻿using LuxRentals.Data;
 using LuxRentals.Repositories.Bookings;
 using LuxRentals.Services.Payment;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -25,6 +26,7 @@ namespace LuxRentals.Controllers.Payment
             _logger = logger;
         }
 
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Checkout(string orderId)
         {
             if (string.IsNullOrEmpty(orderId))
@@ -69,6 +71,8 @@ namespace LuxRentals.Controllers.Payment
         }
 
         [HttpPost]
+        [Authorize(Roles = "Customer")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Capture([FromBody] CaptureRequest request)
         {
             try
