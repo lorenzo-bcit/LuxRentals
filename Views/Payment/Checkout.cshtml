@@ -74,19 +74,25 @@
 @Html.AntiForgeryToken()
 
 <script>
-        paypal.Buttons({
+    paypal.Buttons({
 
         createOrder: function (data, actions) {
-            return "@ViewBag.OrderId"; // Placeholder order id replaced by server-side value
+            return "@ViewBag.OrderId";
         },
 
         onApprove: function (data, actions) {
+
+            document.getElementById("paypal-button-container").innerHTML = "<p>Processing payment...</p>";
+
             fetch("/Payment/Capture", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
-                }
+                },
+                body: JSON.stringify({
+                    orderId: data.orderID
+                })
             })
             .then(res => res.json())
             .then(data => {

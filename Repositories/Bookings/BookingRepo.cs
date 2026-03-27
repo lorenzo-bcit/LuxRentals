@@ -195,26 +195,29 @@ namespace LuxRentals.Repositories.Bookings
         }
 
         // Helper method to check booking availability and conflicts before creating a booking
-        public async Task<(bool Success, string? Message)> CheckBooking(int customerId, int carId, DateTime startDate, DateTime endDate)
+        public async Task<(bool Success, string? Message)> CheckBooking(
+            int customerId,
+            int carId,
+            DateTime startDate,
+            DateTime endDate)
         {
-            // Normalize to midnight UTC
+            // Normalize
             startDate = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
             endDate = DateTime.SpecifyKind(endDate.Date, DateTimeKind.Utc);
 
+            if (endDate <= startDate)
+                return (false, "Invalid date range.");
+
             bool isCarAvailable = await IsCarAvailable(carId, startDate, endDate);
             if (!isCarAvailable)
-            {
-                return (false, "Car is not avalible.");
-            }
+                return (false, "Car is not available.");
 
-            bool hasConflictingBooking = await HasConflictingBooking(customerId, startDate, endDate);
-            if(hasConflictingBooking)
-            {
+            bool hasConflict = await HasConflictingBooking(customerId, startDate, endDate);
+            if (hasConflict)
                 return (false, "You have a conflicting booking.");
-            }
+
             return (true, null);
         }
-
 
         public async Task SaveChanges()
         {
