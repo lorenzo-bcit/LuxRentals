@@ -31,6 +31,14 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
 
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Lockout settings.
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+});
+
 // Load .env into builder.Configuration
 builder.Configuration.AddDotNetEnv();
 

@@ -1,0 +1,30 @@
+@page
+@model LockoutModel
+@{
+    ViewData["Title"] = "Locked out";
+}
+
+<div class="grow flex items-center justify-center pt-12 pb-20 px-6">
+    <div class="w-full max-w-lg bg-surface-container-lowest p-12 md:p-16 shadow-[0_40px_60px_rgba(0,0,0,0.04)] text-center">
+        <header class="mb-12">
+            <div class="w-20 h-20 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-8">
+                <span class="material-symbols-outlined text-error text-4xl">lock</span>
+            </div>
+            <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-4">Account Locked</h1>
+            <p class="font-label text-xs uppercase tracking-[0.2em] text-outline">Security protocol engaged</p>
+        </header>
+
+        <div class="space-y-10">
+            <p class="font-body text-sm text-on-surface-variant leading-relaxed">
+                This account has been locked due to multiple failed login attempts. To protect your collection, access has been temporarily suspended.
+            </p>
+            
+            <div class="pt-8 border-t border-outline-variant/10">
+                <p class="font-label text-[10px] uppercase tracking-widest text-outline mb-8">Please try again later or contact our embassy.</p>
+                <a asp-page="./Login" class="inline-block py-4 px-12 bg-on-secondary-fixed text-tertiary-fixed font-headline text-sm font-bold tracking-tight hover:bg-black transition-colors duration-300">
+                    Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
