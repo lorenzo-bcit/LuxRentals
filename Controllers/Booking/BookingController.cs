@@ -1,4 +1,5 @@
 ﻿using LuxRentals.Repositories.Bookings;
+using LuxRentals.Repositories.Cars;
 using LuxRentals.Services.Payment;
 using LuxRentals.Utils;
 using LuxRentals.ViewModels.Bookings;
@@ -73,6 +74,14 @@ namespace LuxRentals.Controllers.Booking
                 var startDateTime = DateTime.SpecifyKind(model.StartDateTime.Date, DateTimeKind.Utc);
                 var endDateTime = DateTime.SpecifyKind(model.EndDateTime.Date, DateTimeKind.Utc);
 
+                var customerCanBook = await _bookingRepo.CheckBooking(customerId, carId, startDateTime, endDateTime);
+                if (!customerCanBook.Success)
+                {
+                    TempData["Error"] = customerCanBook.Message;
+                    SetCreateViewState(carId);
+                    return View(model);
+                }
+
                 var price = await _bookingRepo.CalculateBookingPrice(
                     carId,
                     startDateTime,
@@ -82,8 +91,11 @@ namespace LuxRentals.Controllers.Booking
                 HttpContext.Session.SetInt32("CustomerId", customerId);
                 HttpContext.Session.SetString("StartDate", startDateTime.ToString("o"));
                 HttpContext.Session.SetString("EndDate", endDateTime.ToString("o"));
+                HttpContext.Session.SetString("Price", price.ToString("F2"));
 
                 var orderId = await _paymentService.CreateOrderAsync(price, "CAD");
+
+                HttpContext.Session.SetString("OrderId", orderId);
 
                 return RedirectToAction(
                     "Checkout",
