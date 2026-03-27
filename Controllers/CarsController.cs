@@ -8,7 +8,7 @@ namespace LuxRentals.Controllers;
 
 public class CarsController : Controller
 {
-    private const int PAGE_SIZE = 5;
+    private const int PAGE_SIZE = 6;
     private const int DEFAULT_BOOKING_WINDOW_DAYS = 7;
     private const int MAX_SELECTABLE_SEATS = 10;
     private const int MAX_SELECTABLE_LUGGAGE = 10;

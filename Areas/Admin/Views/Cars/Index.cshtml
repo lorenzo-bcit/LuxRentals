@@ -9,7 +9,7 @@
     <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-12">
         <div class="max-w-xl">
             <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Asset Management</span>
-            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Fleet Repository</h1>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Fleet Registry</h1>
             <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Comprehensive control over the LuxRentals automotive collection. Manage specifications, collection inventory, and service status.</p>
         </div>
         <div class="flex flex-wrap gap-4 items-center justify-end">
@@ -20,7 +20,7 @@
             <div class="flex gap-4">
                 <a class="border border-on-surface/20 text-on-surface text-center py-4 px-8 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all" asp-area="Admin" asp-controller="Makes" asp-action="Index">Makes</a>
                 <a class="border border-on-surface/20 text-on-surface text-center py-4 px-8 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index">Classes</a>
-                <a class="bg-black text-white text-center py-4 px-10 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-2xl" asp-area="Admin" asp-controller="Cars" asp-action="Create">Repository New</a>
+                <a class="bg-black text-white text-center py-4 px-10 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-2xl" asp-area="Admin" asp-controller="Cars" asp-action="Create">Add New</a>
             </div>
         </div>
     </div>
@@ -38,13 +38,13 @@
     <form method="get" asp-area="Admin" asp-controller="Cars" asp-action="Index" class="space-y-16">
         <div class="group bg-surface-container-lowest p-12 shadow-[0_45px_100px_rgba(0,0,0,0.08)] border border-outline-variant/10 relative overflow-hidden">
              <div class="absolute top-0 right-0 w-64 h-64 bg-secondary/5 rounded-bl-full transform translate-x-24 -translate-y-24"></div>
-             
+
              <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                  <div class="space-y-2">
                     <label asp-for="SearchTerm" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Search Identifier</label>
                     <input asp-for="SearchTerm" class="ghost-input w-full uppercase tracking-widest text-xs" placeholder="PLATE, VIN, OR MODEL" />
                  </div>
-                 
+
                  <div class="space-y-2">
                     <label asp-for="StatusId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Inventory Status</label>
                     <select asp-for="StatusId" asp-items="Model.StatusOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
