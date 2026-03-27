@@ -11,19 +11,15 @@
         <div class="flex items-center justify-between relative max-w-3xl mx-auto">
             <div class="absolute top-1/2 left-0 w-full h-[1px] bg-outline-variant/30 -z-10"></div>
             <div class="flex flex-col items-center gap-2 bg-surface px-4">
-                <span class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-[10px] font-bold bg-white">1</span>
-                <span class="font-label text-[10px] tracking-[0.15rem] uppercase text-on-surface-variant hidden sm:block">Pick a time</span>
+                <span class="w-10 h-10 rounded-full bg-on-secondary-fixed text-secondary-fixed flex items-center justify-center text-[10px] font-bold scale-110 shadow-xl border border-secondary">1</span>
+                <span class="font-label text-[10px] tracking-[0.15rem] uppercase text-on-surface font-black hidden sm:block">Pick a Vehicle</span>
             </div>
             <div class="flex flex-col items-center gap-2 bg-surface px-4">
                 <span class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-[10px] font-bold bg-white">2</span>
-                <span class="font-label text-[10px] tracking-[0.15rem] uppercase text-on-surface-variant hidden sm:block">Pick a type</span>
-            </div>
-            <div class="flex flex-col items-center gap-2 bg-surface px-4">
-                <span class="w-10 h-10 rounded-full bg-on-secondary-fixed text-secondary-fixed flex items-center justify-center text-[10px] font-bold scale-110 shadow-xl border border-secondary">3</span>
-                <span class="font-label text-[10px] tracking-[0.15rem] uppercase text-on-surface font-black hidden sm:block">Pick a Vehicle</span>
+                <span class="font-label text-[10px] tracking-[0.15rem] uppercase text-on-surface-variant hidden sm:block">Pick a Date</span>
             </div>
             <div class="flex flex-col items-center gap-2 bg-surface px-4 opacity-40">
-                <span class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-[10px] font-bold bg-white">4</span>
+                <span class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-[10px] font-bold bg-white">3</span>
                 <span class="font-label text-[10px] tracking-[0.15rem] uppercase text-on-surface-variant hidden sm:block">Reserve</span>
             </div>
         </div>
@@ -43,7 +39,7 @@
     <form method="get" asp-action="Index" autocomplete="off" class="flex flex-col lg:flex-row gap-16">
         <!-- Sidebar Filters -->
         <aside class="w-full lg:w-72 flex-shrink-0 space-y-12">
-            
+
             <!-- Dates & Sort -->
             <div class="space-y-6">
                 <h3 class="font-label text-[11px] font-extrabold uppercase tracking-[0.2rem] text-on-surface">Reservation Details</h3>
@@ -66,7 +62,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div>
                 <div class="space-y-4">
                     <div>
@@ -84,7 +80,7 @@
             <!-- Filters -->
             <div>
                 <h3 class="font-label text-[11px] font-extrabold uppercase tracking-[0.2rem] mb-6 text-on-surface">Filters</h3>
-                
+
                 <div class="space-y-8">
                     <!-- Max Rate -->
                     <div>
@@ -234,7 +230,7 @@
                         <span class="font-label text-[10px] uppercase tracking-[0.2rem] font-bold text-on-surface">Page @Model.Page of @Model.TotalPages</span>
 
                         <button type="submit" name="Page" value="@(Model.Page + 1)" class="w-12 h-12 rounded-full border border-on-surface flex items-center justify-center hover:bg-on-surface hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-on-surface" @(Model.HasNextPage ? "" : "disabled") aria-disabled="@(!Model.HasNextPage)">
-                            <span class="material-symbols-outlined text-sm">arrow_forward_ios_new</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
                         </button>
                     </div>
                 }
