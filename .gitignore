@@ -787,3 +787,6 @@ coverage*[.json, .xml, .info]
 
 # Ionide (cross platform F# VS Code tools) working folder
 
+# Tailwind Standalone
+tailwindcss
+.tailwindcss/

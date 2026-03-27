@@ -5,109 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"] - LuxRentals</title>
     <script type="importmap"></script>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "on-error-container": "#93000a",
-                        "secondary-container": "#fed488",
-                        "surface-container-low": "#f3f3f4",
-                        "tertiary-fixed-dim": "#e9c176",
-                        "on-primary": "#ffffff",
-                        "on-tertiary-container": "#4e3700",
-                        "primary-fixed": "#e2e2e2",
-                        "on-secondary-fixed": "#261900",
-                        "on-primary-container": "#3b3b3b",
-                        "tertiary-fixed": "#ffdea5",
-                        "on-background": "#1a1c1c",
-                        "tertiary": "#775a19",
-                        "on-secondary": "#ffffff",
-                        "surface-dim": "#dadada",
-                        "primary-fixed-dim": "#c6c6c6",
-                        "on-error": "#ffffff",
-                        "error": "#ba1a1a",
-                        "secondary": "#775a19",
-                        "surface": "#f9f9f9",
-                        "on-tertiary-fixed-variant": "#5d4201",
-                        "error-container": "#ffdad6",
-                        "surface-container": "#eeeeee",
-                        "primary": "#5e5e5e",
-                        "surface-container-lowest": "#ffffff",
-                        "on-surface-variant": "#4e4639",
-                        "on-primary-fixed-variant": "#474747",
-                        "secondary-fixed-dim": "#e9c176",
-                        "on-surface": "#1a1c1c",
-                        "inverse-on-surface": "#f0f1f1",
-                        "inverse-primary": "#c6c6c6",
-                        "surface-tint": "#5e5e5e",
-                        "on-primary-fixed": "#1b1b1b",
-                        "on-secondary-fixed-variant": "#5d4201",
-                        "on-secondary-container": "#785a1a",
-                        "secondary-fixed": "#ffdea5",
-                        "surface-container-highest": "#e2e2e2",
-                        "on-tertiary-fixed": "#261900",
-                        "tertiary-container": "#c5a059",
-                        "inverse-surface": "#2f3131",
-                        "primary-container": "#a5a5a5",
-                        "surface-variant": "#e2e2e2",
-                        "outline": "#7f7667",
-                        "on-tertiary": "#ffffff",
-                        "background": "#f9f9f9",
-                        "surface-container-high": "#e8e8e8",
-                        "surface-bright": "#f9f9f9",
-                        "outline-variant": "#d1c5b4"
-                    },
-                    fontFamily: {
-                        "headline": ["Noto Serif"],
-                        "body": ["Manrope"],
-                        "label": ["Manrope"]
-                    },
-                    borderRadius: { "DEFAULT": "0rem", "lg": "0rem", "xl": "0rem", "full": "9999px" },
-                },
-            },
-        }
-    </script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-        }
-        .bg-gold-gradient {
-            background: linear-gradient(to right, #775a19, #c5a059);
-        }
-        .luxury-gradient {
-            background: linear-gradient(to right, #775a19, #c5a059);
-        }
-        .editorial-shadow {
-            box-shadow: 0 20px 60px rgba(26, 28, 28, 0.04);
-        }
-        .text-kern {
-            letter-spacing: 0.3em;
-        }
-        .no-line { border: none !important; }
-        .ghost-input {
-            border: none;
-            border-bottom: 1px solid rgba(127, 118, 103, 0.2);
-            border-radius: 0;
-            padding-left: 0;
-            padding-right: 0;
-        }
-        .ghost-input:focus {
-            outline: none;
-            border-bottom: 1px solid #775a19;
-            box-shadow: none;
-        }
-        input:focus {
-            outline: none !important;
-            box-shadow: none !important;
-        }
-    </style>
-    
+    <link rel="stylesheet" href="~/css/tailwind.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/LuxRentals.styles.css" asp-append-version="true"/>
 </head>
