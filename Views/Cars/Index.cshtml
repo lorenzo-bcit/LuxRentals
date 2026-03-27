@@ -1,209 +1,253 @@
 @model LuxRentals.ViewModels.Cars.CarBrowseVm
 
 @{
-    ViewData["Title"] = "Cars";
+    ViewData["Title"] = "Fleet Inventory";
     var minBrowseDate = Model.MinBrowseDate;
 }
 
-<section class="container py-4">
-    <form method="get" asp-action="Index" autocomplete="off">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 p-3 bg-light border rounded">
-            <h1 class="cars-toolbar-title">Choose your options below</h1>
-            <div class="cars-sort">
-                <label asp-for="SortBy" class="form-label">Sort by</label>
-                <select asp-for="SortBy" class="form-select" onchange="this.form.submit()">
-                    <option value="price_asc">Price: Low to High</option>
-                    <option value="price_desc">Price: High to Low</option>
-                    <option value="year_desc">Year: Newest First</option>
-                    <option value="year_asc">Year: Oldest First</option>
-                </select>
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12">
+    <!-- Progress Indicator -->
+    <div class="mb-16">
+        <div class="flex items-center justify-between relative max-w-3xl mx-auto">
+            <div class="absolute top-1/2 left-0 w-full h-[1px] bg-outline-variant/30 -z-10"></div>
+            <div class="flex flex-col items-center gap-2 bg-surface px-4">
+                <span class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-[10px] font-bold bg-white">1</span>
+                <span class="font-label text-[10px] tracking-[0.15rem] uppercase text-on-surface-variant hidden sm:block">Pick a time</span>
+            </div>
+            <div class="flex flex-col items-center gap-2 bg-surface px-4">
+                <span class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-[10px] font-bold bg-white">2</span>
+                <span class="font-label text-[10px] tracking-[0.15rem] uppercase text-on-surface-variant hidden sm:block">Pick a type</span>
+            </div>
+            <div class="flex flex-col items-center gap-2 bg-surface px-4">
+                <span class="w-10 h-10 rounded-full bg-on-secondary-fixed text-secondary-fixed flex items-center justify-center text-[10px] font-bold scale-110 shadow-xl border border-secondary">3</span>
+                <span class="font-label text-[10px] tracking-[0.15rem] uppercase text-on-surface font-black hidden sm:block">Pick a Vehicle</span>
+            </div>
+            <div class="flex flex-col items-center gap-2 bg-surface px-4 opacity-40">
+                <span class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-[10px] font-bold bg-white">4</span>
+                <span class="font-label text-[10px] tracking-[0.15rem] uppercase text-on-surface-variant hidden sm:block">Reserve</span>
             </div>
         </div>
+    </div>
 
-        <div class="row g-3 mb-3">
-            <div class="col-md-6">
-                <label asp-for="StartDate" class="form-label">Pick-up</label>
-                <input asp-for="StartDate"
-                       type="date"
-                       class="form-control"
-                       min="@minBrowseDate"
-                       value="@Model.StartDate?.ToString("yyyy-MM-dd")"
-                       onchange="updateDateBounds(this.form); submitIfBothDatesSelected(this.form)" />
-            </div>
-            <div class="col-md-6">
-                <label asp-for="EndDate" class="form-label">Drop-off</label>
-                <input asp-for="EndDate"
-                       type="date"
-                       class="form-control"
-                       min="@minBrowseDate"
-                       value="@Model.EndDate?.ToString("yyyy-MM-dd")"
-                       onchange="updateDateBounds(this.form); submitIfBothDatesSelected(this.form)" />
-            </div>
+    <!-- Page Title & Stats -->
+    <div class="flex justify-between items-end mb-12 border-b border-outline-variant/20 pb-8">
+        <div>
+            <span class="font-label text-[10px] tracking-[0.3rem] uppercase text-secondary mb-2 block">Premium Selection</span>
+            <h1 class="font-headline text-4xl md:text-5xl font-black tracking-tighter uppercase">Fleet Inventory</h1>
         </div>
-        <div class="row g-3">
-            <aside class="col-lg-3">
-                <div class="card p-3 row-gap-2">
-                    <h2>Filters</h2>
+        <div class="text-right">
+            <span class="font-label text-[10px] tracking-widest uppercase text-on-surface-variant">Available Vehicles</span>
+        </div>
+    </div>
 
-                    <div class="cars-filter-block">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <label asp-for="MaxRate" class="form-label mb-0">Max daily rate</label>
-                            <span class="fw-semibold" id="maxRateDisplay">CAD @Model.MaxRate?.ToString("0")</span>
+    <form method="get" asp-action="Index" autocomplete="off" class="flex flex-col lg:flex-row gap-16">
+        <!-- Sidebar Filters -->
+        <aside class="w-full lg:w-72 flex-shrink-0 space-y-12">
+            
+            <!-- Dates & Sort -->
+            <div class="space-y-6">
+                <h3 class="font-label text-[11px] font-extrabold uppercase tracking-[0.2rem] text-on-surface">Reservation Details</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label asp-for="StartDate" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Pick-up</label>
+                        <input asp-for="StartDate" type="date"
+                               class="ghost-input w-full uppercase tracking-widest text-xs"
+                               min="@minBrowseDate"
+                               value="@Model.StartDate?.ToString("yyyy-MM-dd")"
+                               onchange="updateDateBounds(this.form); submitIfBothDatesSelected(this.form)" />
+                    </div>
+                    <div>
+                        <label asp-for="EndDate" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Drop-off</label>
+                        <input asp-for="EndDate" type="date"
+                               class="ghost-input w-full uppercase tracking-widest text-xs"
+                               min="@minBrowseDate"
+                               value="@Model.EndDate?.ToString("yyyy-MM-dd")"
+                               onchange="updateDateBounds(this.form); submitIfBothDatesSelected(this.form)" />
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="space-y-4">
+                    <div>
+                        <label asp-for="SortBy" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Sort By</label>
+                        <select asp-for="SortBy" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="this.form.submit()">
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="price_desc">Price: High to Low</option>
+                            <option value="year_desc">Year: Newest First</option>
+                            <option value="year_asc">Year: Oldest First</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div>
+                <h3 class="font-label text-[11px] font-extrabold uppercase tracking-[0.2rem] mb-6 text-on-surface">Filters</h3>
+                
+                <div class="space-y-8">
+                    <!-- Max Rate -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label asp-for="MaxRate" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Max Daily Rate</label>
+                            <span class="font-label text-[10px] font-bold text-secondary" id="maxRateDisplay">CAD @Model.MaxRate?.ToString("0")</span>
                         </div>
-                        <input asp-for="MaxRate"
-                               type="range"
-                               class="form-range mt-2"
-                               min="0"
-                               max="@Model.MaxSelectableRate.ToString("0")"
-                               step="5"
+                        <input asp-for="MaxRate" type="range" class="w-full accent-[#C5A059]" min="0" max="@Model.MaxSelectableRate.ToString("0")" step="5"
                                oninput="document.getElementById('maxRateDisplay').innerText = 'CAD ' + this.value"
                                onchange="this.form.submit()" />
                     </div>
 
-                    <div class="cars-filter-block">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <label asp-for="MinSeats" class="form-label mb-0">Minimum seats</label>
-                            <span class="fw-semibold" id="seatsDisplay">@(Model.MinSeats)</span>
+                    <!-- Min Seats -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label asp-for="MinSeats" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Minimum Seats</label>
+                            <span class="font-label text-[10px] font-bold text-secondary" id="seatsDisplay">@(Model.MinSeats)</span>
                         </div>
-                        <input asp-for="MinSeats"
-                               type="range"
-                               class="form-range mt-2"
-                               min="0"
-                               max="@Model.MaxSelectableSeats"
-                               step="1"
+                        <input asp-for="MinSeats" type="range" class="w-full accent-[#C5A059]" min="0" max="@Model.MaxSelectableSeats" step="1"
                                oninput="document.getElementById('seatsDisplay').innerText = this.value"
                                onchange="this.form.submit()" />
                     </div>
 
-                    <div class="cars-filter-block">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <label asp-for="MinLuggage" class="form-label mb-0">Minimum luggage</label>
-                            <span class="fw-semibold" id="luggageDisplay">@(Model.MinLuggage)</span>
+                    <!-- Min Luggage -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label asp-for="MinLuggage" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Minimum Bags</label>
+                            <span class="font-label text-[10px] font-bold text-secondary" id="luggageDisplay">@(Model.MinLuggage)</span>
                         </div>
-                        <input asp-for="MinLuggage"
-                               type="range"
-                               class="form-range mt-2"
-                               min="0"
-                               max="@Model.MaxSelectableLuggage"
-                               step="1"
+                        <input asp-for="MinLuggage" type="range" class="w-full accent-[#C5A059]" min="0" max="@Model.MaxSelectableLuggage" step="1"
                                oninput="document.getElementById('luggageDisplay').innerText = this.value"
                                onchange="this.form.submit()" />
                     </div>
 
-                    <div class="cars-filter-block">
-                        <label asp-for="MakeId" class="form-label fw-semibold">Make</label>
-                        <select asp-for="MakeId" asp-items="Model.MakeOptions" class="form-select" onchange="this.form.submit()"></select>
+                    <!-- Make -->
+                    <div>
+                        <label asp-for="MakeId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Make</label>
+                        <select asp-for="MakeId" asp-items="Model.MakeOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="this.form.submit()"></select>
                     </div>
 
-                    <div class="cars-filter-block">
-                        <label asp-for="VehicleClassId" class="form-label fw-semibold">Vehicle Type</label>
-                        <select asp-for="VehicleClassId" asp-items="Model.VehicleClassOptions" class="form-select" onchange="this.form.submit()"></select>
+                    <!-- Vehicle Type -->
+                    <div>
+                        <label asp-for="VehicleClassId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Vehicle Type</label>
+                        <select asp-for="VehicleClassId" asp-items="Model.VehicleClassOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="this.form.submit()"></select>
                     </div>
 
-                    <div class="cars-filter-block">
-                        <label asp-for="FuelTypeId" class="form-label fw-semibold">Fuel Type</label>
-                        <select asp-for="FuelTypeId" asp-items="Model.FuelTypeOptions" class="form-select" onchange="this.form.submit()"></select>
+                    <!-- Fuel Type -->
+                    <div>
+                        <label asp-for="FuelTypeId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Fuel Type</label>
+                        <select asp-for="FuelTypeId" asp-items="Model.FuelTypeOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="this.form.submit()"></select>
                     </div>
 
-                    <div class="cars-filter-block">
-                        <label asp-for="TransmissionType" class="form-label fw-semibold">Transmission</label>
-                        <select asp-for="TransmissionType" class="form-select" onchange="this.form.submit()">
+                    <!-- Transmission Type -->
+                    <div>
+                        <label asp-for="TransmissionType" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Transmission</label>
+                        <select asp-for="TransmissionType" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="this.form.submit()">
                             <option value="">Any</option>
                             <option value="1">Automatic</option>
                             <option value="0">Manual</option>
                         </select>
                     </div>
 
-                    <div class="d-grid gap-2">
-                        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+                    <!-- Clear Filters -->
+                    <div class="pt-4 border-t border-outline-variant/20">
+                        <a asp-action="Index" class="border border-on-surface text-center block w-full uppercase tracking-widest font-bold text-[10px] py-4 hover:bg-on-surface hover:text-white transition-colors">Clear Filters</a>
                     </div>
                 </div>
-            </aside>
+            </div>
+        </aside>
 
-            <div class="col-lg-9 d-flex flex-column gap-3">
-                @if (Model.Cars.Count == 0)
-                {
-                    <div class="alert alert-secondary">@Model.EmptyStateMessage</div>
-                }
-                else
-                {
+        <!-- Vehicle Grid -->
+        <div class="flex-grow">
+            @if (Model.Cars.Count == 0)
+            {
+                <div class="bg-surface-container-high p-12 text-center border border-outline-variant/20">
+                    <span class="material-symbols-outlined text-6xl text-secondary mb-4">no_crash</span>
+                    <h3 class="font-headline text-2xl font-bold mb-2">No Vehicles Found</h3>
+                    <p class="font-label text-sm text-on-surface-variant max-w-md mx-auto">@Model.EmptyStateMessage</p>
+                    <a asp-action="Index" class="mt-8 bg-black text-white px-8 py-3 uppercase tracking-widest text-[10px] font-bold shadow-xl inline-block hover:bg-secondary transition-colors">Reset Criteria</a>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                     @foreach (var car in Model.Cars)
                     {
-                        <div class="card p-3">
-                            <div class="row align-items-center g-3">
-                                <div class="col-auto">
-                                    <div class="bg-light border d-flex justify-content-center align-items-center overflow-hidden"
-                                         style="width: 150px; aspect-ratio: 3 / 2;">
-                                        @if (!string.IsNullOrWhiteSpace(car.Thumbnail))
-                                        {
-                                            <img src="@car.Thumbnail"
-                                                 alt="@car.Subtitle"
-                                                 class="img-fluid"
-                                                 style="width: 100%; height: 100%; object-fit: cover;" />
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">No image</span>
-                                        }
+                        <div class="group bg-surface-container-lowest overflow-hidden transition-all duration-500 hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)] border border-transparent hover:border-outline-variant/30 flex flex-col h-full relative">
+                            <div class="relative h-64 bg-surface-container overflow-hidden">
+                                @if (true)
+                                {
+                                    @* Temporarily forced placeholder image per user instructions *@
+                                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 mix-blend-multiply" src="https://via.placeholder.com/600x400/eeeeee/999999?text=Vehicle+Image" alt="@car.Subtitle" />
+                                }
+                                <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-4 py-1 shadow-sm">
+                                    <span class="font-label text-[9px] font-black uppercase tracking-[0.2rem] text-black">@car.Transmission</span>
+                                </div>
+                            </div>
+                            <!-- Card Content - Grows to push button down -->
+                            <div class="p-8 flex flex-col flex-grow">
+                                <div class="mb-6 flex-grow">
+                                    <span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-1 block">@car.Subtitle</span>
+                                    <h3 class="font-headline text-2xl font-bold tracking-tight">@car.Title</h3>
+                                </div>
+                                <!-- Highlights -->
+                                <div class="grid grid-cols-3 gap-2 mb-8 border-t border-b border-outline-variant/20 py-6">
+                                    <div>
+                                        <span class="font-label text-[9px] uppercase tracking-tighter text-on-surface-variant block mb-1">Fuel</span>
+                                        <span class="font-body text-xs font-bold uppercase truncate px-1">@car.FuelType</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-label text-[9px] uppercase tracking-tighter text-on-surface-variant block mb-1">Capacity</span>
+                                        <span class="font-body text-xs font-bold uppercase">@car.Seats Pax</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-label text-[9px] uppercase tracking-tighter text-on-surface-variant block mb-1">Luggage</span>
+                                        <span class="font-body text-xs font-bold uppercase">@car.Luggage Bags</span>
                                     </div>
                                 </div>
-
-                                <div class="col">
-                                    <h3 class="mb-1">@car.Title</h3>
-                                    <p class="mb-1 fw-semibold">@car.Subtitle</p>
-                                    <p class="mb-1 text-muted">
-                                        @car.Transmission • @car.Seats person • @car.Luggage bags • @car.FuelType
-                                    </p>
-                                </div>
-
-                                <div class="col-auto text-end">
-                                    <div class="fw-semibold">Daily Rate</div>
-                                    <div class="text-muted small">CAD</div>
-                                    <div class="fs-3 fw-bold">@car.DailyRate.ToString("0.00")</div>
+                                <!-- Bottom actionable row -->
+                                <div class="flex flex-col sm:flex-row items-baseline sm:items-center justify-between mt-auto gap-4">
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="font-headline text-2xl font-black text-secondary">@car.DailyRate.ToString("0.00")</span>
+                                        <span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">CAD / day</span>
+                                    </div>
                                     <a asp-controller="Booking"
                                        asp-action="Create"
                                        asp-route-carId="@car.CarId"
                                        asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
                                        asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
-                                       class="btn btn-secondary btn-sm mt-1">
-                                        Book
+                                       class="w-full sm:w-auto bg-black text-white px-6 py-3 text-center font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors">
+                                        Select
                                     </a>
                                 </div>
                             </div>
                         </div>
                     }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="mt-20 flex justify-center items-center gap-6">
+                        <button type="submit" name="Page" value="@(Model.Page - 1)" class="w-12 h-12 rounded-full border border-on-surface flex items-center justify-center hover:bg-on-surface hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-on-surface" @(Model.HasPreviousPage ? "" : "disabled") aria-disabled="@(!Model.HasPreviousPage)">
+                            <span class="material-symbols-outlined text-sm">arrow_back_ios_new</span>
+                        </button>
+
+                        <span class="font-label text-[10px] uppercase tracking-[0.2rem] font-bold text-on-surface">Page @Model.Page of @Model.TotalPages</span>
+
+                        <button type="submit" name="Page" value="@(Model.Page + 1)" class="w-12 h-12 rounded-full border border-on-surface flex items-center justify-center hover:bg-on-surface hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-on-surface" @(Model.HasNextPage ? "" : "disabled") aria-disabled="@(!Model.HasNextPage)">
+                            <span class="material-symbols-outlined text-sm">arrow_forward_ios_new</span>
+                        </button>
+                    </div>
                 }
-
-                <nav aria-label="Cars pages" class="cars-pagination align-self-center">
-                    <button type="submit"
-                            name="Page"
-                            value="@(Model.Page - 1)"
-                            class="btn btn-outline-dark rounded-circle @(Model.HasPreviousPage ? "" : "disabled")"
-                            aria-disabled="@(!Model.HasPreviousPage)"
-                            @(Model.HasPreviousPage ? null : "disabled")>
-                        &lt;
-                    </button>
-
-                    <span class="cars-page-label mx-lg-2">Page @Model.Page of @Model.TotalPages</span>
-
-                    <button type="submit"
-                            name="Page"
-                            value="@(Model.Page + 1)"
-                            class="btn btn-outline-dark rounded-circle @(Model.HasNextPage ? "" : "disabled")"
-                            aria-disabled="@(!Model.HasNextPage)"
-                            @(Model.HasNextPage ? null : "disabled")>
-                        &gt;
-                    </button>
-                </nav>
-            </div>
+            }
         </div>
     </form>
-</section>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         function addDays(dateString, days) {
+            if(!dateString) return;
             const [year, month, day] = dateString.split('-').map(Number);
             const date = new Date(Date.UTC(year, month - 1, day));
             date.setUTCDate(date.getUTCDate() + days);
