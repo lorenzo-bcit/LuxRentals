@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LuxRentals.ViewModels.Roles
 {
-    public class ProfileVM
+    public class ProfileVm
     {
         [Key]
         [HiddenInput]
@@ -14,29 +14,32 @@ namespace LuxRentals.ViewModels.Roles
         public string UserId { get; set; } = null!;
 
         [Required(ErrorMessage = "First name is required.")]
-        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters.")]
+        [StringLength(40, ErrorMessage = "First name cannot exceed 40 characters.")]
+        [RegularExpression(@"^[a-zA-Z\s'-]+$", ErrorMessage = "First name can only contain letters, spaces, hyphens, and apostrophes.")]
         [Display(Name = "First Name")]
         public string FirstName { get; set; } = null!;
 
         [Required(ErrorMessage = "Last name is required.")]
-        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters.")]
+        [StringLength(40, ErrorMessage = "Last name cannot exceed 40 characters.")]
+        [RegularExpression(@"^[a-zA-Z\s'-]+$", ErrorMessage = "Last name can only contain letters, spaces, hyphens, and apostrophes.")]
         [Display(Name = "Last Name")]
         public string LastName { get; set; } = null!;
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
-        [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters.")]
+        [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters.")]
         [Display(Name = "Email Address")]
         public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "Phone number is required.")]
-        [Phone(ErrorMessage = "Please enter a valid phone number.")]
-        [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters.")]
+        [RegularExpression(@"^\+?[1-9]\d{1,14}$", ErrorMessage = "Please enter a valid phone number (10-15 digits).")]
+        [StringLength(15, MinimumLength = 10, ErrorMessage = "Phone number must be between 10 and 15 digits.")]
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; } = null!;
 
         [Required(ErrorMessage = "Driver licence number is required.")]
-        [StringLength(30, ErrorMessage = "Driver licence number cannot exceed 30 characters.")]
+        [StringLength(10, ErrorMessage = "Driver licence number cannot exceed 10 characters.")]
+        [RegularExpression(@"^[A-Z0-9]+$", ErrorMessage = "Driver licence number can only contain uppercase letters and numbers.")]
         [Display(Name = "Driver Licence Number")]
         public string DriverLicenceNo { get; set; } = null!;
     }

@@ -5,14 +5,17 @@
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
-        <li class="nav-item">
-            <a class="nav-link text-dark"
+        @if (!User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark"
                    asp-controller="Profile"
                    asp-action="Details"
                    asp-route-id="@User.Identity?.Name">
-                My Profile
-            </a>
-        </li>
+                    My Profile
+                </a>
+            </li>
+        }
         <li class="nav-item">
             <span class="nav-link text-dark" >Hello @User.Identity?.Name!</span>
         </li>
