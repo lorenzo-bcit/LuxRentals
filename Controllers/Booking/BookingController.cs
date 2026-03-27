@@ -91,8 +91,11 @@ namespace LuxRentals.Controllers.Booking
                 HttpContext.Session.SetInt32("CustomerId", customerId);
                 HttpContext.Session.SetString("StartDate", startDateTime.ToString("o"));
                 HttpContext.Session.SetString("EndDate", endDateTime.ToString("o"));
+                HttpContext.Session.SetString("Price", price.ToString("F2"));
 
                 var orderId = await _paymentService.CreateOrderAsync(price, "CAD");
+
+                HttpContext.Session.SetString("OrderId", orderId);
 
                 return RedirectToAction(
                     "Checkout",
