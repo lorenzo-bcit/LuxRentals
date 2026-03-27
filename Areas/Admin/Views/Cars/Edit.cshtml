@@ -1,111 +1,112 @@
 @model LuxRentals.ViewModels.Cars.Admin.CarEditVm
 
 @{
-    ViewData["Title"] = "Edit Car";
+    ViewData["Title"] = "Modify Asset Record";
 }
 
-<section class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="mb-1">Edit Car</h1>
-            <p class="text-muted mb-0">Update the selected inventory record.</p>
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface">
+    <!-- Header -->
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-12">
+        <div class="max-w-xl">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Technical Archive</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Modify Asset</h1>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Updating the master technical specifications and availability status for the selected automotive asset.</p>
         </div>
-        <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Cars" asp-action="Index">Back to Inventory</a>
+        <div class="text-right">
+             <a asp-area="Admin" asp-controller="Cars" asp-action="Index" class="flex items-center gap-3 border border-on-surface/20 px-8 py-4 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                Inventory Archive
+            </a>
+        </div>
     </div>
 
     @if (TempData["StatusMessage"] is string statusMessage)
     {
-        <div class="alert alert-success">@statusMessage</div>
+        <div class="mb-12 p-6 bg-secondary-container/10 border-l-4 border-secondary text-secondary text-xs uppercase tracking-widest font-bold" role="alert">@statusMessage</div>
     }
-
-    @if (TempData["Success"] is string successMessage)
-    {
-        <div class="alert alert-success">@successMessage</div>
-    }
-
     @if (TempData["ErrorMessage"] is string errorMessage)
     {
-        <div class="alert alert-danger">@errorMessage</div>
+        <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert">@errorMessage</div>
     }
 
-    @if (TempData["Error"] is string error)
-    {
-        <div class="alert alert-danger">@error</div>
-    }
+    <!-- Workspace -->
+    <div class="bg-surface-container-lowest p-10 md:p-16 border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.08)] relative overflow-hidden mb-24">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-secondary/5 rounded-bl-full transform translate-x-32 -translate-y-32"></div>
+        
+        <form method="post" enctype="multipart/form-data" asp-area="Admin" asp-controller="Cars" asp-action="Edit" asp-route-id="@Model.CarId" class="relative z-10 space-y-16">
+            <input asp-for="CarId" type="hidden" />
+            <partial name="_CarForm" model="Model" />
 
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
-            <form method="post" enctype="multipart/form-data" asp-area="Admin" asp-controller="Cars" asp-action="Edit" asp-route-id="@Model.CarId">
-                <input asp-for="CarId" type="hidden" />
-                <partial name="_CarForm" model="Model" />
-
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Cars" asp-action="Index">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
+            <div class="pt-16 border-t border-outline-variant/10 flex flex-col sm:flex-row justify-end gap-6">
+                 <a asp-action="Index" class="border border-on-surface px-12 py-5 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-on-surface hover:text-white transition-all text-center">
+                    Discard Changes
+                </a>
+                <button type="submit" class="bg-black text-white px-16 py-5 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-2xl">
+                    Save Metadata
+                </button>
+            </div>
+        </form>
     </div>
 
+    <!-- Linked Reservations -->
     @if (Model.ActiveOrUpcomingBookings.Count > 0)
     {
-        <div class="card border-warning shadow-sm mt-4">
-            <div class="card-body p-4">
-                <h2 class="h5 mb-2">Current and Upcoming Bookings</h2>
+        <div class="space-y-12">
+            <div class="flex items-center justify-between">
+                <h2 class="font-headline text-2xl font-black uppercase tracking-tight">Contractual Obligations</h2>
+                <div class="h-px flex-grow bg-outline-variant/20 mx-8"></div>
+            </div>
 
-                <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
+            <div class="bg-surface-container-lowest border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.06)] overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left font-body text-xs border-collapse">
                         <thead>
-                            <tr>
-                                <th>Status</th>
-                                <th>Customer</th>
-                                <th>Pickup</th>
-                                <th>Return</th>
-                                <th class="text-end">Actions</th>
+                            <tr class="border-b border-outline-variant/20 bg-surface-container-low/30 font-label text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
+                                <th class="py-8 px-10">Occupancy Status</th>
+                                <th class="py-8 px-10">Contract Holder</th>
+                                <th class="py-8 px-10">Collection Window</th>
+                                <th class="py-8 px-10 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                        @foreach (var booking in Model.ActiveOrUpcomingBookings)
-                        {
-                            <tr>
-                                <td>
-                                    <span class="badge @(booking.IsActive ? "bg-primary" : "bg-success")">
-                                        @(booking.IsActive ? "Active" : "Upcoming")
-                                    </span>
-                                </td>
-                                <td>
-                                    <a asp-area=""
-                                       asp-controller="Booking"
-                                       asp-action="ViewCustomerBookings"
-                                       asp-route-customerId="@booking.CustomerId"
-                                       target="_blank"
-                                       rel="noopener noreferrer"
-                                       class="text-decoration-none">
-                                        @booking.CustomerName
-                                        <i class="bi bi-box-arrow-up-right ms-1 small"></i>
-                                    </a>
-                                </td>
-                                <td>@booking.StartDate.ToString("yyyy-MM-dd")</td>
-                                <td>@booking.EndDate.ToString("yyyy-MM-dd")</td>
-                                <td class="text-end">
-                                    <a class="btn btn-outline-danger btn-sm"
-                                       asp-area=""
-                                       asp-controller="Booking"
-                                       asp-action="Cancel"
-                                       asp-route-id="@booking.BookingId"
-                                       asp-route-returnCarId="@Model.CarId">
-                                        Delete Booking
-                                    </a>
-                                </td>
-                            </tr>
-                        }
+                        <tbody class="divide-y divide-outline-variant/10">
+                            @foreach (var booking in Model.ActiveOrUpcomingBookings)
+                            {
+                                <tr class="group hover:bg-surface-container-low/20 transition-colors duration-500">
+                                    <td class="py-8 px-10">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-2 h-2 rounded-full @(booking.IsActive ? "bg-secondary" : "bg-on-surface/30")"></div>
+                                            <span class="font-label text-[9px] font-black uppercase tracking-widest @(booking.IsActive ? "text-secondary" : "text-on-surface-variant")">
+                                                @(booking.IsActive ? "Active Engagement" : "Upcoming Reservation")
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="py-8 px-10">
+                                        <a asp-area="" asp-controller="Booking" asp-action="ViewCustomerBookings" asp-route-customerId="@booking.CustomerId" target="_blank" rel="noopener noreferrer" class="font-headline text-lg font-bold group-hover:text-secondary transition-colors inline-flex items-center gap-2">
+                                            @booking.CustomerName
+                                            <span class="material-symbols-outlined text-sm opacity-50 group-hover:opacity-100">open_in_new</span>
+                                        </a>
+                                    </td>
+                                    <td class="py-8 px-10 font-label text-[10px] uppercase tracking-widest">
+                                        <div class="flex items-center gap-4 text-on-surface-variant">
+                                            <span>@booking.StartDate.ToString("yyyy-MM-dd")</span>
+                                            <span class="w-8 h-px bg-outline-variant/20"></span>
+                                            <span>@booking.EndDate.ToString("yyyy-MM-dd")</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-8 px-10 text-right">
+                                        <a asp-area="" asp-controller="Booking" asp-action="Cancel" asp-route-id="@booking.BookingId" asp-route-returnCarId="@Model.CarId" class="inline-flex items-center gap-2 border border-error/20 text-error px-6 py-3 font-label text-[9px] font-black uppercase tracking-widest hover:bg-error hover:text-white transition-all opacity-0 group-hover:opacity-100 duration-500">
+                                            Terminate Contract
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     }
-</section>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -6,99 +6,108 @@
     var lockedFieldsetState = hasBookings ? "disabled" : null;
 }
 
-<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div asp-validation-summary="ModelOnly" class="mb-8 p-4 bg-error-container/10 border-l-4 border-error text-error text-[10px] uppercase tracking-widest font-bold" role="alert"></div>
 <input asp-for="CarThumbnail" type="hidden" />
 
 @if (hasBookings)
 {
-    <div class="alert alert-warning">
-        This car has active or upcoming bookings. Resolve those bookings before changing the car details or status.
+    <div class="mb-12 p-8 bg-secondary-container/10 border border-secondary/20 flex gap-6 items-start">
+        <span class="material-symbols-outlined text-secondary">warning</span>
+        <div class="space-y-2">
+            <h4 class="font-label text-[10px] font-black uppercase tracking-widest text-secondary">Active Occupancy Detected</h4>
+            <p class="font-body text-xs text-on-surface-variant leading-relaxed">This asset is currently committed to active or upcoming reservations. Specific technical specifications are locked to ensure contractual integrity.</p>
+        </div>
     </div>
 }
 
-<div class="row g-3">
-    <fieldset disabled="@lockedFieldsetState" style="display: contents;">
-        <div class="col-md-6">
-            <label asp-for="FkCarStatusId" class="form-label"></label>
-            <select asp-for="FkCarStatusId" asp-items="Model.CarStatusOptions" class="form-select"></select>
-            <span asp-validation-for="FkCarStatusId" class="text-danger"></span>
+<div class="space-y-16">
+    <fieldset disabled="@lockedFieldsetState" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 disabled:opacity-60">
+        
+        <div class="space-y-2">
+            <label asp-for="FkCarStatusId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Inventory Status</label>
+            <select asp-for="FkCarStatusId" asp-items="Model.CarStatusOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
+            <span asp-validation-for="FkCarStatusId" class="text-error text-[9px] uppercase font-bold"></span>
         </div>
 
-        <div class="col-md-6">
-            <label asp-for="Year" class="form-label"></label>
-            <input asp-for="Year" class="form-control" />
-            <span asp-validation-for="Year" class="text-danger"></span>
-        </div>
-        <div class="col-md-6">
-            <label asp-for="Colour" class="form-label"></label>
-            <input asp-for="Colour" class="form-control" />
-            <span asp-validation-for="Colour" class="text-danger"></span>
+        <div class="space-y-2">
+            <label asp-for="Year" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Model Year</label>
+            <input asp-for="Year" class="ghost-input w-full uppercase tracking-widest text-sm" placeholder="2026" />
+            <span asp-validation-for="Year" class="text-error text-[9px] uppercase font-bold"></span>
         </div>
 
-        <div class="col-md-6">
-            <label asp-for="FkModelId" class="form-label"></label>
-            <select asp-for="FkModelId" asp-items="Model.ModelOptions" class="form-select"></select>
-            <span asp-validation-for="FkModelId" class="text-danger"></span>
+        <div class="space-y-2">
+            <label asp-for="Colour" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Exterior Palette</label>
+            <input asp-for="Colour" class="ghost-input w-full uppercase tracking-widest text-sm" placeholder="ONYX BLACK" />
+            <span asp-validation-for="Colour" class="text-error text-[9px] uppercase font-bold"></span>
+        </div>
+
+        <div class="space-y-2">
+            <label asp-for="FkModelId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Manufacturer Model</label>
+            <select asp-for="FkModelId" asp-items="Model.ModelOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
+            <span asp-validation-for="FkModelId" class="text-error text-[9px] uppercase font-bold"></span>
             @if (!hasBookings)
             {
-                <div class="form-text">
-                    Need a new make or model?
-                    <a asp-area="Admin" asp-controller="Makes" asp-action="Index" asp-route-returnUrl="@returnUrl">Add make</a>
-                    or
-                    <a asp-area="Admin" asp-controller="Models" asp-action="Index" asp-route-returnUrl="@returnUrl">add model</a>.
-                </div>
-            }
-        </div>
-        <div class="col-md-6">
-            <label asp-for="FkFuelTypeId" class="form-label"></label>
-            <select asp-for="FkFuelTypeId" asp-items="Model.FuelTypeOptions" class="form-select"></select>
-            <span asp-validation-for="FkFuelTypeId" class="text-danger"></span>
-        </div>
-
-        <div class="col-md-6">
-            <label asp-for="FkVehicleClassId" class="form-label"></label>
-            <select asp-for="FkVehicleClassId" asp-items="Model.VehicleClassOptions" class="form-select"></select>
-            <span asp-validation-for="FkVehicleClassId" class="text-danger"></span>
-            @if (!hasBookings)
-            {
-                <div class="form-text">
-                    Missing a class?
-                    <a asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index" asp-route-returnUrl="@returnUrl">Add vehicle class</a>.
+                <div class="pt-2 flex items-center gap-2">
+                    <span class="text-[9px] text-on-surface-variant uppercase tracking-tighter italic">Archive missing?</span>
+                    <a asp-area="Admin" asp-controller="Makes" asp-action="Index" asp-route-returnUrl="@returnUrl" class="text-[9px] text-secondary font-bold uppercase tracking-widest hover:underline">Marques</a>
+                    <span class="text-[9px] text-on-surface-variant">/</span>
+                    <a asp-area="Admin" asp-controller="Models" asp-action="Index" asp-route-returnUrl="@returnUrl" class="text-[9px] text-secondary font-bold uppercase tracking-widest hover:underline">Models</a>
                 </div>
             }
         </div>
 
-        <div class="col-md-6">
-            <label asp-for="TransmissionType" class="form-label"></label>
-            <select asp-for="TransmissionType" asp-items="Model.TransmissionOptions" class="form-select"></select>
-            <span asp-validation-for="TransmissionType" class="text-danger"></span>
-        </div>
-        <div class="col-md-6">
-            <label asp-for="DailyRate" class="form-label"></label>
-            <input asp-for="DailyRate" class="form-control" />
-            <span asp-validation-for="DailyRate" class="text-danger"></span>
+        <div class="space-y-2">
+            <label asp-for="FkFuelTypeId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Propulsion Methodology</label>
+            <select asp-for="FkFuelTypeId" asp-items="Model.FuelTypeOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
+            <span asp-validation-for="FkFuelTypeId" class="text-error text-[9px] uppercase font-bold"></span>
         </div>
 
-        <div class="col-md-6">
-            <label asp-for="PersonCap" class="form-label"></label>
-            <input asp-for="PersonCap" class="form-control" />
-            <span asp-validation-for="PersonCap" class="text-danger"></span>
-        </div>
-        <div class="col-md-6">
-            <label asp-for="LuggageCap" class="form-label"></label>
-            <input asp-for="LuggageCap" class="form-control" />
-            <span asp-validation-for="LuggageCap" class="text-danger"></span>
+        <div class="space-y-2">
+            <label asp-for="FkVehicleClassId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Asset Category</label>
+            <select asp-for="FkVehicleClassId" asp-items="Model.VehicleClassOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
+            <span asp-validation-for="FkVehicleClassId" class="text-error text-[9px] uppercase font-bold"></span>
+            @if (!hasBookings)
+            {
+                <div class="pt-2">
+                    <a asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index" asp-route-returnUrl="@returnUrl" class="text-[9px] text-secondary font-bold uppercase tracking-widest hover:underline italic">Segment missing? Register class here.</a>
+                </div>
+            }
         </div>
 
-        <div class="col-md-6">
-            <label asp-for="LicencePlate" class="form-label"></label>
-            <input asp-for="LicencePlate" class="form-control" />
-            <span asp-validation-for="LicencePlate" class="text-danger"></span>
+        <div class="space-y-2">
+            <label asp-for="TransmissionType" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Transmission Logic</label>
+            <select asp-for="TransmissionType" asp-items="Model.TransmissionOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
+            <span asp-validation-for="TransmissionType" class="text-error text-[9px] uppercase font-bold"></span>
         </div>
-        <div class="col-md-6">
-            <label asp-for="VinNumber" class="form-label"></label>
-            <input asp-for="VinNumber" class="form-control" />
-            <span asp-validation-for="VinNumber" class="text-danger"></span>
+
+        <div class="space-y-2">
+            <label asp-for="DailyRate" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Daily Valuation (CAD)</label>
+            <input asp-for="DailyRate" class="ghost-input w-full font-headline text-lg font-black text-secondary uppercase tracking-widest" placeholder="250.00" />
+            <span asp-validation-for="DailyRate" class="text-error text-[9px] uppercase font-bold"></span>
+        </div>
+
+        <div class="space-y-2">
+            <label asp-for="PersonCap" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Lounge Capacity</label>
+            <input asp-for="PersonCap" class="ghost-input w-full uppercase tracking-widest text-sm" placeholder="2" />
+            <span asp-validation-for="PersonCap" class="text-error text-[9px] uppercase font-bold"></span>
+        </div>
+
+        <div class="space-y-2">
+            <label asp-for="LuggageCap" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Storage Capability</label>
+            <input asp-for="LuggageCap" class="ghost-input w-full uppercase tracking-widest text-sm" placeholder="2" />
+            <span asp-validation-for="LuggageCap" class="text-error text-[9px] uppercase font-bold"></span>
+        </div>
+
+        <div class="space-y-2">
+            <label asp-for="LicencePlate" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Regional Identifier (PLATE)</label>
+            <input asp-for="LicencePlate" class="ghost-input w-full uppercase tracking-widest text-sm font-mono" placeholder="LUX-001" />
+            <span asp-validation-for="LicencePlate" class="text-error text-[9px] uppercase font-bold"></span>
+        </div>
+
+        <div class="space-y-2">
+            <label asp-for="VinNumber" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Master Registry (VIN)</label>
+            <input asp-for="VinNumber" class="ghost-input w-full uppercase tracking-widest text-sm font-mono" placeholder="VIN MASTER CODE" />
+            <span asp-validation-for="VinNumber" class="text-error text-[9px] uppercase font-bold"></span>
         </div>
     </fieldset>
 
@@ -118,20 +127,25 @@
         <input asp-for="VinNumber" type="hidden" />
     }
 
-    <div class="col-12">
-        <label asp-for="ImageFile" class="form-label"></label>
-        <input asp-for="ImageFile" class="form-control" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
-        <span asp-validation-for="ImageFile" class="text-danger"></span>
-        <div class="form-text">Accepted formats: JPG, PNG, WEBP. Max file size: 5 MB.</div>
-        @if (!string.IsNullOrWhiteSpace(Model.CarThumbnail))
-        {
-            <div class="mt-3">
-                <div class="small text-muted mb-2">Current image</div>
-                <img src="@Model.CarThumbnail"
-                     alt="Current car image"
-                     class="img-thumbnail"
-                     style="max-width: 240px; max-height: 180px; object-fit: cover;" />
+    <div class="pt-12 border-t border-outline-variant/10">
+        <label asp-for="ImageFile" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block mb-6">Visual Repository Documentation</label>
+        
+        <div class="flex flex-col md:flex-row gap-12 items-start">
+            <div class="flex-grow space-y-4">
+                 <input asp-for="ImageFile" class="block w-full text-xs text-on-surface-variant file:mr-8 file:py-4 file:px-8 file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-black file:text-white hover:file:bg-secondary transition-all cursor-pointer bg-surface-container-low/30 border border-dashed border-outline-variant/40 p-8" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+                 <span asp-validation-for="ImageFile" class="text-error text-[9px] uppercase font-bold"></span>
+                 <p class="text-[9px] uppercase tracking-widest text-on-surface-variant italic">Accepted formats: High-Resolution JPG, PNG, WEBP. Master limits apply.</p>
             </div>
-        }
+
+            @if (!string.IsNullOrWhiteSpace(Model.CarThumbnail))
+            {
+                <div class="shrink-0 space-y-3">
+                    <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Current Documentation</span>
+                    <div class="w-48 aspect-[3/2] border border-outline-variant/30 overflow-hidden bg-surface-container">
+                        <img src="@Model.CarThumbnail" alt="Recorded asset visual" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                    </div>
+                </div>
+            }
+        </div>
     </div>
 </div>

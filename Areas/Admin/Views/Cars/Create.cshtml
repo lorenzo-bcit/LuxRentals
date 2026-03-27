@@ -1,31 +1,43 @@
 @model LuxRentals.ViewModels.Cars.Admin.CarEditVm
 
 @{
-    ViewData["Title"] = "Add Car";
+    ViewData["Title"] = "Establish New Asset";
 }
 
-<section class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface">
+    <!-- Header -->
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-8">
         <div>
-            <h1 class="mb-1">Add Car</h1>
-            <p class="text-muted mb-0">Create a new inventory record.</p>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Enterprise Collection</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-4">Establish New Asset</h1>
+            <p class="font-body text-xs text-on-surface-variant uppercase tracking-widest opacity-80">Cataloging a new automotive masterpiece within the LuxRentals repository.</p>
         </div>
-        <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Cars" asp-action="Index">Back to Inventory</a>
-    </div>
-
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
-            <form method="post" enctype="multipart/form-data" asp-area="Admin" asp-controller="Cars" asp-action="Create">
-                <partial name="_CarForm" model="Model" />
-
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Cars" asp-action="Index">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Create Car</button>
-                </div>
-            </form>
+        <div class="text-right">
+             <a asp-area="Admin" asp-controller="Cars" asp-action="Index" class="flex items-center gap-3 border border-on-surface/20 px-8 py-4 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                Return to Archive
+            </a>
         </div>
     </div>
-</section>
+
+    <!-- Inventory Workspace -->
+    <div class="bg-surface-container-lowest p-10 md:p-16 border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.08)] relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-secondary/5 rounded-bl-full transform translate-x-32 -translate-y-32"></div>
+        
+        <form method="post" enctype="multipart/form-data" asp-area="Admin" asp-controller="Cars" asp-action="Create" class="relative z-10 space-y-16">
+            <partial name="_CarForm" model="Model" />
+
+            <div class="pt-16 border-t border-outline-variant/10 flex flex-col sm:flex-row justify-end gap-6">
+                 <a asp-action="Index" class="border border-on-surface px-12 py-5 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-on-surface hover:text-white transition-all text-center">
+                    Discard Draft
+                </a>
+                <button type="submit" class="bg-black text-white px-16 py-5 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-2xl">
+                    Register Asset
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

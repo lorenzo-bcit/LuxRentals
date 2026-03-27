@@ -1,191 +1,200 @@
 @model LuxRentals.ViewModels.Cars.Admin.CarIndexVm
 
 @{
-    ViewData["Title"] = "Admin Cars";
+    ViewData["Title"] = "Admin Fleet Repository";
 }
 
-<section class="py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-        <div>
-            <h1 class="mb-1">Fleet Inventory</h1>
-            <p class="text-muted mb-0">Search, filter, and manage all cars across the fleet.</p>
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface">
+    <!-- Header -->
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-12">
+        <div class="max-w-xl">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Asset Management</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Fleet Repository</h1>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Comprehensive control over the LuxRentals automotive collection. Manage specifications, collection inventory, and service status.</p>
         </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Makes" asp-action="Index">Manage Makes</a>
-            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Models" asp-action="Index">Manage Models</a>
-            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index">Manage Classes</a>
-            <a class="btn btn-primary" asp-area="Admin" asp-controller="Cars" asp-action="Create">Add Car</a>
+        <div class="flex flex-wrap gap-4 items-center justify-end">
+            <div class="flex flex-col space-y-2 mr-6 text-right hidden lg:block">
+                 <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant">Global Archive</span>
+                 <span class="font-headline text-2xl font-black italic">@Model.TotalCount Vehicles</span>
+            </div>
+            <div class="flex gap-4">
+                <a class="border border-on-surface/20 text-on-surface text-center py-4 px-8 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all" asp-area="Admin" asp-controller="Makes" asp-action="Index">Makes</a>
+                <a class="border border-on-surface/20 text-on-surface text-center py-4 px-8 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index">Classes</a>
+                <a class="bg-black text-white text-center py-4 px-10 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-2xl" asp-area="Admin" asp-controller="Cars" asp-action="Create">Repository New</a>
+            </div>
         </div>
     </div>
 
     @if (TempData["StatusMessage"] is string statusMessage)
     {
-        <div class="alert alert-success">@statusMessage</div>
+        <div class="mb-12 p-6 bg-secondary-container/10 border-l-4 border-secondary text-secondary text-xs uppercase tracking-widest font-bold" role="alert">@statusMessage</div>
     }
-
     @if (TempData["ErrorMessage"] is string errorMessage)
     {
-        <div class="alert alert-danger">@errorMessage</div>
+        <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert">@errorMessage</div>
     }
 
-    <form method="get" asp-area="Admin" asp-controller="Cars" asp-action="Index" class="d-flex flex-column gap-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="row g-3 align-items-end">
-                    <div class="col-lg-3">
-                        <label asp-for="SearchTerm" class="form-label"></label>
-                        <input asp-for="SearchTerm" class="form-control" placeholder="Plate, VIN, make, or model" />
-                    </div>
-                    <div class="col-md-6 col-lg-2">
-                        <label asp-for="StatusId" class="form-label"></label>
-                        <select asp-for="StatusId" asp-items="Model.StatusOptions" class="form-select"></select>
-                    </div>
-                    <div class="col-md-6 col-lg-2">
-                        <label asp-for="VehicleClassId" class="form-label"></label>
-                        <select asp-for="VehicleClassId" asp-items="Model.VehicleClassOptions" class="form-select"></select>
-                    </div>
-                    <div class="col-md-6 col-lg-2">
-                        <label asp-for="MakeId" class="form-label"></label>
-                        <select asp-for="MakeId" asp-items="Model.MakeOptions" class="form-select"></select>
-                    </div>
-                    <div class="col-md-6 col-lg-3">
-                        <label asp-for="HasActiveOrUpcomingBookingsOnly" class="form-label"></label>
-                        <select asp-for="HasActiveOrUpcomingBookingsOnly" class="form-select">
-                            <option value="false">All cars</option>
-                            <option value="true">Has active/upcoming bookings</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 col-lg-3">
-                        <label asp-for="SortBy" class="form-label"></label>
-                        <select asp-for="SortBy" asp-items="Model.SortOptions" class="form-select"></select>
-                    </div>
-                    <div class="col-md-6 col-lg-3">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-dark flex-grow-1">Apply</button>
-                            <a asp-area="Admin" asp-controller="Cars" asp-action="Index" class="btn btn-outline-secondary">Reset</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Filtering & Workspace -->
+    <form method="get" asp-area="Admin" asp-controller="Cars" asp-action="Index" class="space-y-16">
+        <div class="group bg-surface-container-lowest p-12 shadow-[0_45px_100px_rgba(0,0,0,0.08)] border border-outline-variant/10 relative overflow-hidden">
+             <div class="absolute top-0 right-0 w-64 h-64 bg-secondary/5 rounded-bl-full transform translate-x-24 -translate-y-24"></div>
+             
+             <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                 <div class="space-y-2">
+                    <label asp-for="SearchTerm" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Search Identifier</label>
+                    <input asp-for="SearchTerm" class="ghost-input w-full uppercase tracking-widest text-xs" placeholder="PLATE, VIN, OR MODEL" />
+                 </div>
+                 
+                 <div class="space-y-2">
+                    <label asp-for="StatusId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Inventory Status</label>
+                    <select asp-for="StatusId" asp-items="Model.StatusOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
+                 </div>
+
+                 <div class="space-y-2">
+                    <label asp-for="VehicleClassId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Category</label>
+                    <select asp-for="VehicleClassId" asp-items="Model.VehicleClassOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
+                 </div>
+
+                 <div class="space-y-2">
+                    <label asp-for="MakeId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Manufacturer</label>
+                    <select asp-for="MakeId" asp-items="Model.MakeOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
+                 </div>
+
+                 <div class="space-y-2">
+                    <label asp-for="SortBy" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Ordering Strategy</label>
+                    <select asp-for="SortBy" asp-items="Model.SortOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
+                 </div>
+
+                 <div class="space-y-2 col-span-1 md:col-span-2 lg:col-span-1">
+                    <label asp-for="HasActiveOrUpcomingBookingsOnly" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Occupancy Filter</label>
+                    <select asp-for="HasActiveOrUpcomingBookingsOnly" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer">
+                        <option value="false">SHOW ALL ASSETS</option>
+                        <option value="true">ACTIVE/UPCOMING ONLY</option>
+                    </select>
+                 </div>
+
+                 <div class="lg:col-span-2 flex items-end gap-4 pt-4 lg:pt-0">
+                    <button type="submit" class="flex-grow bg-black text-white text-center py-4 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-xl">Apply Criteria</button>
+                    <a asp-action="Index" class="border border-on-surface p-4 flex items-center justify-center hover:bg-on-surface hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-sm">restart_alt</span>
+                    </a>
+                 </div>
+             </div>
         </div>
 
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-            <div>
-                <div class="fw-semibold">@Model.TotalCount cars</div>
-                <div class="text-muted small">Showing page @Model.Page of @Model.TotalPages</div>
-            </div>
-        </div>
-
-        <div class="card shadow-sm">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                    <tr>
-                        <th>Image</th>
-                        <th>Car</th>
-                        <th>Year</th>
-                        <th>Status</th>
-                        <th>Class</th>
-                        <th>Specs</th>
-                        <th>Plate</th>
-                        <th>VIN</th>
-                        <th class="text-end">Daily Rate</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @if (Model.Cars.Count == 0)
-                    {
-                        <tr>
-                            <td colspan="10" class="text-center py-4 text-muted">No cars found for the current filters.</td>
+        <!-- Inventory List -->
+        <div class="bg-surface-container-lowest border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.06)] overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left font-body text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-outline-variant/20 bg-surface-container-low/30 font-label text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
+                            <th class="py-8 px-10">Asset</th>
+                            <th class="py-8 px-10">Manufacturer Info</th>
+                            <th class="py-8 px-10">Identifier</th>
+                            <th class="py-8 px-10">Spec Sheet</th>
+                            <th class="py-8 px-10 text-right">Daily Rate</th>
+                            <th class="py-8 px-10 text-right">Actions</th>
                         </tr>
-                    }
-                    else
-                    {
-                        @foreach (var car in Model.Cars)
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/10">
+                        @if (Model.Cars.Count == 0)
                         {
                             <tr>
-                                <td>
-                                    <div class="bg-light border d-flex justify-content-center align-items-center overflow-hidden"
-                                         style="width: 84px; aspect-ratio: 3 / 2;">
-                                        @if (!string.IsNullOrWhiteSpace(car.Thumbnail))
-                                        {
-                                            <img src="@car.Thumbnail"
-                                                 alt="@car.DisplayName"
-                                                 style="width: 100%; height: 100%; object-fit: cover;" />
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">None</span>
-                                        }
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold">@car.MakeName @car.ModelName</div>
-                                </td>
-                                <td>@car.Year</td>
-                                <td>
-                                    <span class="badge text-bg-secondary">@car.Status</span>
-                                </td>
-                                <td>@car.VehicleClass</td>
-                                <td class="small text-muted">@car.Transmission • @car.FuelType</td>
-                                <td>@car.LicencePlate</td>
-                                <td class="small">@car.VinNumber</td>
-                                <td class="text-end">@car.DailyRate.ToString("C")</td>
-                                <td>
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <a class="btn btn-sm btn-outline-primary"
-                                           asp-area="Admin"
-                                           asp-controller="Cars"
-                                           asp-action="Edit"
-                                           asp-route-id="@car.CarId">Edit</a>
-                                        <button type="submit"
-                                                form="delete-car-@car.CarId"
-                                                class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Delete this car? Cars with bookings will be moved Out of Service instead.');">
-                                            Delete
-                                        </button>
+                                <td colspan="6" class="py-24 text-center">
+                                    <div class="max-w-xs mx-auto space-y-4">
+                                        <span class="material-symbols-outlined text-4xl text-outline-variant/30">inventory_2</span>
+                                        <p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">No vehicle assets found in this vault configuration.</p>
                                     </div>
                                 </td>
                             </tr>
                         }
-                    }
+                        else
+                        {
+                            @foreach (var car in Model.Cars)
+                            {
+                                <tr class="group hover:bg-surface-container-low/20 transition-colors duration-500">
+                                    <td class="py-8 px-10">
+                                        <div class="flex items-center gap-8">
+                                            <div class="w-24 aspect-[3/2] bg-surface-container border border-outline-variant/20 overflow-hidden relative">
+                                                @if (!string.IsNullOrWhiteSpace(car.Thumbnail))
+                                                {
+                                                    <img src="@car.Thumbnail" alt="@car.DisplayName" class="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="w-full h-full flex items-center justify-center text-[8px] font-bold uppercase tracking-tighter text-outline-variant/40">No Visual</div>
+                                                }
+                                            </div>
+                                            <div>
+                                                <span class="font-label text-[9px] font-black uppercase tracking-widest text-secondary block mb-1">@car.Status</span>
+                                                <h4 class="font-headline text-lg font-bold leading-none">@car.ModelName</h4>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-8 px-10">
+                                        <div class="space-y-1">
+                                            <p class="font-bold uppercase tracking-tight">@car.MakeName</p>
+                                            <p class="font-label text-[9px] text-on-surface-variant uppercase tracking-widest">Model Year @car.Year</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-8 px-10">
+                                        <div class="space-y-1">
+                                            <p class="font-bold font-mono tracking-tighter">@car.LicencePlate</p>
+                                            <p class="text-[9px] uppercase tracking-widest text-on-surface-variant font-mono">@car.VinNumber</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-8 px-10">
+                                        <div class="flex items-center gap-6">
+                                            <div class="text-right border-r border-outline-variant/10 pr-6">
+                                                <span class="font-label text-[9px] uppercase tracking-tighter text-on-surface-variant block">Type</span>
+                                                <span class="font-bold uppercase text-[10px]">@car.VehicleClass</span>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-[9px] uppercase tracking-widest font-bold">@car.Transmission</p>
+                                                <p class="text-[9px] uppercase tracking-widest text-on-surface-variant">@car.FuelType</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-8 px-10 text-right">
+                                        <div class="flex flex-col items-end">
+                                            <span class="font-headline text-lg font-black text-secondary">@car.DailyRate.ToString("C")</span>
+                                            <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant">PER CALENDAR DAY</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-8 px-10 text-right">
+                                        <div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                            <a asp-action="Edit" asp-route-id="@car.CarId" class="w-10 h-10 flex items-center justify-center border border-on-surface/20 text-on-surface hover:bg-black hover:text-white transition-all">
+                                                <span class="material-symbols-outlined text-sm">edit</span>
+                                            </a>
+                                            <button type="submit" form="delete-car-@car.CarId" class="w-10 h-10 flex items-center justify-center border border-error/20 text-error hover:bg-error hover:text-white transition-all" onclick="return confirm('Archive absolute asset repository data?');">
+                                                <span class="material-symbols-outlined text-sm">delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
                     </tbody>
                 </table>
             </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <div class="p-12 border-t border-outline-variant/10 flex justify-center items-center gap-12 bg-surface-container-low/20">
+                    <button type="submit" name="Page" value="@(Model.Page - 1)" class="w-12 h-12 rounded-full border border-on-surface flex items-center justify-center hover:bg-on-surface hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent" @(Model.HasPreviousPage ? "" : "disabled")>
+                        <span class="material-symbols-outlined text-sm">arrow_back_ios_new</span>
+                    </button>
+                    <span class="font-label text-[10px] uppercase tracking-[0.3rem] font-bold">Registry Page @Model.Page / @Model.TotalPages</span>
+                    <button type="submit" name="Page" value="@(Model.Page + 1)" class="w-12 h-12 rounded-full border border-on-surface flex items-center justify-center hover:bg-on-surface hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent" @(Model.HasNextPage ? "" : "disabled")>
+                        <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+                    </button>
+                </div>
+            }
         </div>
-
-        <nav aria-label="Admin car pages" class="d-flex justify-content-center align-items-center gap-3">
-            <button type="submit"
-                    name="Page"
-                    value="@(Model.Page - 1)"
-                    class="btn btn-outline-dark @(Model.HasPreviousPage ? "" : "disabled")"
-                    aria-disabled="@(!Model.HasPreviousPage)"
-                    @(Model.HasPreviousPage ? null : "disabled")>
-                Previous
-            </button>
-
-            <span class="text-muted">Page @Model.Page of @Model.TotalPages</span>
-
-            <button type="submit"
-                    name="Page"
-                    value="@(Model.Page + 1)"
-                    class="btn btn-outline-dark @(Model.HasNextPage ? "" : "disabled")"
-                    aria-disabled="@(!Model.HasNextPage)"
-                    @(Model.HasNextPage ? null : "disabled")>
-                Next
-            </button>
-        </nav>
     </form>
 
     @foreach (var car in Model.Cars)
     {
-        <form id="delete-car-@car.CarId"
-              method="post"
-              asp-area="Admin"
-              asp-controller="Cars"
-              asp-action="Delete"
-              asp-route-id="@car.CarId">
-        </form>
+        <form id="delete-car-@car.CarId" method="post" asp-area="Admin" asp-controller="Cars" asp-action="Delete" asp-route-id="@car.CarId"></form>
     }
-</section>
+</main>
