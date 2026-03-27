@@ -1,4 +1,4 @@
-﻿using DotNetEnv.Configuration;
+using DotNetEnv.Configuration;
 using LuxRentals.Data;
 using LuxRentals.Data.Seeders;
 using LuxRentals.Repositories.Cars;
@@ -29,6 +29,14 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Lockout settings.
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+});
 
 // Load .env into builder.Configuration
 builder.Configuration.AddDotNetEnv();
