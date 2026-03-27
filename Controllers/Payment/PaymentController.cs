@@ -29,96 +29,136 @@ namespace LuxRentals.Controllers.Payment
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Checkout(string orderId)
         {
-            if (string.IsNullOrEmpty(orderId))
+            try
             {
+                var sessionOrderId = HttpContext.Session.GetString("OrderId");
+
+                if (string.IsNullOrEmpty(orderId) || string.IsNullOrEmpty(sessionOrderId) || orderId != sessionOrderId)
+                {
+                    TempData["Error"] = "Invalid checkout session. Please try again.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                int customerId = HttpContext.Session.GetInt32("CustomerId") ?? 0;
+                int? carId = HttpContext.Session.GetInt32("CarId");
+                string startDateStr = HttpContext.Session.GetString("StartDate");
+                string endDateStr = HttpContext.Session.GetString("EndDate");
+
+                if (customerId == 0)
+                {
+                    TempData["Error"] = "Session expired. Please log in again.";
+                    return RedirectToAction("Login", "Account");
+                }
+
+                if (carId == null || startDateStr == null || endDateStr == null)
+                {
+                    TempData["Error"] = "Booking session expired.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var clientId = _paypalOptions.ClientId;
+                if (string.IsNullOrEmpty(clientId))
+                {
+                    _logger.LogError("PayPal ClientId missing.");
+
+                    TempData["Error"] = "Payment system is currently unavailable.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                ViewBag.PayPalClientId = clientId;
+
+                // Parse dates with RoundtripKind to preserve UTC
+                if (!DateTime.TryParse(startDateStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime startDate) ||
+                    !DateTime.TryParse(endDateStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime endDate))
+                {
+                    TempData["Error"] = "Invalid booking dates.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var canBook = await _bookingRepo.CheckBooking(customerId, (int)carId, startDate, endDate);
+                if (!canBook.Success)
+                {
+                    TempData["Error"] = canBook.Message;
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var pricestr = HttpContext.Session.GetString("Price");
+                if (pricestr == null || !decimal.TryParse(pricestr, out decimal sessionPrice))
+                {
+                    TempData["Error"] = "Booking session expired. Please try again.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var price = await _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
+                if (Math.Abs(sessionPrice - price) > 0.01m)
+                {
+                    _logger.LogWarning("Checkout failed: OrderId mismatch or Price mismatch for customer {CustomerId}", customerId);
+                    TempData["Error"] = "Price mismatch. Please try again.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                ViewBag.Price = sessionPrice;
+                ViewBag.OrderId = orderId;
+                ViewBag.StartDate = startDate.ToString("MMM dd, yyyy");
+                ViewBag.EndDate = endDate.ToString("MMM dd, yyyy");
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during checkout");
+                TempData["Error"] = "An error occurred during checkout. Please try again.";
                 return RedirectToAction("Index", "Home");
             }
-
-            int? carId = HttpContext.Session.GetInt32("CarId");
-            string startDateStr = HttpContext.Session.GetString("StartDate");
-            string endDateStr = HttpContext.Session.GetString("EndDate");
-
-            if (carId == null || startDateStr == null || endDateStr == null)
-            {
-                TempData["Error"] = "Booking session expired.";
-                return RedirectToAction("Index", "Home");
-            }
-
-            var clientId = _paypalOptions.ClientId;
-            if (string.IsNullOrEmpty(clientId))
-            {
-                throw new Exception("PayPal ClientId not configured.");
-            }
-
-            ViewBag.PayPalClientId = clientId;
-
-            // Parse dates with RoundtripKind to preserve UTC
-            if (!DateTime.TryParse(startDateStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime startDate) ||
-                !DateTime.TryParse(endDateStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out DateTime endDate))
-            {
-                TempData["Error"] = "Invalid booking dates.";
-                return RedirectToAction("Index", "Home");
-            }
-
-            var price = await _bookingRepo.CalculateBookingPrice(carId.Value, startDate, endDate);
-
-            ViewBag.OrderId = orderId;
-            ViewBag.StartDate = startDate.ToString("MMM dd, yyyy");
-            ViewBag.EndDate = endDate.ToString("MMM dd, yyyy");
-            ViewBag.Price = price;
-
-            return View();
         }
 
         [HttpPost]
         [Authorize(Roles = "Customer")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Capture([FromBody] CaptureRequest request)
+        public async Task<IActionResult> Capture()
         {
             try
             {
-                bool paymentSuccess = await _paymentService.CaptureOrderAsync(request.OrderId);
+                // Get OrderId from server-side session only
+                var orderId = HttpContext.Session.GetString("OrderId");
+                if (string.IsNullOrEmpty(orderId))
+                {
+                    TempData["Error"] = "Checkout session expired.";
+                    return Json(new { success = false });
+                }
+
+                bool paymentSuccess = await _paymentService.CaptureOrderAsync(orderId);
 
                 if (!paymentSuccess)
                 {
-                    _logger.LogError("Payment failed {Status Code}: ", Response.StatusCode);
+                    _logger.LogError("Payment failed for OrderId {OrderId}", orderId);
                     return Json(new { success = false, message = "Payment failed." });
                 }
 
                 int carId = HttpContext.Session.GetInt32("CarId").Value;
                 int customerId = HttpContext.Session.GetInt32("CustomerId").Value;
 
-                // FIXED: Parse dates with RoundtripKind to preserve UTC from session
                 DateTime startDate = DateTime.Parse(
-                    HttpContext.Session.GetString("StartDate"),
+                    HttpContext.Session.GetString("StartDate")!,
                     null,
                     System.Globalization.DateTimeStyles.RoundtripKind);
 
                 DateTime endDate = DateTime.Parse(
-                    HttpContext.Session.GetString("EndDate"),
+                    HttpContext.Session.GetString("EndDate")!,
                     null,
                     System.Globalization.DateTimeStyles.RoundtripKind);
 
-                var booking = await _bookingRepo.CreateBooking(carId, customerId, startDate, endDate, request.OrderId);
+                var booking = await _bookingRepo.CreateBooking(carId, customerId, startDate, endDate, orderId);
 
                 HttpContext.Session.Clear();
 
-                return Json(new
-                {
-                    success = true,
-                    redirectUrl = Url.Action("MyBookings", "Booking")
-                });
+                return Json(new { success = true, redirectUrl = Url.Action("MyBookings", "Booking") });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during payment capture");
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = "An error occurred. Please try again." });
             }
         }
-    }
-
-    public class CaptureRequest
-    {
-        public string OrderId { get; set; }
     }
 }
