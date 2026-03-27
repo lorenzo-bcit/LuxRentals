@@ -20,34 +20,14 @@ namespace LuxRentals.Repositories.Bookings
         public async Task<Booking> CreateBooking(int carId, int customerId,
             DateTime startDate, DateTime endDate, string transactionId)
         {
-            // Normalize to midnight UTC
-            startDate = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
-            endDate = DateTime.SpecifyKind(endDate.Date, DateTimeKind.Utc);
-
-            var tomorrow = BookingClock.Tomorrow();
-
-            // Validation checks (date-only comparison)
-            if (endDate <= startDate)
+            var validation = await ValidateBooking(customerId, carId, startDate, endDate);
+            if (!validation.Success)
             {
-                throw new ArgumentException("End date must be after start date.");
+                throw new InvalidOperationException(validation.Message);
             }
 
-            if (startDate.Date < tomorrow)
-            {
-                throw new ArgumentException("Start date must be at least one day in the future.");
-            }
-
-            bool isCarAvailable = await IsCarAvailable(carId, startDate, endDate);
-            if (!isCarAvailable)
-            {
-                throw new InvalidOperationException("The car is not available for the selected dates.");
-            }
-
-            bool hasConflictingBooking = await HasConflictingBooking(customerId, startDate, endDate);
-            if (hasConflictingBooking)
-            {
-                throw new InvalidOperationException("You have another booking that conflicts with the selected dates.");
-            }
+            startDate = validation.StartDate;
+            endDate = validation.EndDate;
 
             var booking = new Booking
             {
@@ -194,8 +174,17 @@ namespace LuxRentals.Repositories.Bookings
             return car.DailyRate * days;
         }
 
-        // Helper method to check booking availability and conflicts before creating a booking
         public async Task<(bool Success, string? Message)> CheckBooking(
+            int customerId,
+            int carId,
+            DateTime startDate,
+            DateTime endDate)
+        {
+            var validation = await ValidateBooking(customerId, carId, startDate, endDate);
+            return (validation.Success, validation.Message);
+        }
+
+        private async Task<(bool Success, string? Message, DateTime StartDate, DateTime EndDate)> ValidateBooking(
             int customerId,
             int carId,
             DateTime startDate,
@@ -206,17 +195,20 @@ namespace LuxRentals.Repositories.Bookings
             endDate = DateTime.SpecifyKind(endDate.Date, DateTimeKind.Utc);
 
             if (endDate <= startDate)
-                return (false, "Invalid date range.");
+                return (false, "End date must be after start date.", startDate, endDate);
+
+            if (startDate.Date < BookingClock.Tomorrow())
+                return (false, "Start date must be at least one day in the future.", startDate, endDate);
 
             bool isCarAvailable = await IsCarAvailable(carId, startDate, endDate);
             if (!isCarAvailable)
-                return (false, "Car is not available.");
+                return (false, "The car is not available for the selected dates.", startDate, endDate);
 
             bool hasConflict = await HasConflictingBooking(customerId, startDate, endDate);
             if (hasConflict)
-                return (false, "You have a conflicting booking.");
+                return (false, "You have another booking that conflicts with the selected dates.", startDate, endDate);
 
-            return (true, null);
+            return (true, null, startDate, endDate);
         }
 
         public async Task SaveChanges()
