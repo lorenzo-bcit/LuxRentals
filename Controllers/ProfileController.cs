@@ -135,15 +135,6 @@ namespace LuxRentals.Controllers
                 return NotFound();
             }
 
-            // Check authorization
-            bool isAdmin = User.IsInRole("Admin");
-            var existingProfile = await _profileRepo.GetUserByCustAsync(id);
-
-            if (existingProfile == null)
-            {
-                return NotFound();
-            }
-
             try
             {
                 // Check authorization
