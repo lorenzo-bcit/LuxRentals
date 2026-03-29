@@ -5,8 +5,19 @@
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
+        @if (!User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark"
+                   asp-controller="Profile"
+                   asp-action="Details"
+                   asp-route-id="@User.Identity?.Name">
+                    My Profile
+                </a>
+            </li>
+        }
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
+            <span class="nav-link text-dark" >Hello @User.Identity?.Name!</span>
         </li>
         <li class="nav-item">
             <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
@@ -17,7 +28,7 @@
     else
     {
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register" >Register</a>
         </li>
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>

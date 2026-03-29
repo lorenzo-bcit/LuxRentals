@@ -57,7 +57,21 @@
     <!-- Quick Actions -->
     <h4 class="mb-3">Quick Actions</h4>
     <div class="row g-4">
-        <div class="col-md-4">
+        <div class="col-md-6">
+            <div class="card admin-action-card shadow-sm h-100">
+                <div class="card-body text-center py-4">
+                    <div class="mb-3">
+                        <i class="bi bi-person-vcard display-4" style="color: #e83e8c;"></i>
+                    </div>
+                    <h5 class="card-title">Manage Profiles</h5>
+                    <p class="card-text text-muted">Edit customer profiles in the system.</p>
+                    <a asp-area="" asp-controller="Profile" asp-action="Index" class="btn text-white" style="background-color: #e83e8c; border-color: #e83e8c;">
+                        <i class="bi bi-arrow-right-circle"></i> Go to Customer Profiles
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
             <div class="card admin-action-card shadow-sm h-100">
                 <div class="card-body text-center py-4">
                     <div class="mb-3">
@@ -71,7 +85,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card admin-action-card shadow-sm h-100">
                 <div class="card-body text-center py-4">
                     <div class="mb-3">
@@ -85,7 +99,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card admin-action-card shadow-sm h-100">
                 <div class="card-body text-center py-4">
                     <div class="mb-3">

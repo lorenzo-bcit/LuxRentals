@@ -1,0 +1,72 @@
+﻿@model LuxRentals.ViewModels.Roles.ProfileVm
+@{
+    ViewData["Title"] = "Profile Details";
+    bool isAdmin = User.IsInRole("Admin");
+    bool isOwnProfile = Model.Email == User.Identity?.Name;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Info"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="bi bi-info-circle-fill"></i> @TempData["Info"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Profile Details</h3>
+                </div>
+
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">First Name</dt>
+                        <dd class="col-sm-8">@Model.FirstName</dd>
+
+                        <dt class="col-sm-4">Last Name</dt>
+                        <dd class="col-sm-8">@Model.LastName</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">Phone Number</dt>
+                        <dd class="col-sm-8">@Model.PhoneNumber</dd>
+
+                        <dt class="col-sm-4">Driver Licence</dt>
+                        <dd class="col-sm-8">@Model.DriverLicenceNo</dd>
+                    </dl>
+                    
+                        <div class="d-flex justify-content-between mt-4">
+                        @if (isAdmin)
+                        {
+                            <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>            
+                        }
+                        else
+                            {
+                            <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary">Home</a>
+                            }
+                        <a asp-action="Edit" asp-route-id="@Model.PkCustomerId" class="btn btn-primary">Edit Profile</a>
+                        </div>            
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
