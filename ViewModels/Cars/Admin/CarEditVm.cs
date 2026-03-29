@@ -17,7 +17,7 @@ public class CarEditVm
     public byte TransmissionType { get; set; }
 
     [Range(1886, 2100)]
-    public int Year { get; set; }
+    public int Year { get; set; } = DateTime.UtcNow.Year;
 
     [StringLength(255)]
     public string? CarThumbnail { get; set; }
