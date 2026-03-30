@@ -29,10 +29,6 @@
                 {
                     <a asp-area="" asp-controller="Booking" asp-action="CustomerList" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">Bookings</a>
                 }
-                else
-                {
-                    <a asp-area="" asp-controller="Booking" asp-action="MyBookings" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">My Bookings</a>
-                }
             }
             @if (User.IsInRole("Admin"))
             {
@@ -46,7 +42,7 @@
     </div>
 </nav>
 
-<main class="flex-grow relative">
+<main class="grow relative">
     @RenderBody()
 </main>
 
