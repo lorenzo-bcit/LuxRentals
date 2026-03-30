@@ -4,7 +4,7 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <a asp-controller="Profile" asp-action="Details" asp-route-id="@User.Identity?.Name" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">
+    <a asp-area="" asp-controller="Profile" asp-action="Details" asp-route-id="@User.Identity?.Name" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">
         My Profile
     </a>
     <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" class="m-0 p-0 inline flex items-center">
