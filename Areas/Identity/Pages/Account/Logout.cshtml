@@ -1,0 +1,30 @@
+@page
+@model LogoutModel
+@{
+    ViewData["Title"] = "Log out";
+}
+
+<main class="grow flex items-center justify-center pt-32 pb-24 px-6 bg-surface min-h-screen">
+    <div class="w-full max-w-2xl bg-surface-container-lowest p-12 md:p-16 shadow-[0_45px_100px_rgba(0,0,0,0.06)] border border-outline-variant/10 text-center">
+        
+        <div class="mb-12">
+            <span class="material-symbols-outlined text-secondary text-8xl mb-8">logout</span>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Secure Exit</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Successfully Terminated</h1>
+            <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose max-w-md mx-auto">
+                Your session has been securely closed. Thank you for utilizing the LuxRentals infrastructure.
+            </p>
+        </div>
+
+        <div class="space-y-6">
+            <a asp-area="" asp-controller="Home" asp-action="Index" 
+               class="block w-full py-6 bg-black text-secondary font-headline text-sm font-black uppercase tracking-[0.2em] hover:opacity-80 transition-opacity duration-500 shadow-2xl">
+                RETURN TO LOBBY
+            </a>
+            
+            <a asp-area="Identity" asp-page="/Account/Login" class="font-label text-[10px] text-on-surface font-black uppercase tracking-widest hover:text-secondary transition-colors block">
+                AUTHENTICATE NEW SESSION
+            </a>
+        </div>
+    </div>
+</main>
