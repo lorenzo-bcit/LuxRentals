@@ -60,7 +60,7 @@
         <div class="h-px grow bg-outline-variant/20 mx-8"></div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
         <!-- Roles Action -->
         <div class="group bg-surface-container-lowest p-8 border border-outline-variant/10 shadow-[0_20px_60px_rgba(0,0,0,0.04)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-700 relative overflow-hidden flex flex-col justify-between">
             <div class="absolute -top-10 -right-10 w-32 h-32 bg-secondary/5 rounded-full transform scale-0 group-hover:scale-150 transition-transform duration-1000"></div>
@@ -93,6 +93,24 @@
                 </div>
             </div>
             <a asp-area="Admin" asp-controller="UserRole" asp-action="Index" class="relative z-10 mt-6 block w-full border border-on-surface text-center py-3 font-label text-[9px] font-bold uppercase tracking-[0.2rem] hover:bg-on-surface hover:text-white transition-all">
+                Access Registry
+            </a>
+        </div>
+
+        <!-- Engagement Action (Bookings) -->
+        <div class="group bg-surface-container-lowest p-8 border border-outline-variant/10 shadow-[0_20px_60px_rgba(0,0,0,0.04)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-700 relative overflow-hidden flex flex-col justify-between">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-secondary/5 rounded-full transform scale-0 group-hover:scale-150 transition-transform duration-1000"></div>
+            
+            <div class="relative z-10 space-y-8 text-center">
+                <div class="mx-auto w-20 h-20 bg-surface-container flex items-center justify-center rounded-full mb-6 border border-outline-variant/30 group-hover:bg-black group-hover:text-white transition-all duration-500">
+                    <span class="material-symbols-outlined text-4xl">assignment_ind</span>
+                </div>
+                <div>
+                    <h3 class="font-headline text-lg font-bold uppercase tracking-tight mb-2">Reservations</h3>
+                    <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Comprehensive monitoring of membership interactions and booking history.</p>
+                </div>
+            </div>
+            <a asp-area="" asp-controller="Booking" asp-action="CustomerList" class="relative z-10 mt-6 block w-full border border-on-surface text-center py-3 font-label text-[9px] font-bold uppercase tracking-[0.2rem] hover:bg-on-surface hover:text-white transition-all">
                 Access Registry
             </a>
         </div>

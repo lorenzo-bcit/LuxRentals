@@ -51,9 +51,18 @@
                             Security Credentials
                         </a>
                      }
-                     <a asp-controller="Booking" asp-action="MyBookings" class="block w-full border border-on-surface/20 text-center py-4 font-label text-[10px] font-bold uppercase tracking-[0.2rem] hover:bg-on-surface hover:text-white transition-all shadow-xl">
-                        Manage Bookings
-                    </a>
+                     @if (isAdmin)
+                     {
+                        <a asp-area="" asp-controller="Booking" asp-action="ViewCustomerBookings" asp-route-customerId="@Model.PkCustomerId" class="block w-full border border-on-surface/20 text-center py-4 font-label text-[10px] font-bold uppercase tracking-[0.2rem] hover:bg-on-surface hover:text-white transition-all shadow-xl">
+                            Manage Bookings
+                        </a>
+                     }
+                     else
+                     {
+                        <a asp-area="" asp-controller="Booking" asp-action="MyBookings" class="block w-full border border-on-surface/20 text-center py-4 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-on-surface hover:text-white transition-all shadow-xl">
+                            Manage Bookings
+                        </a>
+                     }
                      <a asp-action="Edit" asp-route-id="@Model.PkCustomerId" class="block w-full bg-black text-white text-center py-4 font-label text-[10px] font-bold uppercase tracking-[0.2rem] hover:bg-secondary transition-colors shadow-2xl">
                         Modify Profile
                     </a>

@@ -25,7 +25,7 @@
             <a asp-area="" asp-controller="Cars" asp-action="Index" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">Fleet</a>
             @if (User.Identity?.IsAuthenticated == true)
             {
-                @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
+                @if (!User.IsInRole("Admin") && User.IsInRole("Employee"))
                 {
                     <a asp-area="" asp-controller="Booking" asp-action="CustomerList" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">Bookings</a>
                 }
