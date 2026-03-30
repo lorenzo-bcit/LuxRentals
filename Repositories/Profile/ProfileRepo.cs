@@ -1,4 +1,4 @@
-﻿using LuxRentals.Data;
+using LuxRentals.Data;
 using LuxRentals.ViewModels.Roles;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +31,7 @@ namespace LuxRentals.Repositories.Roles
                     DriverLicenceNo = c.DriverLicenceNo
                 })
                 .ToListAsync();
-        }
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving all profiles");
@@ -56,7 +56,7 @@ namespace LuxRentals.Repositories.Roles
                     DriverLicenceNo = c.DriverLicenceNo
                 })
                 .FirstOrDefaultAsync();
-        }
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving profile for customer ID {CustomerId}", id);
@@ -67,7 +67,7 @@ namespace LuxRentals.Repositories.Roles
         public async Task<ProfileVm?> GetUserByEmailAsync(string email)
         {
             try
-        {
+            {
             return await _db.Customers
                     .Where(c => c.Email == email)
                     .Select(c => new ProfileVm
@@ -81,7 +81,7 @@ namespace LuxRentals.Repositories.Roles
                     DriverLicenceNo = c.DriverLicenceNo
                 })
                 .FirstOrDefaultAsync();
-        }
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving profile for email {Email}", email);
@@ -92,31 +92,58 @@ namespace LuxRentals.Repositories.Roles
         public async Task<bool> UpdateProfileAsync(ProfileVm model)
         {
             try
-        {
-            var customer = await _db.Customers
-                .FirstOrDefaultAsync(c => c.PkCustomerId == model.PkCustomerId);
-
-            if (customer == null)
             {
-                    _logger.LogWarning("Attempted to update non-existent customer ID {CustomerId}", model.PkCustomerId);
-                return false;
+                var customer = await _db.Customers
+                    .FirstOrDefaultAsync(c => c.PkCustomerId == model.PkCustomerId);
+
+                if (customer == null)
+                {
+                        _logger.LogWarning("Attempted to update non-existent customer ID {CustomerId}", model.PkCustomerId);
+                    return false;
+                }
+
+                    // Update fields (except for EMAIL which is not editable)
+                customer.FirstName = model.FirstName;
+                customer.LastName = model.LastName;
+                customer.Email = model.Email;
+                customer.PhoneNumber = model.PhoneNumber;
+                customer.DriverLicenceNo = model.DriverLicenceNo;
+
+                await _db.SaveChangesAsync();
+
+                    _logger.LogInformation("Profile updated successfully for customer ID {CustomerId}", model.PkCustomerId);
+                return true;
             }
-
-                // Update fields (except for EMAIL which is not editable)
-            customer.FirstName = model.FirstName;
-            customer.LastName = model.LastName;
-            customer.Email = model.Email;
-            customer.PhoneNumber = model.PhoneNumber;
-            customer.DriverLicenceNo = model.DriverLicenceNo;
-
-            await _db.SaveChangesAsync();
-
-                _logger.LogInformation("Profile updated successfully for customer ID {CustomerId}", model.PkCustomerId);
-            return true;
-        }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating profile for customer ID {CustomerId}", model.PkCustomerId);
+                throw;
+            }
+        }
+
+        public async Task<bool> CreateProfileAsync(ProfileVm model)
+        {
+            try
+            {
+                var customer = new LuxRentals.Models.Customer
+                {
+                    UserId = model.UserId,
+                    FirstName = model.FirstName ?? "New",
+                    LastName = model.LastName ?? "User",
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber ?? "000-000-0000",
+                    DriverLicenceNo = model.DriverLicenceNo ?? "PENDING"
+                };
+
+                _db.Customers.Add(customer);
+                await _db.SaveChangesAsync();
+
+                _logger.LogInformation("Profile created successfully for user {UserId}", model.UserId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating profile for user {UserId}", model.UserId);
                 throw;
             }
         }

@@ -4,12 +4,9 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    @if (!User.IsInRole("Admin"))
-    {
-        <a asp-controller="Profile" asp-action="Details" asp-route-id="@User.Identity?.Name" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">
-            My Profile
-        </a>
-    }
+    <a asp-controller="Profile" asp-action="Details" asp-route-id="@User.Identity?.Name" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">
+        My Profile
+    </a>
     <a asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">
         Hello @User.Identity?.Name!
     </a>
