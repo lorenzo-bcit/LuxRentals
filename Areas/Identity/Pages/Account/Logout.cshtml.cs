@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace LuxRentals.Areas.Identity.Pages.Account
 {
+    [AllowAnonymous]
     public class LogoutModel : PageModel
     {
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -21,6 +22,10 @@ namespace LuxRentals.Areas.Identity.Pages.Account
         {
             _signInManager = signInManager;
             _logger = logger;
+        }
+
+        public void OnGet()
+        {
         }
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
