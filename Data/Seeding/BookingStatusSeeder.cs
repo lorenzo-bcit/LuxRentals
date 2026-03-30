@@ -1,8 +1,7 @@
-﻿using LuxRentals.Data;
-using LuxRentals.Models;
+﻿using LuxRentals.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace LuxRentals.Data.Seeders
+namespace LuxRentals.Data.Seeding
 {
     public static class BookingStatusSeeder
     {

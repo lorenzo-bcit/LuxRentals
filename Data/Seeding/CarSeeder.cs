@@ -2,11 +2,20 @@ using LuxRentals.Models;
 using LuxRentals.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace LuxRentals.Data.Seeders;
+namespace LuxRentals.Data.Seeding;
 
 public static class CarSeeder
 {
-    public static async Task EnsureCarCatalogSeededAsync(this WebApplication app)
+    public static async Task EnsureCoreCarLookupsSeededAsync(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<LuxRentalsDbContext>();
+
+        await EnsureCarStatusesAsync(db);
+        await EnsureFuelTypesAsync(db);
+    }
+
+    public static async Task EnsureDemoCarCatalogSeededAsync(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
         var services = scope.ServiceProvider;

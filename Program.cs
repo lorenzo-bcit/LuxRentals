@@ -1,6 +1,5 @@
 ﻿using DotNetEnv.Configuration;
 using LuxRentals.Data;
-using LuxRentals.Data.Seeders;
 using LuxRentals.Repositories.Cars;
 using LuxRentals.Services;
 using LuxRentals.Services.Cars;
@@ -13,6 +12,8 @@ using LuxRentals.Services.ServiceSettings;
 using LuxRentals.Repositories.Bookings;
 using System.Net.Mail;
 using System.Net;
+using LuxRentals.Data.Seeding;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,8 @@ builder.Services.AddScoped<ICarImageStorage, CarImageStorage>();
 
 builder.Services.Configure<ReCaptchaOptions>(
     builder.Configuration.GetSection("ReCaptcha"));
+builder.Services.Configure<SeedDataOptions>(
+    builder.Configuration.GetSection("SeedData"));
 
 builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>(client =>
 {
@@ -84,12 +87,14 @@ builder.Services.AddTransient<IEmailSender, IdentityEmailSender>();
 
 var app = builder.Build();
 
-// Apply any pending migrations and seeding in dev mode
-if (app.Environment.IsDevelopment())
+var seedDataOptions = app.Services.GetRequiredService<IOptions<SeedDataOptions>>().Value;
+var shouldSeedDemoData = app.Environment.IsDevelopment() || seedDataOptions.EnableDemoData;
+
+// Apply any pending migrations and demo seeding when explicitly enabled.
+if (shouldSeedDemoData)
 {
     await app.ApplyPendingMigrationsAsync();
-    await app.EnsureAdminSeededAsync();
-    await app.EnsureCarCatalogSeededAsync();
+    await app.EnsureDemoCarCatalogSeededAsync();
 }
 
 if (app.Environment.IsProduction())
@@ -100,6 +105,8 @@ if (app.Environment.IsProduction())
 }
 
 await app.EnsureBookingStatusSeededAsync();
+await app.EnsureCoreCarLookupsSeededAsync();
+await app.EnsureAdminSeededAsync();
 
 app.UseSession();
 

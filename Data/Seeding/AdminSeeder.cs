@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
-namespace LuxRentals.Data.Seeders;
+namespace LuxRentals.Data.Seeding;
 
 public static class AdminSeeder
 {
-    private const string ADMIN_EMAIL = "admin@example.com";
-    private const string ADMIN_PASSWORD = "Admin123!";
     private const string ADMIN_ROLE = "Admin";
 
     public static async Task EnsureAdminSeededAsync(this WebApplication app)
@@ -18,6 +17,13 @@ public static class AdminSeeder
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var options = services.GetRequiredService<IOptions<SeedDataOptions>>().Value;
+
+        if (string.IsNullOrWhiteSpace(options.AdminEmail) || string.IsNullOrWhiteSpace(options.AdminPassword))
+        {
+            logger.LogWarning("Admin seeding skipped because SeedData:AdminEmail or SeedData:AdminPassword is missing.");
+            return;
+        }
 
         // ensure admin role exists
         if (!await roleManager.RoleExistsAsync(ADMIN_ROLE))
@@ -39,12 +45,12 @@ public static class AdminSeeder
 
         var adminUser = new IdentityUser
         {
-            UserName = ADMIN_EMAIL,
-            Email = ADMIN_EMAIL,
+            UserName = options.AdminEmail,
+            Email = options.AdminEmail,
             EmailConfirmed = true
         };
 
-        var createResult = await userManager.CreateAsync(adminUser, ADMIN_PASSWORD);
+        var createResult = await userManager.CreateAsync(adminUser, options.AdminPassword);
         if (!createResult.Succeeded)
         {
             logger.LogError("Failed to create default admin user.");
