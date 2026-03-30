@@ -32,7 +32,7 @@
             }
             @if (User.IsInRole("Admin"))
             {
-                <a asp-area="Admin" asp-controller="AdminProfile" asp-action="Index" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">Admin</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">Admin</a>
             }
             <partial name="_LoginPartial" />
         </div>
