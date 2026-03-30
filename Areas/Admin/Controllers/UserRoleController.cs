@@ -2,8 +2,10 @@ using LuxRentals.Repositories.Roles;
 using LuxRentals.ViewModels;
 using LuxRentals.ViewModels.Roles;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace LuxRentals.Areas.Admin.Controllers;
 
@@ -14,22 +16,46 @@ public class UserRoleController : Controller
     private readonly UserRepo _userRepo;
     private readonly RoleRepo _roleRepo;
     private readonly UserRoleRepo _userRoleRepo;
-
+    private readonly ProfileRepo _profileRepo;
+    private readonly UserManager<IdentityUser> _userManager;
 
     public UserRoleController(UserRepo userRepo
                              , RoleRepo roleRepo
-                             , UserRoleRepo userRoleRepo)
+                             , UserRoleRepo userRoleRepo
+                             , ProfileRepo profileRepo
+                             , UserManager<IdentityUser> userManager)
     {
         _userRepo = userRepo;
         _roleRepo = roleRepo;
         _userRoleRepo = userRoleRepo;
+        _profileRepo = profileRepo;
+        _userManager = userManager;
     }
 
-    // Show all users
+    // Show all clients (Unified Registry)
     public async Task<IActionResult> Index()
     {
-        var userVm = await _userRepo.GetAllUsersAsync();
-        return View(userVm);
+        var users = await _userManager.Users.ToListAsync();
+        var profiles = await _profileRepo.GetAllProfilesAsync();
+
+        var registry = new List<ClientRegistryVm>();
+
+        foreach (var user in users)
+        {
+            var profile = profiles.FirstOrDefault(p => p.Email == user.Email);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            registry.Add(new ClientRegistryVm
+            {
+                Email = user.Email ?? "",
+                FullName = profile != null ? $"{profile.FirstName} {profile.LastName}" : "Identity Account (No Profile)",
+                PhoneNumber = profile?.PhoneNumber ?? user.PhoneNumber,
+                Roles = roles,
+                PkCustomerId = profile?.PkCustomerId
+            });
+        }
+
+        return View(registry);
     }
 
     public async Task<IActionResult> Detail(string userName)

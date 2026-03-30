@@ -361,6 +361,9 @@
   .mt-1\.5 {
     margin-top: calc(var(--spacing) * 1.5);
   }
+  .mt-3 {
+    margin-top: calc(var(--spacing) * 3);
+  }
   .mt-4 {
     margin-top: calc(var(--spacing) * 4);
   }
@@ -873,6 +876,10 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
+  .border-0 {
+    border-style: var(--tw-border-style);
+    border-width: 0px;
+  }
   .border-x-0 {
     border-inline-style: var(--tw-border-style);
     border-inline-width: 0px;
@@ -922,6 +929,12 @@
   }
   .border-on-surface {
     border-color: var(--color-on-surface);
+  }
+  .border-on-surface\/10 {
+    border-color: color-mix(in srgb, #1a1c1c 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-on-surface) 10%, transparent);
+    }
   }
   .border-on-surface\/20 {
     border-color: color-mix(in srgb, #1a1c1c 20%, transparent);
@@ -1028,6 +1041,12 @@
   .bg-on-secondary-fixed {
     background-color: var(--color-on-secondary-fixed);
   }
+  .bg-on-surface\/5 {
+    background-color: color-mix(in srgb, #1a1c1c 5%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-on-surface) 5%, transparent);
+    }
+  }
   .bg-on-surface\/20 {
     background-color: color-mix(in srgb, #1a1c1c 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1051,6 +1070,9 @@
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-outline-variant) 30%, transparent);
     }
+  }
+  .bg-primary {
+    background-color: var(--color-primary);
   }
   .bg-secondary {
     background-color: var(--color-secondary);
@@ -1510,6 +1532,12 @@
   .text-on-surface-variant {
     color: var(--color-on-surface-variant);
   }
+  .text-on-surface-variant\/40 {
+    color: color-mix(in srgb, #4e4639 40%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-on-surface-variant) 40%, transparent);
+    }
+  }
   .text-on-surface\/40 {
     color: color-mix(in srgb, #1a1c1c 40%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1602,6 +1630,9 @@
   }
   .opacity-50 {
     opacity: 50%;
+  }
+  .opacity-60 {
+    opacity: 60%;
   }
   .opacity-80 {
     opacity: 80%;
