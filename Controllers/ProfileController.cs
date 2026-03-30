@@ -1,4 +1,4 @@
-﻿using LuxRentals.Repositories.Roles;
+using LuxRentals.Repositories.Roles;
 using LuxRentals.ViewModels.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -62,11 +62,10 @@ namespace LuxRentals.Controllers
 
                 if (vm == null)
                 {
-                    // Check if Admin trying to view their own profile
-                    if (targetEmail == currentUserEmail && isAdmin)
+                    // If viewing own missing profile, offer to create it
+                    if (targetEmail == currentUserEmail)
                     {
-                        TempData["Info"] = "Admins do not have a customer profile record.";
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("Create");
                     }
 
                     TempData["Error"] = "Profile not found.";
@@ -80,6 +79,59 @@ namespace LuxRentals.Controllers
                 _logger.LogError(ex, "Error loading profile details for {Email}", id);
                 TempData["Error"] = "Unable to load profile details.";
                 return RedirectToAction("Index", "Home");
+            }
+        }
+
+        // GET: ProfileController/Create
+        public IActionResult Create()
+        {
+            var userEmail = User.Identity?.Name ?? "";
+            var userId = _userManager.GetUserId(User) ?? "";
+            
+            var vm = new ProfileVm
+            {
+                Email = userEmail,
+                UserId = userId,
+                FirstName = "",
+                LastName = "",
+                PhoneNumber = "",
+                DriverLicenceNo = ""
+            };
+            
+            return View(vm);
+        }
+
+        // POST: ProfileController/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ProfileVm model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                // Ensure UserId and Email are correct for the current user
+                model.UserId = _userManager.GetUserId(User) ?? "";
+                model.Email = User.Identity?.Name ?? "";
+
+                var created = await _profileRepo.CreateProfileAsync(model);
+                if (created)
+                {
+                    TempData["Success"] = "Profile initialized successfully.";
+                    return RedirectToAction("Details");
+                }
+
+                TempData["Error"] = "Failed to initialize profile.";
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating profile for user {User}", model.Email);
+                TempData["Error"] = "An error occurred during profile initialization.";
+                return View(model);
             }
         }
 
