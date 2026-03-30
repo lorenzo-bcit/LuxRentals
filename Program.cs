@@ -1,18 +1,18 @@
-﻿using DotNetEnv.Configuration;
+﻿using System.Net;
+using System.Net.Mail;
+using DotNetEnv.Configuration;
 using LuxRentals.Data;
+using LuxRentals.Data.Seeding;
+using LuxRentals.Repositories.Bookings;
 using LuxRentals.Repositories.Cars;
+using LuxRentals.Repositories.Roles;
 using LuxRentals.Services;
 using LuxRentals.Services.Cars;
 using LuxRentals.Services.Payment;
+using LuxRentals.Services.ServiceSettings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using LuxRentals.Repositories.Roles;
-using LuxRentals.Services.ServiceSettings;
-using LuxRentals.Repositories.Bookings;
-using System.Net.Mail;
-using System.Net;
-using LuxRentals.Data.Seeding;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
