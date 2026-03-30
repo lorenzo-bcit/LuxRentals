@@ -69,6 +69,7 @@
     --color-on-tertiary-fixed-variant: #5d4201;
     --color-error-container: #ffdad6;
     --color-outline: #7f7667;
+    --color-on-tertiary-container: #4e3700;
     --color-surface-container-low: #f3f3f4;
     --color-error: #ba1a1a;
     --color-surface-container-high: #e8e8e8;
@@ -85,6 +86,7 @@
     --color-surface-container: #eeeeee;
     --color-secondary-container: #fed488;
     --color-on-surface-variant: #4e4639;
+    --color-tertiary-container: #c5a059;
     --color-outline-variant: #d1c5b4;
     --color-on-secondary-fixed: #261900;
     --font-headline: "Noto Serif", serif;
@@ -999,6 +1001,9 @@
       border-color: color-mix(in oklab, var(--color-secondary) 30%, transparent);
     }
   }
+  .border-tertiary {
+    border-color: var(--color-tertiary);
+  }
   .border-tertiary\/30 {
     border-color: color-mix(in srgb, #775a19 30%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1067,6 +1072,9 @@
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-on-surface) 30%, transparent);
     }
+  }
+  .bg-on-tertiary-container {
+    background-color: var(--color-on-tertiary-container);
   }
   .bg-outline-variant\/20 {
     background-color: color-mix(in srgb, #d1c5b4 20%, transparent);
@@ -1142,6 +1150,9 @@
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-surface-container) 30%, transparent);
     }
+  }
+  .bg-tertiary-container {
+    background-color: var(--color-tertiary-container);
   }
   .bg-transparent {
     background-color: transparent;
@@ -1559,6 +1570,9 @@
       color: color-mix(in oklab, var(--color-on-surface) 40%, transparent);
     }
   }
+  .text-on-tertiary-container {
+    color: var(--color-on-tertiary-container);
+  }
   .text-on-tertiary-fixed {
     color: var(--color-on-tertiary-fixed);
   }
@@ -1597,6 +1611,9 @@
   }
   .text-tertiary {
     color: var(--color-tertiary);
+  }
+  .text-tertiary-container {
+    color: var(--color-tertiary-container);
   }
   .text-tertiary-fixed {
     color: var(--color-tertiary-fixed);
