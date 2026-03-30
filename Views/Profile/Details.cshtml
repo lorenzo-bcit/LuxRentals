@@ -74,18 +74,18 @@
 
                     <div class="pt-10 border-t border-outline-variant/10">
                          <div class="space-y-2">
-                            <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Primary Communication</span>
+                            <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Email</span>
                             <p class="font-headline text-xl font-bold lowercase tracking-tight">@Model.Email</p>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-outline-variant/10">
                         <div class="space-y-2">
-                            <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Secure Line</span>
+                            <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Phone Number</span>
                             <p class="font-headline text-xl font-bold uppercase">@Model.PhoneNumber</p>
                         </div>
                         <div class="space-y-2">
-                            <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Verification ID</span>
+                            <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Driver's License</span>
                             <p class="font-headline text-xl font-bold uppercase tracking-widest">
                                 @(Model.DriverLicenceNo.Length > 4 ? "####-" + Model.DriverLicenceNo.Substring(Model.DriverLicenceNo.Length - 4) : Model.DriverLicenceNo)
                             </p>
