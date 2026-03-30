@@ -138,16 +138,16 @@
                                     Cancelled on @booking.CancelledAt.Value.ToString("MMM dd")
                                 </div>
                             }
-                            else if (canCancel)
+                            else if (isUpcoming || isAdminOrEmployee)
                             {
                                 <a asp-action="Cancel" asp-route-id="@booking.PkBookingId" class="block w-full text-center py-4 border border-on-surface/20 text-on-surface hover:bg-black hover:text-white transition-all font-label text-[10px] uppercase tracking-widest font-bold">
                                     Cancel Reservation
                                 </a>
                             }
-                            else if (!isAdminOrEmployee && isUpcoming)
+                            else if (isActive)
                             {
                                 <div class="text-center py-4 border border-outline-variant/20 bg-surface-container-low text-on-surface-variant font-label text-[9px] uppercase tracking-widest">
-                                    Locked (Under 48hrs)
+                                    Active Deployment
                                 </div>
                             }
                             else if (isCompleted)
