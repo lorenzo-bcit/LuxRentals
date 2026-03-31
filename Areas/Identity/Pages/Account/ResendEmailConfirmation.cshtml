@@ -4,34 +4,45 @@
     ViewData["Title"] = "Resend Verification";
 }
 
-<div class="grow flex items-center justify-center pt-12 pb-20 px-6">
-    <div class="w-full max-w-lg bg-surface-container-lowest p-12 md:p-16 shadow-[0_40px_60px_rgba(0,0,0,0.04)]">
-        <header class="mb-12">
-            <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">@ViewData["Title"]</h1>
-            <p class="font-label text-xs uppercase tracking-[0.2em] text-outline">Continue your luxury experience</p>
+<main class="grow flex items-center justify-center pt-40 pb-32 px-6 bg-surface min-h-[calc(100vh-88px)]">
+    <div class="w-full max-w-xl bg-surface-container-lowest p-12 md:p-14 shadow-[0_45px_100px_rgba(0,0,0,0.08)] border border-outline-variant/10 relative overflow-hidden group">
+        <!-- Corner Decorative Accent -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-full transform translate-x-12 -translate-y-12"></div>
+        
+        <!-- Header -->
+        <header class="mb-14 relative z-10">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Identity Verification</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6 leading-none">Resend Dispatch</h1>
+            <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose">Transmit a new authorization tether to your validated mailbox.</p>
         </header>
 
-        <form method="post" class="space-y-10">
-            <div asp-validation-summary="All" class="text-error font-body text-sm mb-4" role="alert"></div>
-
-            <div class="relative">
-                <label asp-for="Input.Email" class="block font-label text-[10px] uppercase tracking-[0.15em] text-outline mb-1">Email Address</label>
-                <input asp-for="Input.Email" class="w-full ghost-input py-3 font-body text-on-surface placeholder:text-outline/30 bg-transparent" placeholder="name@example.com" autocomplete="email" aria-required="true" />
-                <span asp-validation-for="Input.Email" class="text-error text-xs block mt-1"></span>
+        <!-- Form -->
+        <form method="post" class="space-y-10 relative z-10">
+            <div asp-validation-summary="All" class="p-4 bg-error-container/10 border-l-4 border-error text-error text-[10px] uppercase tracking-widest font-bold mb-6" role="alert"></div>
+            
+            <div class="space-y-2 group/input">
+                <label asp-for="Input.Email" class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Official ID Registry</label>
+                <div class="relative">
+                    <input asp-for="Input.Email" class="ghost-input w-full uppercase tracking-widest text-sm" placeholder="ID@LUXRENTALS.COM" autocomplete="email" aria-required="true" />
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-secondary transition-all duration-500 group-focus-within/input:w-full"></span>
+                </div>
+                <span asp-validation-for="Input.Email" class="text-error text-[9px] uppercase tracking-tighter font-bold"></span>
             </div>
 
-            <div class="pt-4">
-                <button type="submit" class="w-full py-5 bg-on-secondary-fixed text-tertiary-fixed font-headline text-lg font-bold tracking-tight hover:bg-black transition-colors duration-300">
-                    RESEND EMAIL
+            <div class="pt-6 space-y-6">
+                <button type="submit" class="w-full py-5 bg-black text-white font-headline text-sm font-black uppercase tracking-[0.25em] hover:bg-secondary transition-all duration-500 shadow-2xl">
+                    Dispatch Verification
                 </button>
-            </div>
-
-            <div class="pt-8 border-t border-outline-variant/10 flex flex-col space-y-4">
-                <a asp-page="./Login" class="font-label text-[10px] uppercase tracking-[0.1rem] text-tertiary hover:opacity-70 transition-opacity text-center">Back to Login</a>
+                
+                <div class="text-center pt-8 border-t border-outline-variant/10">
+                    <a asp-page="./Login" class="font-label text-[10px] text-on-surface font-black uppercase tracking-widest border-b border-on-surface/20 hover:border-secondary hover:text-secondary transition-all">
+                        Return to Authorization
+                    </a>
+                </div>
             </div>
         </form>
     </div>
-</div>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

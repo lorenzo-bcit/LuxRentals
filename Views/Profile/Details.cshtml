@@ -45,12 +45,6 @@
                 <span class="font-label text-[10px] uppercase tracking-[0.2rem] text-secondary font-bold block mb-8">Executive Client</span>
                 
                 <div class="pt-8 border-t border-outline-variant/20 flex flex-col gap-4">
-                     @if (isOwnProfile)
-                     {
-                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="block w-full border border-on-surface/10 text-center py-4 font-label text-[9px] font-bold uppercase tracking-[0.2rem] opacity-60 hover:opacity-100 hover:bg-surface-container transition-all">
-                            Security Credentials
-                        </a>
-                     }
                      @if (isAdmin)
                      {
                         <a asp-area="" asp-controller="Booking" asp-action="ViewCustomerBookings" asp-route-customerId="@Model.PkCustomerId" class="block w-full border border-on-surface/20 text-center py-4 font-label text-[10px] font-bold uppercase tracking-[0.2rem] hover:bg-on-surface hover:text-white transition-all shadow-xl">
