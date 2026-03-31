@@ -5,7 +5,7 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <a asp-area="" asp-controller="Profile" asp-action="Details" asp-route-id="@User.Identity?.Name" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300">
-        My Profile
+        Profile
     </a>
     <form asp-area="Identity" asp-page="/Account/Logout" class="m-0 p-0 inline flex items-center">
         <button type="submit" class="font-['Noto_Serif'] tracking-tighter uppercase text-sm font-bold text-black dark:text-white hover:text-[#C5A059] transition-colors duration-300 bg-transparent border-none cursor-pointer">
