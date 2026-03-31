@@ -1,18 +1,19 @@
-﻿using DotNetEnv.Configuration;
+﻿using System.Net;
+using System.Net.Mail;
+using DotNetEnv.Configuration;
 using LuxRentals.Data;
-using LuxRentals.Data.Seeders;
+using LuxRentals.Data.Seeding;
+using LuxRentals.Repositories.Bookings;
 using LuxRentals.Repositories.Cars;
+using LuxRentals.Repositories.Roles;
 using LuxRentals.Services;
 using LuxRentals.Services.Cars;
 using LuxRentals.Services.Payment;
+using LuxRentals.Services.ServiceSettings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using LuxRentals.Repositories.Roles;
-using LuxRentals.Services.ServiceSettings;
-using LuxRentals.Repositories.Bookings;
-using System.Net.Mail;
-using System.Net;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,8 @@ builder.Services.AddScoped<ICarImageStorage, CarImageStorage>();
 
 builder.Services.Configure<ReCaptchaOptions>(
     builder.Configuration.GetSection("ReCaptcha"));
+builder.Services.Configure<BootstrapOptions>(
+    builder.Configuration.GetSection("Bootstrap"));
 
 builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>(client =>
 {
@@ -84,12 +87,18 @@ builder.Services.AddTransient<IEmailSender, IdentityEmailSender>();
 
 var app = builder.Build();
 
-// Apply any pending migrations and seeding in dev mode
-if (app.Environment.IsDevelopment())
+var bootstrapOptions = app.Services.GetRequiredService<IOptions<BootstrapOptions>>().Value;
+var shouldApplyMigrations = app.Environment.IsDevelopment() || bootstrapOptions.AutoApplyMigrations;
+var shouldSeedDemoData = app.Environment.IsDevelopment() || bootstrapOptions.EnableDemoData;
+
+if (shouldApplyMigrations)
 {
     await app.ApplyPendingMigrationsAsync();
-    await app.EnsureAdminSeededAsync();
-    await app.EnsureCarCatalogSeededAsync();
+}
+
+if (shouldSeedDemoData)
+{
+    await app.EnsureDemoCarCatalogSeededAsync();
 }
 
 if (app.Environment.IsProduction())
@@ -100,6 +109,8 @@ if (app.Environment.IsProduction())
 }
 
 await app.EnsureBookingStatusSeededAsync();
+await app.EnsureCoreCarLookupsSeededAsync();
+await app.EnsureAdminSeededAsync();
 
 app.UseSession();
 
