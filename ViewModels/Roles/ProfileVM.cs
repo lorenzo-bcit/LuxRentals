@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace LuxRentals.ViewModels.Roles
@@ -38,10 +38,9 @@ namespace LuxRentals.ViewModels.Roles
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; } = null!;
 
-        [Required(ErrorMessage = "Driver licence number is required.")]
         [StringLength(20, MinimumLength = 7,
             ErrorMessage = "Driver's license number must be between 7 and 20 characters.")]
         [Display(Name = "Driver Licence Number")]
-        public string DriverLicenceNo { get; set; } = null!;
+        public string? DriverLicenceNo { get; set; }
     }
 }
