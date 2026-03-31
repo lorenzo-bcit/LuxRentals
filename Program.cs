@@ -87,9 +87,9 @@ builder.Services.AddTransient<IEmailSender, IdentityEmailSender>();
 
 var app = builder.Build();
 
-var seedDataOptions = app.Services.GetRequiredService<IOptions<BootstrapOptions>>().Value;
-var shouldApplyMigrations = app.Environment.IsDevelopment() || seedDataOptions.AutoApplyMigrations;
-var shouldSeedDemoData = app.Environment.IsDevelopment() || seedDataOptions.EnableDemoData;
+var bootstrapOptions = app.Services.GetRequiredService<IOptions<BootstrapOptions>>().Value;
+var shouldApplyMigrations = app.Environment.IsDevelopment() || bootstrapOptions.AutoApplyMigrations;
+var shouldSeedDemoData = app.Environment.IsDevelopment() || bootstrapOptions.EnableDemoData;
 
 if (shouldApplyMigrations)
 {
