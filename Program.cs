@@ -58,7 +58,7 @@ builder.Services.AddScoped<ICarImageStorage, CarImageStorage>();
 
 builder.Services.Configure<ReCaptchaOptions>(
     builder.Configuration.GetSection("ReCaptcha"));
-builder.Services.Configure<SeedDataOptions>(
+builder.Services.Configure<BootstrapOptions>(
     builder.Configuration.GetSection("SeedData"));
 
 builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>(client =>
@@ -87,13 +87,17 @@ builder.Services.AddTransient<IEmailSender, IdentityEmailSender>();
 
 var app = builder.Build();
 
-var seedDataOptions = app.Services.GetRequiredService<IOptions<SeedDataOptions>>().Value;
+var seedDataOptions = app.Services.GetRequiredService<IOptions<BootstrapOptions>>().Value;
+var shouldApplyMigrations = app.Environment.IsDevelopment() || seedDataOptions.AutoApplyMigrations;
 var shouldSeedDemoData = app.Environment.IsDevelopment() || seedDataOptions.EnableDemoData;
 
-// Apply any pending migrations and demo seeding when explicitly enabled.
-if (shouldSeedDemoData)
+if (shouldApplyMigrations)
 {
     await app.ApplyPendingMigrationsAsync();
+}
+
+if (shouldSeedDemoData)
+{
     await app.EnsureDemoCarCatalogSeededAsync();
 }
 

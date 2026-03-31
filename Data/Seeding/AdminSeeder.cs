@@ -17,7 +17,7 @@ public static class AdminSeeder
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-        var options = services.GetRequiredService<IOptions<SeedDataOptions>>().Value;
+        var options = services.GetRequiredService<IOptions<BootstrapOptions>>().Value;
 
         if (string.IsNullOrWhiteSpace(options.AdminEmail) || string.IsNullOrWhiteSpace(options.AdminPassword))
         {
