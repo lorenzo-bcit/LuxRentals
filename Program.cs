@@ -59,7 +59,7 @@ builder.Services.AddScoped<ICarImageStorage, CarImageStorage>();
 builder.Services.Configure<ReCaptchaOptions>(
     builder.Configuration.GetSection("ReCaptcha"));
 builder.Services.Configure<BootstrapOptions>(
-    builder.Configuration.GetSection("SeedData"));
+    builder.Configuration.GetSection("Bootstrap"));
 
 builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>(client =>
 {

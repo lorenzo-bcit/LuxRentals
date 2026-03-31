@@ -21,7 +21,7 @@ public static class AdminSeeder
 
         if (string.IsNullOrWhiteSpace(options.AdminEmail) || string.IsNullOrWhiteSpace(options.AdminPassword))
         {
-            logger.LogWarning("Admin seeding skipped because SeedData:AdminEmail or SeedData:AdminPassword is missing.");
+            logger.LogWarning("Admin seeding skipped because Bootstrap:AdminEmail or Bootstrap:AdminPassword is missing.");
             return;
         }
 
