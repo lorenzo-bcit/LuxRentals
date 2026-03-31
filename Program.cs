@@ -8,6 +8,7 @@ using LuxRentals.Repositories.Cars;
 using LuxRentals.Repositories.Roles;
 using LuxRentals.Services;
 using LuxRentals.Services.Cars;
+using LuxRentals.Services.Email;
 using LuxRentals.Services.Payment;
 using LuxRentals.Services.ServiceSettings;
 using Microsoft.AspNetCore.Identity;

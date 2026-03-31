@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Html;
 
-namespace LuxRentals.Services;
+namespace LuxRentals.ViewModels.Email;
 
 public sealed class IdentityEmailTemplateModel
 {
