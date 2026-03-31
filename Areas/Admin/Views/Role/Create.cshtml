@@ -1,40 +1,42 @@
 @model LuxRentals.ViewModels.Roles.RoleVm
 @{
-    ViewData["Title"] = "Create Role";
+    ViewData["Title"] = "Establish Role";
 }
 
-<div class="admin-section">
-    <h2 class="mb-4"><i class="bi bi-plus-circle"></i> Create New Role</h2>
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface min-h-[calc(100vh-88px)] flex flex-col justify-center">
+    <div class="w-full max-w-2xl mx-auto bg-surface-container-lowest p-12 md:p-16 shadow-[0_45px_100px_rgba(0,0,0,0.06)] border border-outline-variant/10">
+        
+        <!-- Header -->
+        <header class="mb-16 border-b border-outline-variant/10 pb-12">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Access Control</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Establish Role</h1>
+            <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose">
+                Define a new authority level within the LuxRentals organizational hierarchy.
+            </p>
+        </header>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <form asp-action="Create" method="post">
-                        @Html.AntiForgeryToken()
+        <form asp-action="Create" method="post" class="space-y-12">
+            @Html.AntiForgeryToken()
 
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div asp-validation-summary="ModelOnly" class="mb-8 p-6 bg-error-container/10 border-l-4 border-error text-error text-[10px] uppercase tracking-widest font-bold"></div>
 
-                        <div class="mb-3">
-                            <label asp-for="RoleName" class="form-label fw-semibold"></label>
-                            <input asp-for="RoleName" class="form-control" placeholder="e.g. Manager, Editor, Viewer" />
-                            <span asp-validation-for="RoleName" class="text-danger"></span>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <a asp-action="Index" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle"></i> Create Role
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            <div class="space-y-4">
+                <label asp-for="RoleName" class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant block font-bold">Role Designation</label>
+                <input asp-for="RoleName" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-4 focus:border-secondary transition-all duration-500 font-headline text-xl font-bold tracking-tight text-on-surface placeholder:text-outline-variant/30 lowercase" placeholder="e.g. administrator" />
+                <span asp-validation-for="RoleName" class="text-error text-[10px] uppercase tracking-widest block transform translate-y-2 font-bold"></span>
             </div>
-        </div>
+
+            <div class="pt-12 flex flex-col sm:flex-row gap-6">
+                <button type="submit" class="flex-1 bg-black text-white py-6 font-label text-[10px] font-black uppercase tracking-[0.3em] hover:bg-secondary transition-all duration-500 shadow-2xl">
+                    Authorize Role
+                </button>
+                <a asp-action="Index" class="flex-1 border border-on-surface/20 text-on-surface py-6 font-label text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all text-center">
+                    Abort
+                </a>
+            </div>
+        </form>
     </div>
-</div>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

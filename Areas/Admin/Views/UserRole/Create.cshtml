@@ -1,60 +1,61 @@
 @model LuxRentals.ViewModels.Roles.UserRoleVm
 @{
-    ViewData["Title"] = "Assign Role";
+    ViewData["Title"] = "Assign Authority";
 }
 
-<div class="admin-section">
-    <h2 class="mb-4"><i class="bi bi-person-plus-fill"></i> Assign Role to User</h2>
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface min-h-[calc(100vh-88px)] flex flex-col justify-center">
+    <div class="w-full max-w-2xl mx-auto bg-surface-container-lowest p-12 md:p-16 shadow-[0_45px_100px_rgba(0,0,0,0.06)] border border-outline-variant/10">
+        
+        <!-- Header -->
+        <header class="mb-16 border-b border-outline-variant/10 pb-12 text-center">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Credential Management</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6 text-center mx-auto">Assign Credentials</h1>
+            <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose max-w-md mx-auto">
+                Authorize the elevation of a selected system account within the LuxRentals security network.
+            </p>
+        </header>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <form asp-action="Create" method="post">
-                        @Html.AntiForgeryToken()
+        <form asp-action="Create" method="post" class="space-y-12">
+            @Html.AntiForgeryToken()
 
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div asp-validation-summary="ModelOnly" class="mb-8 p-6 bg-error-container/10 border-l-4 border-error text-error text-[10px] uppercase tracking-widest font-bold"></div>
 
-                        @if (TempData["ErrorMessage"] != null)
-                        {
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                @TempData["ErrorMessage"]
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert">@TempData["ErrorMessage"]</div>
+            }
 
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label fw-semibold">User</label>
-                            <select asp-for="Email" class="form-select"
-                                    asp-items="@((SelectList)ViewBag.UserSelectList)">
-                                <option value="">-- Select a User --</option>
-                            </select>
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
+            <div class="grid grid-cols-1 gap-12">
+                <div class="space-y-4">
+                    <label asp-for="Email" class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant block font-bold">Select Personnel</label>
+                    <select asp-for="Email" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-4 focus:border-secondary transition-all duration-500 font-headline text-xl font-bold tracking-tight text-on-surface appearance-none cursor-pointer lowercase"
+                            asp-items="@((SelectList)ViewBag.UserSelectList)">
+                        <option value="" disabled selected>-- IDENTIFY USER --</option>
+                    </select>
+                    <span asp-validation-for="Email" class="text-error text-[10px] uppercase tracking-widest block font-bold"></span>
+                </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Role" class="form-label fw-semibold">Role</label>
-                            <select asp-for="Role" class="form-select"
-                                    asp-items="@((SelectList)ViewBag.RoleSelectList)">
-                                <option value="">-- Select a Role --</option>
-                            </select>
-                            <span asp-validation-for="Role" class="text-danger"></span>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <a asp-action="Index" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle"></i> Assign Role
-                            </button>
-                        </div>
-                    </form>
+                <div class="space-y-4">
+                    <label asp-for="Role" class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant block font-bold">Authority Level</label>
+                    <select asp-for="Role" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-4 focus:border-secondary transition-all duration-500 font-headline text-xl font-bold tracking-tight text-on-surface appearance-none cursor-pointer uppercase"
+                            asp-items="@((SelectList)ViewBag.RoleSelectList)">
+                        <option value="" disabled selected>-- DESIGNATE RANK --</option>
+                    </select>
+                    <span asp-validation-for="Role" class="text-error text-[10px] uppercase tracking-widest block font-bold"></span>
                 </div>
             </div>
-        </div>
+
+            <div class="pt-12 flex flex-col sm:flex-row gap-6">
+                <button type="submit" class="flex-1 bg-black text-white py-6 font-label text-[10px] font-black uppercase tracking-[0.3em] hover:bg-secondary transition-all duration-500 shadow-2xl">
+                    AUTHORIZE PERMISSIONS
+                </button>
+                <a asp-action="Index" class="flex-1 border border-on-surface/20 text-on-surface py-6 font-label text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all text-center">
+                    ABORT
+                </a>
+            </div>
+        </form>
     </div>
-</div>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
