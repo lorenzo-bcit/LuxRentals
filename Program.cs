@@ -8,6 +8,7 @@ using LuxRentals.Repositories.Cars;
 using LuxRentals.Repositories.Roles;
 using LuxRentals.Services;
 using LuxRentals.Services.Cars;
+using LuxRentals.Services.Email;
 using LuxRentals.Services.Payment;
 using LuxRentals.Services.ServiceSettings;
 using Microsoft.AspNetCore.Identity;
@@ -82,6 +83,7 @@ var emailOptions = builder.Configuration
 
 builder.Services
     .AddFluentEmail(emailOptions.From, emailOptions.Name)
+    .AddRazorRenderer()
     .AddSmtpSender(() => new SmtpClient(emailOptions.Host)
     {
         Port = emailOptions.Port,
