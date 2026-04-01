@@ -85,7 +85,7 @@
                 <div class="space-y-4">
                     <div>
                         <label asp-for="SortBy" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Sort By</label>
-                        <select asp-for="SortBy" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="this.form.submit()">
+                        <select asp-for="SortBy" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="submitBrowseForm(this.form)">
                             <option value="price_asc">Price: Low to High</option>
                             <option value="price_desc">Price: High to Low</option>
                             <option value="year_desc">Year: Newest First</option>
@@ -108,7 +108,7 @@
                         </div>
                         <input asp-for="MaxRate" type="range" class="w-full accent-[#C5A059]" min="0" max="@Model.MaxSelectableRate.ToString("0")" step="5"
                                oninput="document.getElementById('maxRateDisplay').innerText = 'CAD ' + this.value"
-                               onchange="this.form.submit()" />
+                               onchange="submitBrowseForm(this.form)" />
                     </div>
 
                     <!-- Min Seats -->
@@ -119,7 +119,7 @@
                         </div>
                         <input asp-for="MinSeats" type="range" class="w-full accent-[#C5A059]" min="0" max="@Model.MaxSelectableSeats" step="1"
                                oninput="document.getElementById('seatsDisplay').innerText = this.value"
-                               onchange="this.form.submit()" />
+                               onchange="submitBrowseForm(this.form)" />
                     </div>
 
                     <!-- Min Luggage -->
@@ -130,31 +130,31 @@
                         </div>
                         <input asp-for="MinLuggage" type="range" class="w-full accent-[#C5A059]" min="0" max="@Model.MaxSelectableLuggage" step="1"
                                oninput="document.getElementById('luggageDisplay').innerText = this.value"
-                               onchange="this.form.submit()" />
+                               onchange="submitBrowseForm(this.form)" />
                     </div>
 
                     <!-- Make -->
                     <div>
                         <label asp-for="MakeId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Make</label>
-                        <select asp-for="MakeId" asp-items="Model.MakeOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="this.form.submit()"></select>
+                        <select asp-for="MakeId" asp-items="Model.MakeOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="submitBrowseForm(this.form)"></select>
                     </div>
 
                     <!-- Vehicle Type -->
                     <div>
                         <label asp-for="VehicleClassId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Vehicle Type</label>
-                        <select asp-for="VehicleClassId" asp-items="Model.VehicleClassOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="this.form.submit()"></select>
+                        <select asp-for="VehicleClassId" asp-items="Model.VehicleClassOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="submitBrowseForm(this.form)"></select>
                     </div>
 
                     <!-- Fuel Type -->
                     <div>
                         <label asp-for="FuelTypeId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Fuel Type</label>
-                        <select asp-for="FuelTypeId" asp-items="Model.FuelTypeOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="this.form.submit()"></select>
+                        <select asp-for="FuelTypeId" asp-items="Model.FuelTypeOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="submitBrowseForm(this.form)"></select>
                     </div>
 
                     <!-- Transmission Type -->
                     <div>
                         <label asp-for="TransmissionType" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2 block">Transmission</label>
-                        <select asp-for="TransmissionType" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="this.form.submit()">
+                        <select asp-for="TransmissionType" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer" onchange="submitBrowseForm(this.form)">
                             <option value="">Any</option>
                             <option value="1">Automatic</option>
                             <option value="0">Manual</option>
@@ -280,12 +280,24 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
+        const browseScrollStorageKey = 'cars-index-scroll-y';
+        const hasBrowseResults = @Model.Cars.Count.ToString().ToLowerInvariant();
+
         function addDays(dateString, days) {
             if(!dateString) return;
             const [year, month, day] = dateString.split('-').map(Number);
             const date = new Date(Date.UTC(year, month - 1, day));
             date.setUTCDate(date.getUTCDate() + days);
             return date.toISOString().split('T')[0];
+        }
+
+        function rememberBrowseScroll() {
+            sessionStorage.setItem(browseScrollStorageKey, String(window.scrollY));
+        }
+
+        function submitBrowseForm(form) {
+            rememberBrowseScroll();
+            form.submit();
         }
 
         function updateDateBounds(form) {
@@ -310,16 +322,32 @@
             const end = form.querySelector('[name=EndDate]').value;
 
             if (start && end) {
-                form.submit();
+                submitBrowseForm(form);
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.querySelector('form[method="get"]');
             const dateInputs = form?.querySelectorAll('input[type="date"]') ?? [];
+            const savedScrollPosition = sessionStorage.getItem(browseScrollStorageKey);
+
+            if (savedScrollPosition !== null) {
+                sessionStorage.removeItem(browseScrollStorageKey);
+
+                if (hasBrowseResults) {
+                    window.requestAnimationFrame(() => {
+                        window.scrollTo(0, Number(savedScrollPosition));
+                    });
+                } else {
+                    window.requestAnimationFrame(() => {
+                        window.scrollTo(0, 0);
+                    });
+                }
+            }
 
             if (form) {
                 updateDateBounds(form);
+                form.addEventListener('submit', rememberBrowseScroll);
             }
 
             dateInputs.forEach(input => {
