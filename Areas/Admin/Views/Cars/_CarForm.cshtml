@@ -131,7 +131,7 @@
         <label asp-for="ImageFile" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block mb-6">Visual Repository Documentation</label>
         
         <div class="flex flex-col md:flex-row gap-12 items-start">
-            <div class="flex-grow space-y-4">
+            <div class="grow space-y-4">
                  <input asp-for="ImageFile" class="block w-full text-xs text-on-surface-variant file:mr-8 file:py-4 file:px-8 file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-black file:text-white hover:file:bg-secondary transition-all cursor-pointer bg-surface-container-low/30 border border-dashed border-outline-variant/40 p-8" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
                  <span asp-validation-for="ImageFile" class="text-error text-[9px] uppercase font-bold"></span>
                  <p class="text-[9px] uppercase tracking-widest text-on-surface-variant italic">Accepted formats: High-Resolution JPG, PNG, WEBP. Master limits apply.</p>
@@ -141,7 +141,7 @@
             {
                 <div class="shrink-0 space-y-3">
                     <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Current Documentation</span>
-                    <div class="w-48 aspect-[3/2] border border-outline-variant/30 overflow-hidden bg-surface-container">
+                    <div class="w-48 aspect-3/2 border border-outline-variant/30 overflow-hidden bg-surface-container">
                         <img src="@Model.CarThumbnail" alt="Recorded asset visual" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
                     </div>
                 </div>
