@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Register";
 }
+<style>
+    nav, footer { display: none !important; }
+</style>
 <script src='https://www.google.com/recaptcha/api.js'></script>
 
 <div class="min-h-[calc(100vh-88px)] pt-32 pb-24 flex items-center justify-center px-6 bg-surface">
@@ -60,7 +63,9 @@
                 </div>
             </div>
 
-            <div class="g-recaptcha my-6" data-sitekey='@ViewData["SiteKey"]'></div>
+            <div class="g-recaptcha-wrapper my-6">
+                <div class="g-recaptcha" data-sitekey='@ViewData["SiteKey"]'></div>
+            </div>
 
             <button id="registerSubmit" type="submit" class="w-full py-6 luxury-gradient text-on-secondary-fixed font-label text-[12px] font-black uppercase tracking-[0.2rem] hover:opacity-90 transition-all duration-300 active:scale-[0.98]">
                 Register

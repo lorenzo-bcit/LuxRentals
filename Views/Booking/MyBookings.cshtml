@@ -10,23 +10,17 @@
 
 <main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface min-h-[80vh]">
     <!-- Header -->
-    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-12">
-        <div class="max-w-xl">
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-center md:items-end text-center md:text-left gap-12">
+        <div class="w-full md:w-auto max-w-xl">
             <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">
                 @(isAdminView ? "Customer Bookings" : "My Bookings")
             </span>
-            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-6">
                 @(isAdminView ? "Customer Bookings" : "My Bookings")
             </h1>
             <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">
                 Review and manage bookings.
             </p>
-        </div>
-
-        <div class="flex gap-4">
-            <a asp-controller="Cars" asp-action="Index" class="bg-black text-white text-center py-4 px-10 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-2xl">
-                Browse Fleet
-            </a>
         </div>
     </div>
 

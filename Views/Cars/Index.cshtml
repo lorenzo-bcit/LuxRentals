@@ -7,8 +7,8 @@
 
 <main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12">
     <!-- Progress Indicator -->
-    <div class="mb-20">
-        <div class="flex items-center justify-between relative max-w-2xl mx-auto px-12">
+    <div class="mb-20 hidden md:block">
+        <div class="flex items-center justify-between relative max-w-2xl mx-auto px-4 sm:px-12">
             <div class="absolute top-5 left-0 w-full h-px bg-secondary/30 z-0"></div>
             
             <a asp-controller="Cars" asp-action="Index" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
@@ -35,19 +35,28 @@
     </div>
 
     <!-- Page Title & Stats -->
-    <div class="flex justify-between items-end mb-12 border-b border-outline-variant/20 pb-8">
-        <div>
+    <div class="flex flex-col md:flex-row justify-between items-center md:items-end text-center md:text-left gap-6 md:gap-0 mb-12 border-b border-outline-variant/20 pb-8" data-reveal>
+        <div class="w-full md:w-auto">
             <span class="font-label text-[10px] tracking-[0.3rem] uppercase text-secondary mb-2 block">Selection</span>
-            <h1 class="font-headline text-4xl md:text-5xl font-black tracking-tighter uppercase">Vehicles</h1>
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase">Vehicles</h1>
         </div>
-        <div class="text-right">
+        <div class="w-full md:w-auto text-center md:text-right">
             <span class="font-label text-[10px] tracking-widest uppercase text-on-surface-variant">Available Vehicles</span>
         </div>
     </div>
 
     <form method="get" asp-action="Index" autocomplete="off" class="flex flex-col lg:flex-row gap-16">
         <!-- Sidebar Filters -->
-        <aside class="w-full lg:w-72 shrink-0 space-y-12">
+        <aside class="w-full lg:w-72 shrink-0">
+            <!-- Mobile Filter Toggle -->
+            <button type="button" id="filter-toggle-btn"
+                    class="w-full flex items-center justify-between gap-3 border border-outline-variant/30 px-6 py-4 mb-4 font-label text-[10px] font-extrabold uppercase tracking-[0.2rem] text-on-surface lg:hidden"
+                    aria-expanded="false"
+                    aria-controls="filter-sidebar">
+                <span>Filters & Dates</span>
+                <span class="material-symbols-outlined text-sm" id="filter-toggle-icon">expand_more</span>
+            </button>
+            <div id="filter-sidebar" class="space-y-12">
 
             <!-- Dates & Sort -->
             <div class="space-y-6">
@@ -158,6 +167,7 @@
                     </div>
                 </div>
             </div>
+            </div>
         </aside>
 
         <!-- Vehicle Grid -->
@@ -173,11 +183,11 @@
             }
             else
             {
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-12">
                     @foreach (var car in Model.Cars)
                     {
                         <div class="group bg-surface-container-lowest overflow-hidden transition-all duration-500 hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)] border border-transparent hover:border-outline-variant/30 flex flex-col h-full relative">
-                            <div class="relative h-64 bg-surface-container overflow-hidden">
+                            <div class="relative h-32 md:h-64 bg-surface-container overflow-hidden">
                                 @if (true)
                                 {
                                     @* Temporarily forced placeholder image per user instructions *@
@@ -188,38 +198,38 @@
                                 </div>
                             </div>
                             <!-- Card Content - Grows to push button down -->
-                            <div class="p-8 flex flex-col grow">
-                                <div class="mb-6 grow">
-                                    <span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-1 block">@car.Subtitle</span>
-                                    <h3 class="font-headline text-2xl font-bold tracking-tight">@car.Title</h3>
+                            <div class="p-4 md:p-8 flex flex-col grow">
+                                <div class="mb-4 md:mb-6 grow">
+                                    <span class="font-label text-[8px] md:text-[10px] uppercase tracking-widest text-on-surface-variant mb-1 block truncate">@car.Subtitle</span>
+                                    <h3 class="font-headline text-sm md:text-2xl font-bold tracking-tight leading-tight">@car.Title</h3>
                                 </div>
                                 <!-- Highlights -->
-                                <div class="grid grid-cols-3 gap-2 mb-8 border-t border-b border-outline-variant/20 py-6">
+                                <div class="grid grid-cols-3 gap-1 md:gap-2 mb-6 md:mb-8 border-t border-b border-outline-variant/20 py-4 md:py-6">
                                     <div>
-                                        <span class="font-label text-[9px] uppercase tracking-tighter text-on-surface-variant block mb-1">Fuel</span>
-                                        <span class="font-body text-xs font-bold uppercase truncate px-1">@car.FuelType</span>
+                                        <span class="font-label text-[8px] md:text-[9px] uppercase tracking-tighter text-on-surface-variant block mb-1">Fuel</span>
+                                        <span class="font-body text-[9px] md:text-xs font-bold uppercase truncate px-1">@car.FuelType</span>
                                     </div>
                                     <div>
-                                        <span class="font-label text-[9px] uppercase tracking-tighter text-on-surface-variant block mb-1">Capacity</span>
-                                        <span class="font-body text-xs font-bold uppercase">@car.Seats Pax</span>
+                                        <span class="font-label text-[8px] md:text-[9px] uppercase tracking-tighter text-on-surface-variant block mb-1">Cap.</span>
+                                        <span class="font-body text-[9px] md:text-xs font-bold uppercase">@car.Seats P.</span>
                                     </div>
                                     <div>
-                                        <span class="font-label text-[9px] uppercase tracking-tighter text-on-surface-variant block mb-1">Luggage</span>
-                                        <span class="font-body text-xs font-bold uppercase">@car.Luggage Bags</span>
+                                        <span class="font-label text-[8px] md:text-[9px] uppercase tracking-tighter text-on-surface-variant block mb-1">Lug.</span>
+                                        <span class="font-body text-[9px] md:text-xs font-bold uppercase">@car.Luggage B.</span>
                                     </div>
                                 </div>
                                 <!-- Bottom actionable row -->
-                                <div class="flex flex-col sm:flex-row items-baseline sm:items-center justify-between mt-auto gap-4">
+                                <div class="flex flex-col xl:flex-row items-baseline justify-between mt-auto gap-3">
                                     <div class="flex items-baseline gap-1">
-                                        <span class="font-headline text-2xl font-black text-secondary">@car.DailyRate.ToString("0.00")</span>
-                                        <span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">CAD / day</span>
+                                        <span class="font-headline text-lg md:text-2xl font-black text-secondary">@car.DailyRate.ToString("0.00")</span>
+                                        <span class="font-label text-[8px] md:text-[10px] uppercase font-bold text-on-surface-variant">CAD/d</span>
                                     </div>
                                     <a asp-controller="Booking"
                                        asp-action="Create"
                                        asp-route-carId="@car.CarId"
                                        asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
                                        asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
-                                       class="w-full sm:w-auto bg-black text-white px-6 py-3 text-center font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors">
+                                       class="w-full xl:w-auto bg-black text-white px-2 py-3 text-center font-label text-[9px] md:text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors">
                                         Select
                                     </a>
                                 </div>

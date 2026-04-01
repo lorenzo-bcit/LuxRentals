@@ -8,7 +8,7 @@
     <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-8">
         <div>
             <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Access Control</span>
-            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-4">Role Registry</h1>
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-4">Role Registry</h1>
             <p class="font-body text-xs text-on-surface-variant uppercase tracking-widest opacity-80">Define the organizational hierarchy and system authority levels.</p>
         </div>
         <div class="text-right">
@@ -27,7 +27,7 @@
         <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert">@TempData["ErrorMessage"]</div>
     }
 
-    <div class="bg-surface-container-lowest border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.06)] overflow-hidden">
+    <div class="table-scroll bg-surface-container-lowest border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.06)] overflow-hidden">
         <table class="w-full text-left font-body text-xs border-collapse">
             <thead>
                 <tr class="border-b border-outline-variant/20 bg-surface-container-low/30 font-label text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
@@ -48,7 +48,7 @@
                                 </div>
                             </td>
                             <td class="py-8 px-10 text-right">
-                                <a asp-action="Delete" asp-route-id="@role.Id" class="inline-flex items-center justify-center p-4 border border-error/20 text-error hover:bg-error hover:text-white transition-all opacity-0 group-hover:opacity-100 duration-500">
+                                <a asp-action="Delete" asp-route-id="@role.Id" class="inline-flex items-center justify-center p-4 border border-error/20 text-error hover:bg-error hover:text-white transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100 duration-500">
                                     <span class="material-symbols-outlined text-sm">delete</span>
                                 </a>
                             </td>
