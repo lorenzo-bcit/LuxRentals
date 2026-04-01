@@ -3,7 +3,7 @@ name: Publish GHCR Image
 on:
   push:
     branches:
-      - chore/docker-ghcr
+      - main
   workflow_dispatch:
 
 permissions:
@@ -34,7 +34,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=test
+            type=raw,value=latest
             type=sha
 
       - name: Build and push image
