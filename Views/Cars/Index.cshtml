@@ -10,21 +10,21 @@
     <div class="mb-20 hidden md:block">
         <div class="flex items-center justify-between relative max-w-2xl mx-auto px-4 sm:px-12">
             <div class="absolute top-5 left-0 w-full h-px bg-secondary/30 z-0"></div>
-            
+
             <a asp-controller="Cars" asp-action="Index" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
                 <div class="bg-surface px-4">
                     <div class="w-10 h-10 rounded-full bg-black text-secondary flex items-center justify-center text-[11px] font-black shadow-[0_0_30px_rgba(197,160,89,0.3)] ring-4 ring-surface group-hover:scale-110 transition-transform">1</div>
                 </div>
                 <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface font-black whitespace-nowrap">01. Selection</span>
             </a>
-            
+
             <div class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500">
                 <div class="bg-surface px-4">
                     <div class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant flex items-center justify-center text-[11px] font-black ring-4 ring-surface opacity-30 grayscale">2</div>
                 </div>
                 <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface-variant font-black whitespace-nowrap opacity-30 grayscale">02. Itinerary</span>
             </div>
-            
+
             <div class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500">
                 <div class="bg-surface px-4">
                     <div class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant flex items-center justify-center text-[11px] font-black ring-4 ring-surface opacity-30 grayscale">3</div>
@@ -161,8 +161,10 @@
                         </select>
                     </div>
 
-                    <!-- Clear Filters -->
                     <div class="pt-4 border-t border-outline-variant/20">
+                        <button type="submit" class="mb-4 bg-black text-white text-center block w-full uppercase tracking-widest font-bold text-[10px] py-4 hover:bg-secondary hover:text-black transition-colors lg:hidden">
+                            Apply Filters
+                        </button>
                         <a asp-action="Index" class="border border-on-surface text-center block w-full uppercase tracking-widest font-bold text-[10px] py-4 hover:bg-on-surface hover:text-white transition-colors">Clear Filters</a>
                     </div>
                 </div>
@@ -187,7 +189,7 @@
                     @foreach (var car in Model.Cars)
                     {
                         <div class="group bg-surface-container-lowest flex flex-col h-full border border-outline-variant/10 hover:border-secondary/30 transition-all duration-500 hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)] overflow-hidden relative">
-                            
+
                             <!-- Gold Accent Line -->
                             <div class="absolute top-0 left-0 w-full h-[2px] bg-secondary z-20 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-700"></div>
 
@@ -217,8 +219,11 @@
                             <!-- Card Body -->
                             <div class="p-5 md:p-6 flex flex-col grow">
                                 <!-- Title -->
-                                <div class="mb-4 grow">
-                                    <h3 class="font-headline text-base md:text-lg font-black tracking-tight leading-snug uppercase">@car.Title</h3>
+                                <div class="mb-4 grow" style="min-height: 3.5rem;">
+                                    <h3 class="font-headline text-base md:text-lg font-black tracking-tight leading-snug uppercase overflow-hidden"
+                                        style="display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;">
+                                        @car.Title
+                                    </h3>
                                 </div>
 
                                 <!-- Specs Row -->
@@ -265,7 +270,10 @@
                             <span class="material-symbols-outlined text-sm">arrow_back_ios_new</span>
                         </button>
 
-                        <span class="font-label text-[10px] uppercase tracking-[0.2rem] font-bold text-on-surface">Page @Model.Page of @Model.TotalPages</span>
+                        <span class="font-label text-[10px] uppercase tracking-[0.2rem] font-bold text-on-surface text-center inline-block"
+                              style="min-width: 10rem;">
+                            Page @Model.Page of @Model.TotalPages
+                        </span>
 
                         <button type="submit" name="Page" value="@(Model.Page + 1)" class="w-12 h-12 rounded-full border border-on-surface flex items-center justify-center hover:bg-on-surface hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-on-surface" @(Model.HasNextPage ? "" : "disabled") aria-disabled="@(!Model.HasNextPage)">
                             <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
@@ -283,6 +291,12 @@
         const browseScrollStorageKey = 'cars-index-scroll-y';
         const hasBrowseResults = @Model.Cars.Count.ToString().ToLowerInvariant();
 
+        function isCollapsedFilterMode() {
+            // Match the actual rendered layout instead of duplicating the CSS breakpoint in JS.
+            const filterToggleButton = document.getElementById('filter-toggle-btn');
+            return !!filterToggleButton && window.getComputedStyle(filterToggleButton).display !== 'none';
+        }
+
         function addDays(dateString, days) {
             if(!dateString) return;
             const [year, month, day] = dateString.split('-').map(Number);
@@ -292,10 +306,36 @@
         }
 
         function rememberBrowseScroll() {
+            // Collapsed filter mode uses an explicit Apply button, so there is no spot to preserve.
+            if (isCollapsedFilterMode()) {
+                sessionStorage.removeItem(browseScrollStorageKey);
+                return;
+            }
+
             sessionStorage.setItem(browseScrollStorageKey, String(window.scrollY));
         }
 
+        function restoreBrowseScroll(position) {
+            const root = document.documentElement;
+            const previousScrollBehavior = root.style.scrollBehavior;
+            const targetPosition = Number(position);
+
+            // Temporarily bypass global smooth scrolling so desktop restore snaps back in place.
+            root.style.scrollBehavior = 'auto';
+            window.scrollTo(0, targetPosition);
+
+            window.requestAnimationFrame(() => {
+                window.scrollTo(0, targetPosition);
+                root.style.scrollBehavior = previousScrollBehavior;
+            });
+        }
+
         function submitBrowseForm(form) {
+            // Auto-submit only when filters are persistently visible in the desktop sidebar.
+            if (isCollapsedFilterMode()) {
+                return;
+            }
+
             rememberBrowseScroll();
             form.submit();
         }
@@ -331,17 +371,17 @@
             const dateInputs = form?.querySelectorAll('input[type="date"]') ?? [];
             const savedScrollPosition = sessionStorage.getItem(browseScrollStorageKey);
 
-            if (savedScrollPosition !== null) {
+            // Clear any stale saved position when the filter drawer is in collapsed mode.
+            if (isCollapsedFilterMode()) {
+                sessionStorage.removeItem(browseScrollStorageKey);
+            } else if (savedScrollPosition !== null) {
                 sessionStorage.removeItem(browseScrollStorageKey);
 
+                // When a filter change removes all results, reset to the top instead of a stale offset.
                 if (hasBrowseResults) {
-                    window.requestAnimationFrame(() => {
-                        window.scrollTo(0, Number(savedScrollPosition));
-                    });
+                    restoreBrowseScroll(savedScrollPosition);
                 } else {
-                    window.requestAnimationFrame(() => {
-                        window.scrollTo(0, 0);
-                    });
+                    restoreBrowseScroll(0);
                 }
             }
 
