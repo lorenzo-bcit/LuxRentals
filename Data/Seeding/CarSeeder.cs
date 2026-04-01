@@ -94,6 +94,7 @@ public static class CarSeeder
         var required = new[]
         {
             CarStatusNames.AVAILABLE,
+            CarStatusNames.BOOKING_HOLD,
             CarStatusNames.MAINTENANCE,
             CarStatusNames.OUT_OF_SERVICE
         };
