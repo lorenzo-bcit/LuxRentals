@@ -39,14 +39,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.AllowedForNewUsers = true;
 });
 
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    // Lockout settings.
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true;
-});
-
 // Load .env into builder.Configuration
 builder.Configuration.AddDotNetEnv();
 
