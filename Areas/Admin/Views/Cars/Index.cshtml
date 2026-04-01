@@ -115,10 +115,10 @@
                                 <tr class="group hover:bg-surface-container-low/20 transition-colors duration-500">
                                     <td class="py-8 px-10">
                                         <div class="flex items-center gap-8">
-                                            <div class="w-24 aspect-[3/2] bg-surface-container border border-outline-variant/20 overflow-hidden relative">
+                                            <div class="w-24 aspect-video bg-surface-container border border-outline-variant/20 overflow-hidden relative shrink-0">
                                                 @if (!string.IsNullOrWhiteSpace(car.Thumbnail))
                                                 {
-                                                    <img src="@car.Thumbnail" alt="@car.DisplayName" class="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0" />
+                                                    <img src="@car.Thumbnail" alt="@car.DisplayName" class="absolute inset-0 w-full h-full object-cover object-bottom grayscale transition-all duration-700 group-hover:grayscale-0" />
                                                 }
                                                 else
                                                 {
