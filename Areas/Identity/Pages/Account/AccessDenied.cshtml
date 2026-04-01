@@ -1,7 +1,7 @@
 @page
 @model AccessDeniedModel
 @{
-    ViewData["Title"] = "Access Restricted";
+    ViewData["Title"] = "Access Denied";
 }
 
 <main class="min-h-[calc(100vh-88px)] pt-32 pb-24 flex items-center justify-center px-6 bg-surface">
@@ -9,27 +9,27 @@
         
         <div class="mb-12">
             <span class="material-symbols-outlined text-error text-8xl mb-8">lock</span>
-            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Security Protocol</span>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-error mb-4 block">Access Denied</span>
             <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">@ViewData["Title"]</h1>
             <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose max-w-md mx-auto">
-                Your current credentials lack the necessary clearance level to access this specific segment of the LuxRentals infrastructure.
+                You do not have permission to view this page.
             </p>
         </div>
 
         <div class="py-12 border-t border-b border-outline-variant/10 mb-12">
             <p class="font-body text-[10px] text-outline uppercase tracking-widest leading-relaxed">
-                If you believe this is a technical discrepancy in your member profile, please contact our administrative liaison.
+                If you believe this is an error, please contact support.
             </p>
         </div>
 
         <div class="space-y-6">
             <a asp-area="" asp-controller="Home" asp-action="Index" 
                class="block w-full py-6 bg-black text-secondary font-headline text-sm font-black uppercase tracking-[0.2em] hover:opacity-80 transition-opacity duration-500 shadow-2xl">
-                RETURN TO LOBBY
+                HOME
             </a>
             
             <a href="mailto:concierge@luxrentals.com" class="font-label text-[10px] text-on-surface font-black uppercase tracking-widest hover:text-secondary transition-colors block">
-                CONTACT CONCIERGE SUPPORT
+                CONTACT SUPPORT
             </a>
         </div>
     </div>

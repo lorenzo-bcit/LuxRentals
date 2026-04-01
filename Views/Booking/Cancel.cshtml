@@ -11,16 +11,15 @@
 <main class="grow flex items-center justify-center pt-32 pb-24 px-6 bg-surface min-h-screen">
     <div class="w-full max-w-2xl bg-surface-container-lowest p-12 md:p-16 shadow-[0_45px_100px_rgba(0,0,0,0.06)] border border-outline-variant/10">
         
-        <!-- Header -->
         <header class="mb-16 border-b border-outline-variant/10 pb-12">
-            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Reservation Management</span>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Bookings</span>
             <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">
-                @(Model.CanCancel ? "Cancel Reservation" : "Cancellation Locked")
+                @(Model.CanCancel ? "Cancel Booking" : "Cannot Cancel")
             </h1>
             <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose">
                 @(Model.CanCancel 
-                    ? "Carefully review the details below before authorizing the removal of this selection from your itinerary." 
-                    : "The designated window for self-authorized cancellation has concluded for this reservation.")
+                    ? "Are you sure you want to cancel this booking?" 
+                    : "This booking can no longer be cancelled.")
             </p>
         </header>
 
@@ -32,34 +31,28 @@
             </div>
         }
 
-        <!-- Booking Summary -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 border-b border-outline-variant/10 pb-12">
             <div class="space-y-4">
-                <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Deployment Start</span>
+                <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Pickup</span>
                 <span class="font-headline text-xl font-bold tracking-tight">@Model.StartDateTime.ToString("MMMM dd, yyyy")</span>
             </div>
             <div class="space-y-4">
-                <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Deployment End</span>
+                <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Return</span>
                 <span class="font-headline text-xl font-bold tracking-tight">@Model.EndDateTime.ToString("MMMM dd, yyyy")</span>
             </div>
         </div>
 
         @if (Model.CanCancel)
         {
-            <!-- Warnings -->
             <div class="mb-16 p-8 bg-secondary-container/5 border border-secondary/20">
-                <h5 class="font-headline text-sm font-black uppercase tracking-widest text-secondary mb-4">Authorization Required</h5>
+                <h5 class="font-headline text-sm font-black uppercase tracking-widest text-secondary mb-4">Required Details</h5>
                 <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose mb-8">
                     @Model.Message
                 </p>
                 <div class="space-y-3">
                     <div class="flex items-start gap-4">
                         <span class="material-symbols-outlined text-secondary text-lg">info</span>
-                        <span class="font-label text-[9px] uppercase tracking-[0.15em] text-on-surface-variant">Cancellations must be authorized at least two full calendar days prior to deployment.</span>
-                    </div>
-                    <div class="flex items-start gap-4">
-                        <span class="material-symbols-outlined text-secondary text-lg">info</span>
-                        <span class="font-label text-[9px] uppercase tracking-[0.15em] text-on-surface-variant">Once processed, this slot will be immediately returned to the public registry.</span>
+                        <span class="font-label text-[9px] uppercase tracking-[0.15em] text-on-surface-variant">Cancellations must be made at least two calendar days prior to pickup.</span>
                     </div>
                 </div>
             </div>
@@ -74,28 +67,28 @@
                 }
 
                 <button type="submit" class="w-full py-6 bg-error text-white font-headline text-sm font-black uppercase tracking-[0.2em] hover:bg-black transition-colors duration-500 shadow-2xl">
-                    AUTHORIZE CANCELLATION
+                    CANCEL BOOKING
                 </button>
 
                 @if (returnCarId != null)
                 {
                     <a asp-area="Admin" asp-controller="Cars" asp-action="Edit" asp-route-id="@returnCarId" 
                        class="block w-full text-center py-6 border border-on-surface/20 text-on-surface hover:bg-black hover:text-white transition-all font-headline text-[10px] uppercase tracking-[0.2em] font-black">
-                        ABORT CANCELLATION
+                        BACK
                     </a>
                 }
                 else if (isAdminOrEmployee)
                 {
                     <a asp-action="ViewCustomerBookings" asp-route-customerId="@bookingCustomerId"
                        class="block w-full text-center py-6 border border-on-surface/20 text-on-surface hover:bg-black hover:text-white transition-all font-headline text-[10px] uppercase tracking-[0.2em] font-black">
-                        ABORT CANCELLATION
+                        BACK
                     </a>
                 }
                 else
                 {
                     <a asp-action="MyBookings" 
                        class="block w-full text-center py-6 border border-on-surface/20 text-on-surface hover:bg-black hover:text-white transition-all font-headline text-[10px] uppercase tracking-[0.2em] font-black">
-                        ABORT CANCELLATION
+                        BACK
                     </a>
                 }
             </form>

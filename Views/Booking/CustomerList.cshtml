@@ -8,14 +8,14 @@
     <!-- Header -->
     <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-12">
         <div class="max-w-xl">
-            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Enterprise Management</span>
-            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Engagement Registry</h1>
-            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Comprehensive monitoring of the current LuxRentals membership base and their respective automotive engagements.</p>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Management</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Customer Bookings</h1>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">List of customers and their active bookings.</p>
         </div>
         <div class="text-right">
              <div class="flex items-center gap-3 text-secondary justify-end mb-2">
                 <span class="material-symbols-outlined text-sm">assignment_ind</span>
-                <span class="font-label text-[10px] font-bold uppercase tracking-widest">Master Tenant Directory</span>
+                <span class="font-label text-[10px] font-bold uppercase tracking-widest">Directory</span>
             </div>
         </div>
     </div>
@@ -57,12 +57,12 @@
                                 {
                                     <div class="inline-flex items-center gap-2 bg-secondary/10 px-4 py-2 border border-secondary/20 rounded-full">
                                         <div class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></div>
-                                        <span class="font-label text-[9px] font-black uppercase tracking-widest text-secondary">In Engagement (@customer.ActiveBookings)</span>
+                                        <span class="font-label text-[9px] font-black uppercase tracking-widest text-secondary">Active (@customer.ActiveBookings)</span>
                                     </div>
                                 }
                                 else
                                 {
-                                    <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant opacity-30">Dormant</span>
+                                    <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant opacity-30">Inactive</span>
                                 }
                             </td>
                             <td class="py-8 px-10 text-center">
@@ -79,7 +79,7 @@
                         <td colspan="5" class="py-32 text-center">
                             <div class="max-w-xs mx-auto space-y-4">
                                 <span class="material-symbols-outlined text-4xl text-outline-variant/30">sensor_occupied</span>
-                                <p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">The registry currently confirms no active client engagements.</p>
+                                <p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">No customers found.</p>
                             </div>
                         </td>
                     </tr>

@@ -37,11 +37,10 @@
         </div>
     </div>
 
-    <!-- Page Title -->
     <div class="max-w-3xl mx-auto mb-16 text-center">
-        <span class="font-label text-[10px] tracking-[0.3rem] uppercase text-secondary mb-4 block">Finalize Experience</span>
-        <h1 class="font-headline text-4xl md:text-5xl font-black tracking-tighter uppercase mb-6">Complete Your Reservation</h1>
-        <p class="font-body text-on-surface-variant leading-relaxed">Confirm your dates for the absolute pinnacle of automotive excellence. Our specialist concierge team will prepare your vehicle at the Vancouver Embassy.</p>
+        <span class="font-label text-[10px] tracking-[0.3rem] uppercase text-secondary mb-4 block">Finalize</span>
+        <h1 class="font-headline text-4xl md:text-5xl font-black tracking-tighter uppercase mb-6">Complete Reservation</h1>
+        <p class="font-body text-on-surface-variant leading-relaxed">Confirm your dates to finalize your reservation.</p>
     </div>
 
     <div class="max-w-2xl mx-auto">
@@ -60,9 +59,8 @@
                 @Html.AntiForgeryToken()
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <!-- Pickup Date -->
                     <div class="space-y-2">
-                        <label asp-for="StartDateTime" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Collection Date</label>
+                        <label asp-for="StartDateTime" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Pickup Date</label>
                         <input asp-for="StartDateTime"
                                type="date"
                                class="ghost-input w-full uppercase tracking-widest text-sm"

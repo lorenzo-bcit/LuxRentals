@@ -9,7 +9,7 @@
     <div class="w-full max-w-2xl bg-surface-container-lowest p-12 md:p-16 shadow-[0_40px_80px_rgba(0,0,0,0.03)] border border-outline-variant/10">
         <div class="mb-12 text-center">
             <h1 class="font-headline text-5xl font-black tracking-tighter mb-4">@ViewData["Title"]</h1>
-            <p class="font-body text-on-surface-variant text-sm uppercase tracking-[0.2rem]">Join the inner circle of automotive excellence</p>
+            <p class="font-body text-on-surface-variant text-sm uppercase tracking-[0.2rem]">Create a new account</p>
         </div>
 
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="space-y-10">
@@ -63,7 +63,7 @@
             <div class="g-recaptcha my-6" data-sitekey='@ViewData["SiteKey"]'></div>
 
             <button id="registerSubmit" type="submit" class="w-full py-6 luxury-gradient text-on-secondary-fixed font-label text-[12px] font-black uppercase tracking-[0.2rem] hover:opacity-90 transition-all duration-300 active:scale-[0.98]">
-                Register Account
+                Register
             </button>
 
             <div class="pt-4 text-center">

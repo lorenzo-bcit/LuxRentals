@@ -9,21 +9,21 @@
         
         <div class="mb-12">
             <span class="material-symbols-outlined text-secondary text-8xl mb-8">logout</span>
-            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Secure Exit</span>
-            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Successfully Terminated</h1>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Logged Out</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Successfully Logged Out</h1>
             <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose max-w-md mx-auto">
-                Your session has been securely closed. Thank you for utilizing the LuxRentals infrastructure.
+                You have successfully logged out.
             </p>
         </div>
 
         <div class="space-y-6">
             <a asp-area="" asp-controller="Home" asp-action="Index" 
                class="block w-full py-6 bg-black text-secondary font-headline text-sm font-black uppercase tracking-[0.2em] hover:opacity-80 transition-opacity duration-500 shadow-2xl">
-                RETURN TO LOBBY
+                HOME
             </a>
             
             <a asp-area="Identity" asp-page="/Account/Login" class="font-label text-[10px] text-on-surface font-black uppercase tracking-widest hover:text-secondary transition-colors block">
-                AUTHENTICATE NEW SESSION
+                LOG IN
             </a>
         </div>
     </div>
