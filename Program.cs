@@ -28,9 +28,9 @@ builder.Services.AddDbContext<LuxRentalsDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<LuxRentalsDbContext>();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<LuxRentalsDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -52,6 +52,7 @@ builder.Services.Configure<PaypalOptions>(
 builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>();
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 // Repositories
 builder.Services.AddScoped<RoleRepo>();
