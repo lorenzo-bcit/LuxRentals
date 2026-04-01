@@ -68,11 +68,18 @@ public class CarService : ICarService
             return SaveResult.FailMany(errors);
 
         var hasActiveOrUpcomingBookings = await _repo.CountActiveOrUpcomingBookingsAsync(id) > 0;
-        if (hasActiveOrUpcomingBookings && HasProtectedFieldChanges(vm, existing))
+        if (hasActiveOrUpcomingBookings)
         {
-            return SaveResult.Fail(
-                string.Empty,
-                $"Car {existing.VinNumber} has active or upcoming bookings. Resolve those bookings before changing the car details or status.");
+            if (HasLockedFieldChanges(vm, existing))
+            {
+                return SaveResult.Fail(
+                    string.Empty,
+                    $"Car {existing.VinNumber} has active or upcoming bookings. Resolve those bookings before changing car details.");
+            }
+
+            var bookedCarStatusChange = await ValidateBookedCarStatusChangeAsync(vm.FkCarStatusId, existing);
+            if (!bookedCarStatusChange.IsSuccess)
+                return bookedCarStatusChange;
         }
 
         var previousThumbnailPath = existing.CarThumbnail;
@@ -398,8 +405,34 @@ public class CarService : ICarService
         return errors;
     }
 
-    private static bool HasProtectedFieldChanges(CarEditVm vm, Car car) =>
-        vm.FkCarStatusId != car.FkCarStatusId ||
+    private async Task<SaveResult> ValidateBookedCarStatusChangeAsync(int newStatusId, Car existing)
+    {
+        if (newStatusId == existing.FkCarStatusId)
+            return SaveResult.Ok(string.Empty);
+
+        var availableStatusId = await _repo.GetCarStatusIdByNameAsync(CarStatusNames.AVAILABLE);
+        var bookingHoldStatusId = await _repo.GetCarStatusIdByNameAsync(CarStatusNames.BOOKING_HOLD);
+
+        if (availableStatusId is null || bookingHoldStatusId is null)
+        {
+            return SaveResult.Fail(
+                string.Empty,
+                "Required car statuses are missing. Seed car statuses and try again.");
+        }
+
+        var isAllowedTransition =
+            existing.FkCarStatusId == availableStatusId.Value && newStatusId == bookingHoldStatusId.Value ||
+            existing.FkCarStatusId == bookingHoldStatusId.Value && newStatusId == availableStatusId.Value;
+
+        if (isAllowedTransition)
+            return SaveResult.Ok(string.Empty);
+
+        return SaveResult.Fail(
+            nameof(CarEditVm.FkCarStatusId),
+            "While a car has active or upcoming bookings, status can only switch between Available and Booking Hold.");
+    }
+
+    private static bool HasLockedFieldChanges(CarEditVm vm, Car car) =>
         vm.Year != car.Year ||
         !string.Equals(vm.Colour, car.Colour, StringComparison.Ordinal) ||
         vm.FkModelId != car.FkModelId ||

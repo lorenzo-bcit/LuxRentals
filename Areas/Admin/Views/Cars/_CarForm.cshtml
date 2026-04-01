@@ -15,19 +15,21 @@
         <span class="material-symbols-outlined text-secondary">warning</span>
         <div class="space-y-2">
             <h4 class="font-label text-[10px] font-black uppercase tracking-widest text-secondary">Active Occupancy Detected</h4>
-            <p class="font-body text-xs text-on-surface-variant leading-relaxed">This asset is currently committed to active or upcoming reservations. Specific technical specifications are locked to ensure contractual integrity.</p>
+            <p class="font-body text-xs text-on-surface-variant leading-relaxed">This asset has active or upcoming reservations. Specs are locked, but status can still switch between Available and Booking Hold.</p>
         </div>
     </div>
 }
 
 <div class="space-y-16">
-    <fieldset disabled="@lockedFieldsetState" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 disabled:opacity-60">
-        
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
         <div class="space-y-2">
             <label asp-for="FkCarStatusId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Inventory Status</label>
             <select asp-for="FkCarStatusId" asp-items="Model.CarStatusOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
             <span asp-validation-for="FkCarStatusId" class="text-error text-[9px] uppercase font-bold"></span>
         </div>
+    </div>
+
+    <fieldset disabled="@lockedFieldsetState" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 disabled:opacity-60">
 
         <div class="space-y-2">
             <label asp-for="Year" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Model Year</label>
@@ -113,7 +115,6 @@
 
     @if (hasBookings)
     {
-        <input asp-for="FkCarStatusId" type="hidden" />
         <input asp-for="Year" type="hidden" />
         <input asp-for="Colour" type="hidden" />
         <input asp-for="FkModelId" type="hidden" />

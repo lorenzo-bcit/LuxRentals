@@ -9,14 +9,14 @@
     <div class="mb-20 hidden md:block">
         <div class="flex items-center justify-between relative max-w-2xl mx-auto px-4 sm:px-12">
             <div class="absolute top-5 left-0 w-full h-px bg-secondary/30 z-0"></div>
-            
+
             <a asp-controller="Cars" asp-action="Index" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
                 <div class="bg-surface px-4">
                     <div class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant flex items-center justify-center text-[11px] font-black ring-4 ring-surface group-hover:scale-110 transition-transform opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0">1</div>
                 </div>
                 <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface-variant font-black whitespace-nowrap opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0">01. Selection</span>
             </a>
-            
+
             @{
                 var sessionCarId = Context.Session.GetInt32("CarId");
             }
@@ -38,7 +38,7 @@
                     <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface-variant font-black whitespace-nowrap opacity-30 grayscale">02. Itinerary</span>
                 </div>
             }
-            
+
             <a asp-controller="Payment" asp-action="Checkout" asp-route-orderId="@ViewBag.OrderId" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
                 <div class="bg-surface px-4">
                     <div class="w-10 h-10 rounded-full bg-black text-secondary flex items-center justify-center text-[11px] font-black shadow-[0_0_30px_rgba(197,160,89,0.3)] ring-4 ring-surface group-hover:scale-110 transition-transform">3</div>
@@ -70,7 +70,7 @@
     }
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
-        
+
         <!-- Statement Details -->
         <div class="space-y-12">
             <div>
@@ -78,7 +78,7 @@
                     <span class="w-8 h-px bg-on-surface/20"></span>
                     Reservation Summary
                 </h3>
-                
+
                 <div class="space-y-8">
                     <!-- Dates -->
                     <div class="grid grid-cols-2 gap-12 border-b border-outline-variant/10 pb-8">
@@ -115,7 +115,7 @@
 
             <div class="bg-surface-container-low p-8 border border-outline-variant/10 text-center">
                 <p class="font-body text-[10px] uppercase tracking-widest text-on-surface-variant leading-loose">
-                    By clicking to pay, you acknowledge our policy requiring rentals to be secured at least one calendar day prior to pickup.
+                    By clicking to pay, you agree to return the vehicle by 9:00 AM local time on the return date.
                 </p>
             </div>
         </div>
@@ -124,7 +124,7 @@
         <div class="lg:sticky lg:top-48">
             <div class="bg-surface-container-lowest p-12 shadow-[0_45px_100px_rgba(0,0,0,0.08)] border border-outline-variant/10 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-full transform translate-x-12 -translate-y-12"></div>
-                
+
                 <div class="relative z-10 space-y-12">
                      <div class="flex flex-col items-center gap-6">
                         <div class="w-20 h-20 bg-black flex items-center justify-center rounded-full mb-4 shadow-xl">
@@ -138,7 +138,7 @@
 
                     <div class="space-y-8">
                         <div id="paypal-button-container" class="min-h-[50px]"></div>
-                        
+
                         <div class="flex items-center gap-4 text-outline justify-center opacity-40 grayscale group-hover:grayscale-0 transition-all">
                              <span class="material-symbols-outlined">shield</span>
                              <span class="font-label text-[9px] uppercase tracking-widest font-bold">Encrypted via PayPal Network</span>

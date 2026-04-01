@@ -13,21 +13,21 @@
     <div class="mb-20 hidden md:block">
         <div class="flex items-center justify-between relative max-w-2xl mx-auto px-12">
             <div class="absolute top-5 left-0 w-full h-px bg-secondary/30 z-0"></div>
-            
+
             <a asp-controller="Cars" asp-action="Index" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
                 <div class="bg-surface px-4">
                     <div class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant flex items-center justify-center text-[11px] font-black ring-4 ring-surface group-hover:scale-110 transition-transform opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0">1</div>
                 </div>
                 <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface-variant font-black whitespace-nowrap opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0">01. Selection</span>
             </a>
-            
+
             <a asp-controller="Booking" asp-action="Create" asp-route-carId="@carId" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
                 <div class="bg-surface px-4">
                     <div class="w-10 h-10 rounded-full bg-black text-secondary flex items-center justify-center text-[11px] font-black shadow-[0_0_30px_rgba(197,160,89,0.3)] ring-4 ring-surface group-hover:scale-110 transition-transform">2</div>
                 </div>
                 <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface font-black whitespace-nowrap">02. Itinerary</span>
             </a>
-            
+
             <div class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500">
                 <div class="bg-surface px-4">
                     <div class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant flex items-center justify-center text-[11px] font-black ring-4 ring-surface opacity-30 grayscale">3</div>
@@ -52,7 +52,7 @@
         }
 
         <div class="bg-surface-container-lowest p-8 md:p-12 shadow-[0_40px_80px_rgba(0,0,0,0.06)] border border-outline-variant/10">
-            
+
             <div asp-validation-summary="ModelOnly" class="mb-8 p-4 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert"></div>
 
             <form asp-action="Create" asp-route-carId="@carId" method="post" class="space-y-12">
@@ -101,6 +101,10 @@
                         <li class="flex items-start gap-4">
                             <span class="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 shrink-0"></span>
                             <span class="font-body text-xs text-on-surface-variant">Minimum rental duration is one calendar day.</span>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span class="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 shrink-0"></span>
+                            <span class="font-body text-xs text-on-surface-variant">Return date is not billed. Vehicles must be returned by 9:00 AM local time on that date, and pickup begins at 10:00 AM local time.</span>
                         </li>
                     </ul>
                 </div>
