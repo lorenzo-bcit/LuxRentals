@@ -1,99 +1,124 @@
-﻿@using LuxRentals.ViewModels.Bookings
+@using LuxRentals.ViewModels.Bookings
 @model BookingCreateViewModel
 
 @{
-    ViewData["Title"] = "Book Your Vehicle";
+    ViewData["Title"] = "Luxury Reservation";
     var carId = ViewBag.CarId;
     var minBookingDate = (string)ViewBag.MinBookingDate;
     var minReturnDate = Model.StartDateTime.Date.AddDays(1).ToString("yyyy-MM-dd");
 }
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["Error"]
-    </div>
-}
-
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-
-            <!-- Breadcrumb Navigation -->
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a asp-controller="Cars" asp-action="Index">Shop</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Reserve</li>
-                </ol>
-            </nav>
-
-            <!-- Booking Form Card -->
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Complete Your Reservation</h3>
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12">
+    <!-- Progress Indicator -->
+    <div class="mb-20 hidden md:block">
+        <div class="flex items-center justify-between relative max-w-2xl mx-auto px-12">
+            <div class="absolute top-5 left-0 w-full h-px bg-secondary/30 z-0"></div>
+            
+            <a asp-controller="Cars" asp-action="Index" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
+                <div class="bg-surface px-4">
+                    <div class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant flex items-center justify-center text-[11px] font-black ring-4 ring-surface group-hover:scale-110 transition-transform opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0">1</div>
                 </div>
-                <div class="card-body">
-
-                    <!-- Show validation summary if errors exist -->
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-
-                    <form asp-action="Create" asp-route-carId="@carId" method="post">
-                        @Html.AntiForgeryToken()
-
-                        <!-- Pickup Date -->
-                        <div class="mb-4">
-                            <label asp-for="StartDateTime" class="form-label fw-bold">Pick-up</label>
-                            <input asp-for="StartDateTime"
-                                   type="date"
-                                   class="form-control form-control-lg"
-                                   min="@minBookingDate"
-                                   value="@Model.StartDateTime.ToString("yyyy-MM-dd")"
-                                   required />
-                            <span asp-validation-for="StartDateTime" class="text-danger"></span>
-                        </div>
-
-                        <!-- Return Date -->
-                        <div class="mb-4">
-                            <label asp-for="EndDateTime" class="form-label fw-bold">Drop-off</label>
-                            <input asp-for="EndDateTime"
-                                   type="date"
-                                   class="form-control form-control-lg"
-                                   min="@minReturnDate"
-                                   value="@Model.EndDateTime.ToString("yyyy-MM-dd")"
-                                   required />
-                            <span asp-validation-for="EndDateTime" class="text-danger"></span>
-                        </div>
-
-                        <!-- Information Box -->
-                        <div class="alert alert-info" role="alert">
-                            <i class="bi bi-info-circle-fill"></i>
-                            <strong>Important:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>Rental must start at least one day in the future</li>
-                                <li>Return date must be after pickup date</li>
-                                <li>You cannot have overlapping bookings</li>
-                                <li>Cancellations must be made at least 2 days before pickup</li>
-                            </ul>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <a asp-controller="Cars" asp-action="Index"
-                               class="btn btn-secondary btn-lg">
-                                <i class="bi bi-arrow-left"></i> Back to Cars
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-check-circle"></i> Confirm Booking
-                            </button>
-                        </div>
-
-                    </form>
+                <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface-variant font-black whitespace-nowrap opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0">01. Selection</span>
+            </a>
+            
+            <a asp-controller="Booking" asp-action="Create" asp-route-carId="@carId" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
+                <div class="bg-surface px-4">
+                    <div class="w-10 h-10 rounded-full bg-black text-secondary flex items-center justify-center text-[11px] font-black shadow-[0_0_30px_rgba(197,160,89,0.3)] ring-4 ring-surface group-hover:scale-110 transition-transform">2</div>
                 </div>
+                <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface font-black whitespace-nowrap">02. Itinerary</span>
+            </a>
+            
+            <div class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500">
+                <div class="bg-surface px-4">
+                    <div class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant flex items-center justify-center text-[11px] font-black ring-4 ring-surface opacity-30 grayscale">3</div>
+                </div>
+                <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface-variant font-black whitespace-nowrap opacity-30 grayscale">03. Settlement</span>
             </div>
-
         </div>
     </div>
-</div>
+
+    <div class="max-w-3xl mx-auto mb-16 text-center">
+        <span class="font-label text-[10px] tracking-[0.3rem] uppercase text-secondary mb-4 block">Finalize</span>
+        <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-6">Complete Reservation</h1>
+        <p class="font-body text-on-surface-variant leading-relaxed">Confirm your dates to finalize your reservation.</p>
+    </div>
+
+    <div class="max-w-2xl mx-auto">
+        @if (TempData["Error"] != null)
+        {
+            <div class="mb-8 p-4 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold">
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="bg-surface-container-lowest p-8 md:p-12 shadow-[0_40px_80px_rgba(0,0,0,0.06)] border border-outline-variant/10">
+            
+            <div asp-validation-summary="ModelOnly" class="mb-8 p-4 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert"></div>
+
+            <form asp-action="Create" asp-route-carId="@carId" method="post" class="space-y-12">
+                @Html.AntiForgeryToken()
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div class="space-y-2">
+                        <label asp-for="StartDateTime" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Pickup Date</label>
+                        <input asp-for="StartDateTime"
+                               type="date"
+                               class="ghost-input w-full uppercase tracking-widest text-sm"
+                               min="@minBookingDate"
+                               value="@Model.StartDateTime.ToString("yyyy-MM-dd")"
+                               required />
+                        <span asp-validation-for="StartDateTime" class="text-error text-[10px] uppercase tracking-tighter font-bold"></span>
+                    </div>
+
+                    <!-- Return Date -->
+                    <div class="space-y-2">
+                        <label asp-for="EndDateTime" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Return Date</label>
+                        <input asp-for="EndDateTime"
+                               type="date"
+                               class="ghost-input w-full uppercase tracking-widest text-sm"
+                               min="@minReturnDate"
+                               value="@Model.EndDateTime.ToString("yyyy-MM-dd")"
+                               required />
+                        <span asp-validation-for="EndDateTime" class="text-error text-[10px] uppercase tracking-tighter font-bold"></span>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="bg-surface-container-high p-8 border border-outline-variant/20 space-y-4">
+                    <div class="flex items-center gap-3 text-secondary">
+                        <span class="material-symbols-outlined text-xl">info</span>
+                        <span class="font-label text-[10px] font-black uppercase tracking-widest">Our Policy</span>
+                    </div>
+                    <ul class="space-y-2">
+                        <li class="flex items-start gap-4">
+                            <span class="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 shrink-0"></span>
+                            <span class="font-body text-xs text-on-surface-variant">Reservations must be secured at least one calendar day prior to collection.</span>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span class="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 shrink-0"></span>
+                            <span class="font-body text-xs text-on-surface-variant">Collections are exclusively at the Vancouver Embassy Lounge.</span>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <span class="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 shrink-0"></span>
+                            <span class="font-body text-xs text-on-surface-variant">Minimum rental duration is one calendar day.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-6 pt-8">
+                    <a asp-controller="Cars" asp-action="Index"
+                       class="flex-1 border border-on-surface text-center py-5 font-label text-[10px] font-bold uppercase tracking-[0.2rem] hover:bg-on-surface hover:text-white transition-all">
+                        Discard
+                    </a>
+                    <button type="submit" class="flex-1 bg-black text-white py-5 font-label text-[10px] font-bold uppercase tracking-[0.2rem] hover:bg-secondary transition-colors shadow-2xl">
+                        Proceed to Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
 
 @section Scripts {
     @{

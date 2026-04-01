@@ -1,126 +1,124 @@
 @model LuxRentals.ViewModels.Cars.Admin.ModelIndexVm
 
 @{
-    ViewData["Title"] = "Manage Models";
+    ViewData["Title"] = "Asset Models Archive";
 }
 
-<section class="py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface">
+    <!-- Header -->
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-8">
         <div>
-            <h1 class="mb-1">Manage Models</h1>
-            <p class="text-muted mb-0">Attach new models to an existing make.</p>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Enterprise Assets</span>
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-4">Model Archive</h1>
+            <p class="font-body text-xs text-on-surface-variant uppercase tracking-widest opacity-80">Managing the specific model nomenclature for our high-end manufacturers.</p>
         </div>
-        @if (!string.IsNullOrWhiteSpace(Model.ReturnUrl))
-        {
-            <a class="btn btn-outline-secondary" href="@Model.ReturnUrl">Back to Car</a>
-        }
-        else
-        {
-            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Cars" asp-action="Index">Back to Inventory</a>
-        }
+        <div class="text-right">
+             @if (!string.IsNullOrWhiteSpace(Model.ReturnUrl))
+             {
+                <a class="flex items-center gap-3 border border-on-surface/20 px-8 py-4 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all" href="@Model.ReturnUrl">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    Return to Asset
+                </a>
+             }
+             else
+             {
+                <a class="flex items-center gap-3 border border-on-surface/20 px-8 py-4 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all" asp-area="Admin" asp-controller="Cars" asp-action="Index">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    Inventory
+                </a>
+             }
+        </div>
     </div>
 
     @if (TempData["StatusMessage"] is string statusMessage)
     {
-        <div class="alert alert-success">@statusMessage</div>
+        <div class="mb-12 p-6 bg-secondary-container/10 border-l-4 border-secondary text-secondary text-xs uppercase tracking-widest font-bold" role="alert">@statusMessage</div>
     }
-
     @if (TempData["ErrorMessage"] is string errorMessage)
     {
-        <div class="alert alert-danger">@errorMessage</div>
+        <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert">@errorMessage</div>
     }
 
-    <div class="row g-4">
-        <div class="col-lg-5">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h2 class="h5 mb-3">Add Model</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        <!-- Add Model form -->
+        <div class="lg:col-span-5">
+            <div class="bg-surface-container-lowest p-10 border border-outline-variant/10 shadow-[0_25px_70px_rgba(0,0,0,0.05)] h-fit">
+                <h3 class="font-headline text-xl font-bold uppercase tracking-tight mb-8">Establish New Model</h3>
+                
+                <form method="post" asp-area="Admin" asp-controller="Models" asp-action="Create" class="space-y-10">
+                    <input asp-for="ReturnUrl" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="text-error text-[10px] uppercase font-bold tracking-widest"></div>
 
-                    <form method="post" asp-area="Admin" asp-controller="Models" asp-action="Create">
-                        <input asp-for="ReturnUrl" type="hidden" />
+                    <div class="space-y-4">
+                        <label asp-for="FkMakeId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Parent Manufacturer</label>
+                        <select asp-for="FkMakeId" asp-items="Model.MakeOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
+                        <span asp-validation-for="FkMakeId" class="text-error text-[9px] uppercase font-black"></span>
+                    </div>
 
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="space-y-4">
+                        <label asp-for="ModelName" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Model Designation</label>
+                        <input asp-for="ModelName" class="ghost-input w-full uppercase tracking-widest text-sm" placeholder="E.G. 911 GT3" />
+                        <span asp-validation-for="ModelName" class="text-error text-[9px] uppercase font-black"></span>
+                    </div>
 
-                        <div class="mb-3">
-                            <label asp-for="FkMakeId" class="form-label"></label>
-                            <select asp-for="FkMakeId" asp-items="Model.MakeOptions" class="form-select"></select>
-                            <span asp-validation-for="FkMakeId" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="ModelName" class="form-label"></label>
-                            <input asp-for="ModelName" class="form-control" />
-                            <span asp-validation-for="ModelName" class="text-danger"></span>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Add Model</button>
-                    </form>
-                </div>
+                    <button type="submit" class="w-full bg-black text-white text-center py-5 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-2xl">
+                        Register Model
+                    </button>
+                </form>
             </div>
         </div>
 
-        <div class="col-lg-7">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h2 class="h5 mb-3">Current Models</h2>
-
-                    @if (Model.Models.Count == 0)
-                    {
-                        <p class="text-muted mb-0">No models found.</p>
-                    }
-                    else
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-sm align-middle mb-0">
-                                <thead>
-                                <tr>
-                                    <th>Make</th>
-                                    <th>Model</th>
-                                    <th class="text-end">Actions</th>
+        <!-- Current Models table -->
+        <div class="lg:col-span-7">
+            <div class="bg-surface-container-lowest border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.06)] overflow-hidden">
+                <table class="w-full text-left font-body text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-outline-variant/20 bg-surface-container-low/30 font-label text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
+                            <th class="py-6 px-10">Marque Identity</th>
+                            <th class="py-6 px-10">Model Designation</th>
+                            <th class="py-6 px-10 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/10">
+                        @if (Model.Models.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="3" class="py-24 text-center">
+                                    <span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">No model designations identified.</span>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.Models)
+                            {
+                                <tr class="group hover:bg-surface-container-low/20 transition-colors duration-500">
+                                    <td class="py-6 px-10 font-label text-[10px] uppercase tracking-widest text-on-surface-variant">@item.MakeName</td>
+                                    <td class="py-6 px-10 font-headline font-bold text-lg uppercase tracking-tight">@item.ModelName</td>
+                                    <td class="py-6 px-10 text-right">
+                                        <div class="flex items-center justify-end gap-3 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500">
+                                            <a asp-action="Edit" asp-route-id="@item.ModelId" asp-route-returnUrl="@Model.ReturnUrl" class="w-10 h-10 flex items-center justify-center border border-on-surface/20 text-on-surface hover:bg-black hover:text-white transition-all">
+                                                <span class="material-symbols-outlined text-sm">edit</span>
+                                            </a>
+                                            @if (item.CanDelete)
+                                            {
+                                                <form method="post" asp-action="Delete" asp-route-id="@item.ModelId" asp-route-returnUrl="@Model.ReturnUrl" class="inline">
+                                                    <button type="submit" class="w-10 h-10 flex items-center justify-center border border-error/20 text-error hover:bg-error hover:text-white transition-all">
+                                                        <span class="material-symbols-outlined text-sm">delete</span>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                @foreach (var item in Model.Models)
-                                {
-                                    <tr>
-                                        <td>@item.MakeName</td>
-                                        <td>@item.ModelName</td>
-                                        <td>
-                                            <div class="d-flex justify-content-end gap-2">
-                                                <a class="btn btn-sm btn-outline-primary"
-                                                   asp-area="Admin"
-                                                   asp-controller="Models"
-                                                   asp-action="Edit"
-                                                   asp-route-id="@item.ModelId"
-                                                   asp-route-returnUrl="@Model.ReturnUrl">Edit</a>
-                                                @if (item.CanDelete)
-                                                {
-                                                    <form method="post"
-                                                          asp-area="Admin"
-                                                          asp-controller="Models"
-                                                          asp-action="Delete"
-                                                          asp-route-id="@item.ModelId"
-                                                          asp-route-returnUrl="@Model.ReturnUrl">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                                    </form>
-                                                }
-                                                else
-                                                {
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled>In Use</button>
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                </div>
+                            }
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-</section>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -1,51 +1,49 @@
 @model LuxRentals.ViewModels.Cars.Admin.VehicleClassEditVm
-
 @{
-    ViewData["Title"] = "Edit Vehicle Class";
+    ViewData["Title"] = "Segment Designation Metadata";
 }
 
-<section class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="mb-1">Edit Vehicle Class</h1>
-            <p class="text-muted mb-0">Update a class name used by the car inventory form.</p>
-        </div>
-        @if (!string.IsNullOrWhiteSpace(Model.ReturnUrl))
-        {
-            <a class="btn btn-outline-secondary" href="@Model.ReturnUrl">Back to Car</a>
-        }
-        else
-        {
-            <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index">Back to Classes</a>
-        }
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface min-h-[calc(100vh-88px)] flex flex-col justify-center">
+    <div class="w-full max-w-2xl mx-auto bg-surface-container-lowest p-12 md:p-16 shadow-[0_45px_100px_rgba(0,0,0,0.06)] border border-outline-variant/10">
+        
+        <!-- Header -->
+        <header class="mb-16 border-b border-outline-variant/10 pb-12 flex flex-col md:flex-row justify-between items-end gap-8">
+            <div class="max-w-md">
+                <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Asset Segmenting</span>
+                <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-6">Modify Segment</h1>
+                <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose">
+                    Refine category designation metadata for the LuxRentals automotive segment hierarchy.
+                </p>
+            </div>
+             <div class="text-right">
+                <span class="material-symbols-outlined text-secondary text-5xl mb-2">dashboard_customize</span>
+            </div>
+        </header>
+
+        <form method="post" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Edit" asp-route-id="@Model.VehicleClassId" class="space-y-12">
+            @Html.AntiForgeryToken()
+            <input asp-for="VehicleClassId" type="hidden" />
+            <input asp-for="ReturnUrl" type="hidden" />
+
+            <div asp-validation-summary="ModelOnly" class="mb-8 p-6 bg-error-container/10 border-l-4 border-error text-error text-[10px] uppercase tracking-widest font-bold"></div>
+
+            <div class="space-y-4">
+                <label asp-for="VehicleClassName" class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant block font-bold">Segment Designation</label>
+                <input asp-for="VehicleClassName" class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline-variant/30 py-4 focus:border-secondary transition-all duration-500 font-headline text-2xl font-bold tracking-tight text-on-surface placeholder:text-outline-variant/30 uppercase" placeholder="E.G. PERFORMANCE SUV" />
+                <span asp-validation-for="VehicleClassName" class="text-error text-[10px] uppercase tracking-widest block transform translate-y-2 font-bold"></span>
+            </div>
+
+            <div class="pt-12 flex flex-col sm:flex-row gap-6">
+                <button type="submit" class="flex-1 bg-black text-white py-6 font-label text-[10px] font-black uppercase tracking-[0.3em] hover:bg-secondary transition-all duration-500 shadow-2xl">
+                    Save Metadata
+                </button>
+                <a asp-action="Index" class="flex-1 border border-on-surface/20 text-on-surface py-6 font-label text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all text-center">
+                    Abort
+                </a>
+            </div>
+        </form>
     </div>
-
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
-            <form method="post" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Edit" asp-route-id="@Model.VehicleClassId">
-                <input asp-for="VehicleClassId" type="hidden" />
-                <input asp-for="ReturnUrl" type="hidden" />
-
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                <div class="mb-3">
-                    <label asp-for="VehicleClassName" class="form-label"></label>
-                    <input asp-for="VehicleClassName" class="form-control" />
-                    <span asp-validation-for="VehicleClassName" class="text-danger"></span>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2">
-                    <a class="btn btn-outline-secondary"
-                       asp-area="Admin"
-                       asp-controller="VehicleClasses"
-                       asp-action="Index"
-                       asp-route-returnUrl="@Model.ReturnUrl">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</section>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

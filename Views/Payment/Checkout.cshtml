@@ -1,75 +1,155 @@
-﻿@{
-    ViewData["Title"] = "Checkout";
-    var orderId = ViewBag.OrderId as string;
-    var price = ViewBag.Price as decimal?;
+@{
+    ViewData["Title"] = "Luxury Checkout";
 }
 
 <script src="https://www.paypal.com/sdk/js?client-id=@ViewBag.PayPalClientId&currency=CAD"></script>
 
-<div class="checkout-page">
-
-    <div class="checkout-header mb-4">
-        <h1><i class="bi bi-credit-card-fill"></i> Checkout</h1>
-        <p class="text-muted">Complete your booking payment</p>
+<main class="pt-40 pb-32 max-w-7xl mx-auto px-6 md:px-12 bg-surface">
+    <!-- Progress Indicator -->
+    <div class="mb-20 hidden md:block">
+        <div class="flex items-center justify-between relative max-w-2xl mx-auto px-4 sm:px-12">
+            <div class="absolute top-5 left-0 w-full h-px bg-secondary/30 z-0"></div>
+            
+            <a asp-controller="Cars" asp-action="Index" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
+                <div class="bg-surface px-4">
+                    <div class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant flex items-center justify-center text-[11px] font-black ring-4 ring-surface group-hover:scale-110 transition-transform opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0">1</div>
+                </div>
+                <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface-variant font-black whitespace-nowrap opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0">01. Selection</span>
+            </a>
+            
+            @{
+                var sessionCarId = Context.Session.GetInt32("CarId");
+            }
+            @if (sessionCarId.HasValue)
+            {
+                <a asp-controller="Booking" asp-action="Create" asp-route-carId="@sessionCarId.Value" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
+                    <div class="bg-surface px-4">
+                        <div class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant flex items-center justify-center text-[11px] font-black ring-4 ring-surface group-hover:scale-110 transition-transform opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0">2</div>
+                    </div>
+                    <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface-variant font-black whitespace-nowrap opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0">02. Itinerary</span>
+                </a>
+            }
+            else
+            {
+                <div class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500">
+                    <div class="bg-surface px-4">
+                        <div class="w-10 h-10 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant flex items-center justify-center text-[11px] font-black ring-4 ring-surface opacity-30 grayscale">2</div>
+                    </div>
+                    <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface-variant font-black whitespace-nowrap opacity-30 grayscale">02. Itinerary</span>
+                </div>
+            }
+            
+            <a asp-controller="Payment" asp-action="Checkout" asp-route-orderId="@ViewBag.OrderId" class="flex flex-col items-center gap-3 relative z-10 transition-all duration-500 group">
+                <div class="bg-surface px-4">
+                    <div class="w-10 h-10 rounded-full bg-black text-secondary flex items-center justify-center text-[11px] font-black shadow-[0_0_30px_rgba(197,160,89,0.3)] ring-4 ring-surface group-hover:scale-110 transition-transform">3</div>
+                </div>
+                <span class="font-label text-[9px] tracking-[0.25rem] uppercase text-on-surface font-black whitespace-nowrap">03. Settlement</span>
+            </a>
+        </div>
+    </div>
+    <!-- Header -->
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-center md:items-end text-center md:text-left gap-8">
+        <div class="w-full md:w-auto">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Secure Checkout</span>
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-4">Summary</h1>
+            <p class="font-body text-xs text-on-surface-variant uppercase tracking-widest opacity-80">Reference ID: @ViewBag.OrderId</p>
+        </div>
+        <div class="w-full md:w-auto text-center md:text-right">
+             <div class="flex items-center justify-center md:justify-end gap-3 text-secondary mb-2">
+                <span class="material-symbols-outlined text-sm">lock</span>
+                <span class="font-label text-[10px] font-bold uppercase tracking-widest">Secure Payment</span>
+            </div>
+        </div>
     </div>
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold animate-pulse" role="alert">
             @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
-    <div class="row g-4">
-
-        <!-- Booking Summary -->
-        <div class="col-md-6">
-            <div class="card admin-card shadow-sm h-100">
-                <div class="card-body">
-
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="admin-card-icon bg-primary bg-opacity-10 text-primary me-3">
-                            <i class="bi bi-car-front-fill"></i>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
+        
+        <!-- Statement Details -->
+        <div class="space-y-12">
+            <div>
+                <h3 class="font-label text-xs font-black uppercase tracking-[0.2rem] mb-12 flex items-center gap-4">
+                    <span class="w-8 h-px bg-on-surface/20"></span>
+                    Reservation Summary
+                </h3>
+                
+                <div class="space-y-8">
+                    <!-- Dates -->
+                    <div class="grid grid-cols-2 gap-12 border-b border-outline-variant/10 pb-8">
+                        <div>
+                            <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block mb-2">Pickup</span>
+                            <span class="font-headline text-xl font-bold uppercase">@ViewBag.StartDate</span>
                         </div>
                         <div>
-                            <h5 class="card-title mb-0">Booking Summary</h5>
-                            <p class="text-muted mb-0">Review your booking details</p>
+                            <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block mb-2">Return</span>
+                            <span class="font-headline text-xl font-bold uppercase">@ViewBag.EndDate</span>
                         </div>
                     </div>
 
-                    <hr />
-
-                    <p><strong>Start Date:</strong> @ViewBag.StartDate</p>
-                    <p><strong>End Date:</strong> @ViewBag.EndDate</p>
-                    <p><strong>Total Price:</strong> <span class="text-success fw-bold">$@price CAD</span></p>
-
+                    <!-- Financials -->
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-center text-on-surface-variant">
+                            <span class="font-body text-xs uppercase tracking-widest">Base Rate</span>
+                            <span class="font-body text-xs font-bold">$@ViewBag.Price CAD</span>
+                        </div>
+                        <div class="flex justify-between items-center text-on-surface-variant">
+                            <span class="font-body text-xs uppercase tracking-widest">Surcharge</span>
+                            <span class="font-body text-xs font-bold">$0.00 CAD</span>
+                        </div>
+                        <div class="pt-6 border-t border-outline-variant text-on-surface flex justify-between items-baseline font-headline">
+                            <span class="text-[10px] uppercase font-black tracking-widest">Total</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-xs font-bold text-on-surface-variant">CAD</span>
+                                <span class="text-2xl md:text-4xl font-black text-secondary">$@ViewBag.Price</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <div class="bg-surface-container-low p-8 border border-outline-variant/10 text-center">
+                <p class="font-body text-[10px] uppercase tracking-widest text-on-surface-variant leading-loose">
+                    By clicking to pay, you acknowledge our policy requiring rentals to be secured at least one calendar day prior to pickup.
+                </p>
             </div>
         </div>
 
-        <!-- Payment Section -->
-        <div class="col-md-6">
-            <div class="card admin-card shadow-sm h-100">
-                <div class="card-body text-center">
-
-                    <div class="mb-3">
-                        <i class="bi bi-paypal display-4 text-primary"></i>
+        <!-- Payment Processing -->
+        <div class="lg:sticky lg:top-48">
+            <div class="bg-surface-container-lowest p-12 shadow-[0_45px_100px_rgba(0,0,0,0.08)] border border-outline-variant/10 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-full transform translate-x-12 -translate-y-12"></div>
+                
+                <div class="relative z-10 space-y-12">
+                     <div class="flex flex-col items-center gap-6">
+                        <div class="w-20 h-20 bg-black flex items-center justify-center rounded-full mb-4 shadow-xl">
+                            <span class="material-symbols-outlined text-white text-3xl">contactless</span>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="font-headline text-2xl font-black uppercase tracking-tight mb-2">Payment</h3>
+                            <p class="font-body text-xs uppercase tracking-widest text-on-surface-variant">Choose payment method</p>
+                        </div>
                     </div>
 
-                    <h5 class="card-title">Pay with PayPal</h5>
-                    <p class="text-muted">Secure payment processed through PayPal.</p>
-
-                    <hr />
-
-                    <div id="paypal-button-container"></div>
-
+                    <div class="space-y-8">
+                        <div id="paypal-button-container" class="min-h-[50px]"></div>
+                        
+                        <div class="flex items-center gap-4 text-outline justify-center opacity-40 grayscale group-hover:grayscale-0 transition-all">
+                             <span class="material-symbols-outlined">shield</span>
+                             <span class="font-label text-[9px] uppercase tracking-widest font-bold">Encrypted via PayPal Network</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
     </div>
-</div>
+</main>
 
 @Html.AntiForgeryToken()
 

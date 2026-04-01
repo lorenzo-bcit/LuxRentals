@@ -1,71 +1,114 @@
-@model IEnumerable<LuxRentals.ViewModels.UserVm>
+@using LuxRentals.ViewModels.Roles
+@model IEnumerable<ClientRegistryVm>
 @{
-    ViewData["Title"] = "Manage Users";
+    ViewData["Title"] = "Client Registry";
 }
 
-<div class="admin-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-people-fill"></i> Manage Users</h2>
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface flex flex-col min-h-screen">
+    <!-- Header -->
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-12">
+        <div class="max-w-xl">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Enterprise Management</span>
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-6">Client Registry</h1>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">A unified database of system accounts and customer profiles. Manage security access and personal dossiers from a single interface.</p>
+        </div>
+        <div class="text-right">
+             <div class="flex items-center gap-3 text-secondary justify-end mb-2">
+                <span class="material-symbols-outlined text-sm">badge</span>
+                <span class="font-label text-[10px] font-bold uppercase tracking-widest">Master Security List</span>
+            </div>
+        </div>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <div class="mb-12 p-6 bg-secondary-container/10 border-l-4 border-secondary text-secondary text-xs uppercase tracking-widest font-bold" role="alert">@TempData["SuccessMessage"]</div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert">@TempData["ErrorMessage"]</div>
     }
 
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <table class="table table-hover admin-table mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">User Email</th>
-                        <th scope="col" class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Any())
+    <div class="table-scroll bg-surface-container-lowest border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.06)] overflow-hidden">
+        <table class="w-full text-left font-body text-xs border-collapse">
+            <thead>
+                <tr class="border-b border-outline-variant/20 bg-surface-container-low/30 font-label text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
+                    <th class="py-8 px-10">Client Identity</th>
+                    <th class="py-8 px-10">Personal Information</th>
+                    <th class="py-8 px-10 col-hide-mobile">Security Roles</th>
+                    <th class="py-8 px-10 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10">
+                @if (Model.Any())
+                {
+                    @foreach (var client in Model)
                     {
-                        @foreach (var user in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <i class="bi bi-person-circle me-2 text-muted"></i>@user.Email
-                                </td>
-                                <td class="text-end">
-                                    <a asp-action="Detail" asp-route-userName="@user.Email"
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> View Roles
+                        <tr class="group hover:bg-surface-container-low/20 transition-colors duration-500">
+                            <td class="py-8 px-10">
+                                <div class="flex items-center gap-6">
+                                    <div class="w-12 h-12 bg-surface-container flex items-center justify-center border border-outline-variant/20 rounded-full group-hover:bg-black group-hover:text-white transition-all duration-500">
+                                        <span class="material-symbols-outlined text-sm">@(client.HasProfile ? "person_check" : "person")</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-headline font-bold text-lg lowercase tracking-tight block">@client.Email</span>
+                                        @if (!client.HasProfile)
+                                        {
+                                            <span class="font-label text-[8px] uppercase tracking-tighter text-on-surface-variant opacity-60">Identity Only</span>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-8 px-10">
+                                <div class="space-y-1">
+                                    <span class="font-headline font-bold text-on-surface uppercase tracking-tighter block text-md">@client.FullName</span>
+                                    <span class="font-body text-[10px] text-on-surface-variant lowercase tracking-widest">@client.PhoneNumber</span>
+                                </div>
+                            </td>
+                            <td class="py-8 px-10 col-hide-mobile">
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach (var role in client.Roles)
+                                    {
+                                        <span class="px-3 py-1 bg-on-surface/5 border border-on-surface/10 font-label text-[8px] font-black uppercase tracking-widest text-on-surface">@role</span>
+                                    }
+                                    @if (!client.Roles.Any())
+                                    {
+                                        <span class="text-on-surface-variant/40 italic font-body text-[10px]">No assigned roles</span>
+                                    }
+                                </div>
+                            </td>
+                             <td class="py-8 px-10 text-right">
+                                <div class="flex justify-end gap-4">
+                                    @if (client.HasProfile)
+                                    {
+                                        <a asp-area="" asp-controller="Profile" asp-action="Details" asp-route-id="@client.Email" class="inline-flex items-center justify-center py-3 px-6 border border-on-surface/20 text-on-surface font-label text-[9px] font-bold uppercase tracking-widest hover:bg-on-surface hover:text-white transition-all" title="View Profile">
+                                            Profile
+                                        </a>
+                                    }
+                                    <a asp-action="Detail" asp-route-userName="@client.Email" class="inline-flex items-center justify-center py-3 px-6 bg-black text-white font-label text-[9px] font-bold uppercase tracking-widest hover:bg-secondary transition-all" title="Manage Roles">
+                                        Permissions
                                     </a>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="2" class="text-center text-muted py-4">
-                                No users found.
+                                </div>
                             </td>
                         </tr>
                     }
-                </tbody>
-            </table>
-        </div>
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="py-24 text-center">
+                            <span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">No system users identified.</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 
-    <div class="mt-3">
-        <a asp-area="Admin" asp-controller="AdminProfile" asp-action="Index" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
+    <div class="mt-12 flex justify-start">
+        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="flex items-center gap-3 border border-on-surface/20 px-8 py-4 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Dashboard
         </a>
     </div>
-</div>
+</main>

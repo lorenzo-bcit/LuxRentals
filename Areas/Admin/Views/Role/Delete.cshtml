@@ -1,41 +1,45 @@
 @model LuxRentals.ViewModels.Roles.RoleVm
 @{
-    ViewData["Title"] = "Delete Role";
+    ViewData["Title"] = "Relinquish Role";
 }
 
-<div class="admin-section">
-    <h2 class="mb-4"><i class="bi bi-exclamation-triangle-fill text-danger"></i> Delete Role</h2>
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface min-h-[calc(100vh-88px)] flex flex-col justify-center">
+    <div class="w-full max-w-2xl mx-auto bg-surface-container-lowest p-12 md:p-16 shadow-[0_45px_100px_rgba(0,0,0,0.06)] border border-outline-variant/10 text-center">
+        
+        <!-- Header -->
+        <header class="mb-16 border-b border-outline-variant/10 pb-12">
+            <span class="material-symbols-outlined text-error text-6xl mb-8">exclamation</span>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Security Protocol</span>
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-6">Relinquish Role</h1>
+            <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose">
+                Removing the following authority designation from the system directory.
+            </p>
+        </header>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-danger">
-                <div class="card-body p-4">
-                    <p class="mb-3">Are you sure you want to delete the following role?</p>
-
-                    <div class="alert alert-warning">
-                        <strong>Role Name:</strong>
-                        <span class="badge bg-secondary ms-2">@Model.RoleName</span>
-                    </div>
-
-                    <p class="text-muted small">
-                        <i class="bi bi-info-circle"></i>
-                        This action cannot be undone. Roles that are currently assigned to users cannot be deleted.
-                    </p>
-
-                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
-                        @Html.AntiForgeryToken()
-
-                        <div class="d-flex justify-content-between">
-                            <a asp-action="Index" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-danger">
-                                <i class="bi bi-trash"></i> Confirm Delete
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+        <div class="mb-16 p-10 bg-error-container/5 border border-error/20 flex flex-col items-center gap-6">
+            <span class="font-label text-[9px] uppercase tracking-[0.2em] text-on-surface-variant block font-bold mt-2">Designation to be Revoked</span>
+            <span class="font-headline text-2xl md:text-4xl font-black uppercase tracking-tight text-error">@Model.RoleName</span>
         </div>
+
+        <div class="mb-16 p-8 border border-outline-variant/10 bg-surface-container-low/30 text-left">
+            <h5 class="font-headline text-[12px] font-black uppercase tracking-widest text-on-surface mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">info</span>
+                Authorization Notice
+            </h5>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-relaxed">
+                This action is irreversible. System roles that are currently assigned to active personnel may not be removed until all credential links are severed.
+            </p>
+        </div>
+
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
+
+            <button type="submit" class="w-full py-6 bg-error text-white font-label text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black transition-all duration-500 shadow-2xl">
+                AUTHORIZE REVOCATION
+            </button>
+            <a asp-action="Index" class="block w-full py-6 border border-on-surface/20 text-on-surface font-label text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all">
+                ABORT PROCEDURE
+            </a>
+        </form>
     </div>
-</div>
+</main>

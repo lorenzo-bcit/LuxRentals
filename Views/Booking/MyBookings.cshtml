@@ -1,52 +1,47 @@
-﻿@using LuxRentals.Utils
+@using LuxRentals.Utils
 @model IEnumerable<LuxRentals.Models.Booking>
 
 @{
-    ViewData["Title"] = "My Bookings";
-    var isAdminView = ViewBag.CustomerId != null; // Admin viewing customer's bookings
+    ViewData["Title"] = ViewBag.CustomerId != null ? "Customer Bookings" : "My Bookings";
+    var isAdminView = ViewBag.CustomerId != null;
     var today = BookingClock.Today();
     var isAdminOrEmployee = User.IsInRole("Admin") || User.IsInRole("Employee");
 }
 
-<div class="container mt-4">
-
-    <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="display-5">
-                @if (isAdminView)
-                {
-                    <text>Customer Bookings</text>
-                }
-                else
-                {
-                    <text>My Bookings</text>
-                }
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface min-h-[80vh]">
+    <!-- Header -->
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-center md:items-end text-center md:text-left gap-12">
+        <div class="w-full md:w-auto max-w-xl">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">
+                @(isAdminView ? "Customer Bookings" : "My Bookings")
+            </span>
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-6">
+                @(isAdminView ? "Customer Bookings" : "My Bookings")
             </h1>
-            <p class="text-muted">View and manage your vehicle reservations</p>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">
+                Review and manage bookings.
+            </p>
         </div>
     </div>
 
     <!-- Success/Error Messages -->
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="mb-12 p-6 bg-secondary-container/10 border-l-4 border-secondary text-secondary text-xs uppercase tracking-widest font-bold" role="alert">
+            @TempData["Success"]
         </div>
     }
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert">
+            @TempData["Error"]
         </div>
     }
 
     <!-- Bookings List -->
     @if (Model != null && Model.Any())
     {
-        <div class="row">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             @foreach (var booking in Model)
             {
                 var pickupDate = booking.StartDateTime.Date;
@@ -55,133 +50,107 @@
                 var isActive = pickupDate <= today && returnDate > today;
                 var isCompleted = returnDate <= today;
 
-                var statusClass = booking.CancelledAt != null ? "danger" :
-                isUpcoming ? "success" :
-                isActive ? "primary" : "secondary";
+                var isCancelled = booking.CancelledAt != null;
+                var statusColor = isCancelled ? "text-error border-error/30" :
+                    isUpcoming ? "text-secondary border-secondary/30" :
+                    isActive ? "text-tertiary border-tertiary/30" : "text-outline border-outline/30";
 
-                var statusText = booking.CancelledAt != null ? "Cancelled" :
-                isUpcoming ? "Upcoming" :
-                isActive ? "Active" : "Completed";
+                var statusText = isCancelled ? "Cancelled" :
+                    isUpcoming ? "Upcoming" :
+                    isActive ? "Active" : "Completed";
 
-                // Check if admin OR if customer can cancel (2-day date rule)
-                var canCancel = booking.CancelledAt == null &&
-                (isAdminOrEmployee || pickupDate > today.AddDays(1));
+                var canCancel = !isCancelled && (isAdminOrEmployee || pickupDate > today.AddDays(1));
 
                 var totalDays = (booking.EndDateTime - booking.StartDateTime).Days;
                 if (totalDays == 0) totalDays = 1;
                 var totalCost = booking.FkCar.DailyRate * totalDays;
-                var transactionId = booking.TransactionId;
 
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100 shadow-sm">
+                <div class="group bg-surface-container-lowest border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col hover:-translate-y-2 transition-transform duration-500">
 
-                        <!-- Car Image Placeholder -->
-                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
-                            @if (!string.IsNullOrEmpty(booking.FkCar.CarThumbnail))
+                    <!-- Vehicle Image -->
+                    <div class="aspect-video bg-surface-container-low overflow-hidden relative border-b border-outline-variant/10">
+                        @if (!string.IsNullOrEmpty(booking.FkCar.CarThumbnail))
+                        {
+                            <img src="@booking.FkCar.CarThumbnail" alt="@booking.FkCar.FkModel.ModelName" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        }
+                        else
+                        {
+                            <div class="w-full h-full flex items-center justify-center font-label text-[10px] tracking-widest uppercase text-outline">No Visual Record</div>
+                        }
+
+                        <div class="absolute top-4 right-4 px-3 py-1 bg-black/80 backdrop-blur-sm border border-white/10 @statusColor font-label text-[9px] font-black uppercase tracking-widest">
+                            @statusText
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="p-8 grow flex flex-col">
+                        <div class="mb-8">
+                            <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant mb-2 block">@booking.FkCar.FkModel.FkMake.MakeName</span>
+                            <h3 class="font-headline text-2xl font-black tracking-tighter uppercase mb-4">@booking.FkCar.FkModel.ModelName</h3>
+                            <div class="flex gap-4 font-body text-[10px] uppercase tracking-widest text-on-surface-variant">
+                                <span>@booking.FkCar.Year</span>
+                                <span>&bull;</span>
+                                <span>@booking.FkCar.Colour</span>
+                                <span>&bull;</span>
+                                <span>@booking.FkCar.TransmissionType</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4 grow mb-8 border-t border-outline-variant/10 pt-8">
+                            <div class="flex justify-between items-center">
+                                <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant">Pickup</span>
+                                <span class="font-bold text-xs">@booking.StartDateTime.ToString("MMM dd, yyyy")</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant">Return</span>
+                                <span class="font-bold text-xs">@booking.EndDateTime.ToString("MMM dd, yyyy")</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant">Duration</span>
+                                <span class="font-bold text-xs">@totalDays Day@(totalDays > 1 ? "s" : "")</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(booking.TransactionId))
                             {
-                                <img src="@booking.FkCar.CarThumbnail" alt="Car" class="img-fluid" style="max-height: 200px;">
-                            }
-                            else
-                            {
-                                <i class="bi bi-car-front-fill text-white" style="font-size: 4rem;"></i>
+                                <div class="flex justify-between items-center mt-4">
+                                    <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant">Auth No.</span>
+                                    <span class="font-mono text-[9px] text-outline text-right max-w-[120px] truncate" title="@booking.TransactionId">@booking.TransactionId</span>
+                                </div>
                             }
                         </div>
 
-                        <div class="card-body">
-                            <!-- Car Info -->
-                            <h5 class="card-title">
-                                @booking.FkCar.FkModel.FkMake.MakeName @booking.FkCar.FkModel.ModelName
-                            </h5>
-                            <p class="text-muted mb-2">
-                                <small>@booking.FkCar.Year • @booking.FkCar.Colour • @booking.FkCar.TransmissionType</small>
-                            </p>
-
-                            <!-- Status Badge -->
-                            <span class="badge bg-@statusClass mb-3">@statusText</span>
-
-                            <!-- Booking Details -->
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted"><i class="bi bi-calendar-check"></i> Pickup:</span>
-                                    <strong>@booking.StartDateTime.ToString("MMM dd, yyyy")</strong>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted"><i class="bi bi-calendar-x"></i> Return:</span>
-                                    <strong>@booking.EndDateTime.ToString("MMM dd, yyyy")</strong>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted"><i class="bi bi-clock"></i> Duration:</span>
-                                    <strong>@totalDays day(s)</strong>
-                                </div>
-                                @if (!string.IsNullOrEmpty(transactionId))
-                                {
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted"><i class="bi bi-receipt"></i> Transaction ID:</span>
-                                        <strong class="text-truncate" style="max-width: 150px;" title="@transactionId">@transactionId</strong>
-                                    </div>
-                                }
-                                <hr>
-                                <div class="d-flex justify-content-between">
-                                    <span class="text-muted"><i class="bi bi-currency-dollar"></i> Total Cost:</span>
-                                    <strong class="text-primary">$@totalCost.ToString("N2") CAD</strong>
-                                </div>
+                        <!-- Footer / Cost / Actions -->
+                        <div class="mt-auto">
+                            <div class="flex justify-between items-end mb-8">
+                                <span class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant">Total</span>
+                                <span class="font-headline text-xl font-black text-secondary">@totalCost.ToString("C")</span>
                             </div>
 
-                            @if (booking.CancelledAt != null)
+                            @if (isCancelled)
                             {
-                                <div class="alert alert-danger py-2 mb-2" role="alert">
-                                    <small><i class="bi bi-x-circle"></i> Cancelled on @booking.CancelledAt.Value.ToString("MMM dd, yyyy")</small>
+                                <div class="text-center py-4 border border-error/20 bg-error/5 text-error font-label text-[10px] uppercase tracking-widest font-bold">
+                                    Cancelled on @booking.CancelledAt.Value.ToString("MMM dd")
                                 </div>
                             }
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="card-footer bg-white">
-                            @if (canCancel)
+                            else if (isUpcoming || isAdminOrEmployee)
                             {
-                                <!-- Can cancel -->
-                                <a asp-action="Cancel" asp-route-id="@booking.PkBookingId"
-                                   class="btn btn-outline-danger btn-sm w-100">
-                                    <i class="bi bi-x-circle"></i> Cancel Booking
+                                <a asp-action="Cancel" asp-route-id="@booking.PkBookingId" class="block w-full text-center py-4 border border-on-surface/20 text-on-surface hover:bg-black hover:text-white transition-all font-label text-[10px] uppercase tracking-widest font-bold">
+                                    Cancel Reservation
                                 </a>
-                            }
-                            else if (booking.CancelledAt != null)
-                            {
-                                <!-- Already cancelled -->
-                                <button class="btn btn-secondary btn-sm w-100" disabled>
-                                    <i class="bi bi-x-circle"></i> Already Cancelled
-                                </button>
-                            }
-                            else if (!isAdminOrEmployee && isUpcoming)
-                            {
-                                <!-- Less than 2 days before pickup (customer only - admin can still cancel) -->
-                                <button class="btn btn-secondary btn-sm w-100" disabled>
-                                    <i class="bi bi-lock"></i> Cannot Cancel (Less than 2 days)
-                                </button>
-                            }
-                            else if (isCompleted)
-                            {
-                                <!-- Completed -->
-                                <button class="btn btn-secondary btn-sm w-100" disabled>
-                                    <i class="bi bi-check-circle"></i> Completed
-                                </button>
                             }
                             else if (isActive)
                             {
-                                <!-- Active (only shows for customers, admins see cancel button) -->
-                                <button class="btn btn-secondary btn-sm w-100" disabled>
-                                    <i class="bi bi-hourglass-split"></i> Active Rental
-                                </button>
+                                <div class="text-center py-4 border border-outline-variant/20 bg-surface-container-low text-on-surface-variant font-label text-[9px] uppercase tracking-widest">
+                                    Active
+                                </div>
                             }
-                            else
+                            else if (isCompleted)
                             {
-                                <!-- Fallback -->
-                                <button class="btn btn-secondary btn-sm w-100" disabled>
-                                    <i class="bi bi-dash-circle"></i> No Action Available
-                                </button>
+                                <div class="text-center py-4 border border-outline-variant/20 text-on-surface-variant font-label text-[9px] uppercase tracking-widest">
+                                    Completed
+                                </div>
                             }
                         </div>
-
                     </div>
                 </div>
             }
@@ -190,33 +159,17 @@
     else
     {
         <!-- Empty State -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center py-5">
-                        <i class="bi bi-calendar-x" style="font-size: 4rem; color: #ccc;"></i>
-                        <h3 class="mt-3">No Bookings Yet</h3>
-                        <p class="text-muted">You haven't made any vehicle reservations.</p>
-                        <a asp-controller="Cars" asp-action="Index" class="btn btn-primary mt-3">
-                            <i class="bi bi-search"></i> Browse Vehicles
-                        </a>
-                    </div>
-                </div>
+        <div class="bg-surface-container-lowest border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.06)] p-24 text-center mt-12">
+            <div class="max-w-md mx-auto space-y-8">
+                <span class="material-symbols-outlined text-6xl text-outline-variant/30">calendar_month</span>
+                <h3 class="font-headline text-3xl font-black tracking-tighter uppercase">No Bookings Found</h3>
+                <p class="font-body text-sm text-on-surface-variant uppercase tracking-widest leading-loose">
+                    You have no bookings.
+                </p>
+                <a asp-controller="Cars" asp-action="Index" class="inline-block mt-8 bg-black text-secondary py-5 px-12 font-label text-[10px] uppercase tracking-[0.2em] font-bold hover:opacity-80 transition-opacity">
+                    View Vehicles
+                </a>
             </div>
         </div>
     }
-
-</div>
-
-@section Scripts {
-    <script>
-        // Auto-dismiss alerts after 5 seconds
-        setTimeout(function() {
-            var alerts = document.querySelectorAll('.alert-dismissible');
-            alerts.forEach(function(alert) {
-                var bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
-    </script>
-}
+</main>

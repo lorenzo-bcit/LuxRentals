@@ -1,50 +1,53 @@
 @model LuxRentals.ViewModels.Roles.UserRoleVm
 @{
-    ViewData["Title"] = "Remove Role";
+    ViewData["Title"] = "Revoke Authority";
 }
 
-<div class="admin-section">
-    <h2 class="mb-4"><i class="bi bi-exclamation-triangle-fill text-danger"></i> Remove Role from User</h2>
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12 bg-surface min-h-[calc(100vh-88px)] flex flex-col justify-center">
+    <div class="w-full max-w-2xl mx-auto bg-surface-container-lowest p-12 md:p-16 shadow-[0_45px_100px_rgba(0,0,0,0.06)] border border-outline-variant/10 text-center">
+        
+        <!-- Header -->
+        <header class="mb-16 border-b border-outline-variant/10 pb-12 text-center">
+            <span class="material-symbols-outlined text-error text-6xl mb-8">exclamation</span>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-4 block">Security Protocol</span>
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-6 text-center mx-auto">Revoke Authority</h1>
+            <p class="font-body text-[11px] text-on-surface-variant uppercase tracking-widest leading-loose max-w-md mx-auto">
+                Authorized removal of credential levels from the selected personnel profile.
+            </p>
+        </header>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-danger">
-                <div class="card-body p-4">
-                    <p class="mb-3">Are you sure you want to remove this role assignment?</p>
-
-                    <div class="alert alert-warning">
-                        <div class="mb-2">
-                            <strong>User:</strong>
-                            <span class="ms-2">@Model.Email</span>
-                        </div>
-                        <div>
-                            <strong>Role:</strong>
-                            <span class="badge bg-info text-dark ms-2">@Model.Role</span>
-                        </div>
-                    </div>
-
-                    <p class="text-muted small">
-                        <i class="bi bi-info-circle"></i>
-                        The user will lose all permissions associated with this role.
-                    </p>
-
-                    <form asp-action="Delete" method="post">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="email" value="@Model.Email" />
-                        <input type="hidden" name="role" value="@Model.Role" />
-
-                        <div class="d-flex justify-content-between">
-                            <a asp-action="Detail" asp-route-userName="@Model.Email"
-                               class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-danger">
-                                <i class="bi bi-x-circle"></i> Confirm Remove
-                            </button>
-                        </div>
-                    </form>
-                </div>
+        <div class="mb-16 bg-error-container/5 border border-error/20 divide-y divide-error/10 text-left">
+            <div class="p-8 group">
+                <span class="font-label text-[9px] uppercase tracking-[0.2em] text-on-surface-variant block font-bold mb-2">Target Personnel</span>
+                <span class="font-headline text-2xl font-black lowercase tracking-tight text-on-surface">@Model.Email</span>
+            </div>
+            <div class="p-8 group items-center">
+                <span class="font-label text-[9px] uppercase tracking-[0.2em] text-on-surface-variant block font-bold mb-2">Authority Level for Removal</span>
+                <span class="px-4 py-2 bg-on-surface/5 border border-on-surface/10 font-label text-[10px] font-black uppercase tracking-widest text-on-surface inline-block">@Model.Role</span>
             </div>
         </div>
+
+        <div class="mb-16 p-8 border border-outline-variant/10 bg-surface-container-low/30 text-left">
+             <h5 class="font-headline text-[12px] font-black uppercase tracking-widest text-on-surface mb-2 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">info</span>
+                Authorization Notice
+            </h5>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-relaxed">
+                The personnel will immediately lose all system capabilities and logistics access associated with this rank. This action is recorded in the permanent security log.
+            </p>
+        </div>
+
+        <form asp-action="Delete" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="email" value="@Model.Email" />
+            <input type="hidden" name="role" value="@Model.Role" />
+
+            <button type="submit" class="w-full py-6 bg-error text-white font-label text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black transition-all duration-500 shadow-2xl">
+                AUTHORIZE REVOCATION
+            </button>
+            <a asp-action="Detail" asp-route-userName="@Model.Email" class="block w-full py-6 border border-on-surface/20 text-on-surface font-label text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all">
+                ABORT PROCEDURE
+            </a>
+        </form>
     </div>
-</div>
+</main>

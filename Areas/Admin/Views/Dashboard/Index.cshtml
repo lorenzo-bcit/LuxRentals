@@ -1,0 +1,136 @@
+@model LuxRentals.ViewModels.AdminDashboardVm
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<main class="pt-32 pb-24 max-w-7xl mx-auto px-6 md:px-12">
+    <!-- Header -->
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-center md:items-end text-center md:text-left gap-8">
+        <div class="w-full md:w-auto">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block mx-auto md:mx-0">Enterprise Management</span>
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-4">Command Center</h1>
+            <p class="font-body text-xs text-on-surface-variant uppercase tracking-widest opacity-80 max-w-md mx-auto md:mx-0">Welcome back, <strong class="text-on-surface">@Model.AdminEmail</strong></p>
+        </div>
+        <div class="w-full md:w-auto text-center md:text-right mt-6 md:mt-0">
+             <div class="flex items-center justify-center md:justify-end gap-3 text-secondary mb-2">
+                <span class="material-symbols-outlined text-sm">verified_user</span>
+                <span class="font-label text-[10px] font-bold uppercase tracking-widest">Administrator Access</span>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-12 p-6 bg-secondary-container/10 border-l-4 border-secondary text-secondary text-xs uppercase tracking-widest font-bold" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Summary Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        <div class="bg-surface-container-lowest p-8 shadow-[0_40px_80px_rgba(0,0,0,0.06)] border border-outline-variant/10 flex items-center gap-8 group hover:border-secondary/30 transition-all duration-500">
+            <div class="w-16 h-16 bg-surface-container flex items-center justify-center border border-outline-variant/30 group-hover:bg-black group-hover:text-white transition-all duration-500">
+                <span class="material-symbols-outlined text-3xl">people</span>
+            </div>
+            <div>
+                <span class="font-label text-[11px] font-extrabold uppercase tracking-[0.2rem] text-on-surface-variant mb-1 block">Registered Users</span>
+                <h3 class="font-headline text-2xl md:text-4xl font-black text-on-surface">@Model.UserCount</h3>
+            </div>
+        </div>
+        <div class="bg-surface-container-lowest p-8 shadow-[0_40px_80px_rgba(0,0,0,0.06)] border border-outline-variant/10 flex items-center gap-8 group hover:border-secondary/30 transition-all duration-500">
+            <div class="w-16 h-16 bg-surface-container flex items-center justify-center border border-outline-variant/30 group-hover:bg-black group-hover:text-white transition-all duration-500">
+                <span class="material-symbols-outlined text-3xl">badge</span>
+            </div>
+            <div>
+                <span class="font-label text-[11px] font-extrabold uppercase tracking-[0.2rem] text-on-surface-variant mb-1 block">Total Roles</span>
+                <h3 class="font-headline text-2xl md:text-4xl font-black text-on-surface">@Model.RoleCount</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-8 flex items-center justify-between">
+        <h2 class="font-headline text-2xl font-black uppercase tracking-tight">Resource Management</h2>
+        <div class="h-px grow bg-outline-variant/20 mx-8"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+        <!-- Roles Action -->
+        <div class="group bg-surface-container-lowest p-8 border border-outline-variant/10 shadow-[0_20px_60px_rgba(0,0,0,0.04)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-700 relative overflow-hidden flex flex-col justify-between">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-secondary/5 rounded-full transform scale-0 group-hover:scale-150 transition-transform duration-1000"></div>
+            
+            <div class="relative z-10 space-y-8 text-center">
+                <div class="mx-auto w-20 h-20 bg-surface-container flex items-center justify-center rounded-full mb-6 border border-outline-variant/30 group-hover:bg-black group-hover:text-white transition-all duration-500">
+                    <span class="material-symbols-outlined text-4xl">vpn_key</span>
+                </div>
+                <div>
+                    <h3 class="font-headline text-lg font-bold uppercase tracking-tight mb-2">Roles</h3>
+                    <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Access authority levels for the system.</p>
+                </div>
+            </div>
+            <a asp-area="Admin" asp-controller="Role" asp-action="Index" class="relative z-10 mt-6 block w-full border border-on-surface text-center py-3 font-label text-[9px] font-bold uppercase tracking-[0.2rem] hover:bg-on-surface hover:text-white transition-all">
+                Configure
+            </a>
+        </div>
+
+        <!-- Client Registry Action -->
+        <div class="group bg-surface-container-lowest p-8 border border-outline-variant/10 shadow-[0_20px_60px_rgba(0,0,0,0.04)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-700 relative overflow-hidden flex flex-col justify-between">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-secondary/5 rounded-full transform scale-0 group-hover:scale-150 transition-transform duration-1000"></div>
+            
+            <div class="relative z-10 space-y-8 text-center">
+                <div class="mx-auto w-20 h-20 bg-surface-container flex items-center justify-center rounded-full mb-6 border border-outline-variant/30 group-hover:bg-black group-hover:text-white transition-all duration-500">
+                    <span class="material-symbols-outlined text-4xl">contact_page</span>
+                </div>
+                <div>
+                    <h3 class="font-headline text-lg font-bold uppercase tracking-tight mb-2">Client Registry</h3>
+                    <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Unified database for managing customer dossiers and system security access.</p>
+                </div>
+            </div>
+            <a asp-area="Admin" asp-controller="UserRole" asp-action="Index" class="relative z-10 mt-6 block w-full border border-on-surface text-center py-3 font-label text-[9px] font-bold uppercase tracking-[0.2rem] hover:bg-on-surface hover:text-white transition-all">
+                Access Registry
+            </a>
+        </div>
+
+        <!-- Engagement Action (Bookings) -->
+        <div class="group bg-surface-container-lowest p-8 border border-outline-variant/10 shadow-[0_20px_60px_rgba(0,0,0,0.04)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-700 relative overflow-hidden flex flex-col justify-between">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-secondary/5 rounded-full transform scale-0 group-hover:scale-150 transition-transform duration-1000"></div>
+            
+            <div class="relative z-10 space-y-8 text-center">
+                <div class="mx-auto w-20 h-20 bg-surface-container flex items-center justify-center rounded-full mb-6 border border-outline-variant/30 group-hover:bg-black group-hover:text-white transition-all duration-500">
+                    <span class="material-symbols-outlined text-4xl">assignment_ind</span>
+                </div>
+                <div>
+                    <h3 class="font-headline text-lg font-bold uppercase tracking-tight mb-2">Reservations</h3>
+                    <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Comprehensive monitoring of membership interactions and booking history.</p>
+                </div>
+            </div>
+            <a asp-area="" asp-controller="Booking" asp-action="CustomerList" class="relative z-10 mt-6 block w-full border border-on-surface text-center py-3 font-label text-[9px] font-bold uppercase tracking-[0.2rem] hover:bg-on-surface hover:text-white transition-all">
+                Access Registry
+            </a>
+        </div>
+
+        <!-- Cars Action -->
+        <div class="group bg-surface-container-lowest p-8 border border-outline-variant/10 shadow-[0_20px_60px_rgba(0,0,0,0.04)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-700 relative overflow-hidden flex flex-col justify-between">
+             <div class="absolute -top-10 -right-10 w-32 h-32 bg-secondary/5 rounded-full transform scale-0 group-hover:scale-150 transition-transform duration-1000"></div>
+            
+            <div class="relative z-10 space-y-8 text-center">
+                <div class="mx-auto w-20 h-20 bg-surface-container flex items-center justify-center rounded-full mb-6 border border-outline-variant/30 group-hover:bg-black group-hover:text-white transition-all duration-500">
+                    <span class="material-symbols-outlined text-4xl">directions_car</span>
+                </div>
+                <div>
+                    <h3 class="font-headline text-lg font-bold uppercase tracking-tight mb-2">Assets</h3>
+                    <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Control over fleet inventory and fleet data.</p>
+                </div>
+            </div>
+            <a asp-area="Admin" asp-controller="Cars" asp-action="Index" class="relative z-10 mt-6 block bg-black text-white text-center py-3 font-label text-[9px] font-bold uppercase tracking-[0.2rem] hover:bg-secondary transition-colors shadow-xl">
+                Fleet Repository
+            </a>
+        </div>
+    </div>
+</main>

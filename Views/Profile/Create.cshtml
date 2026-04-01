@@ -1,0 +1,90 @@
+@model LuxRentals.ViewModels.Roles.ProfileVm
+@{
+    ViewData["Title"] = "Initialize Dossier";
+}
+
+<main class="pt-32 pb-40 max-w-5xl mx-auto px-6 md:px-12">
+    <!-- Header -->
+    <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-center md:items-end text-center md:text-left gap-12">
+        <div class="w-full md:w-auto max-w-xl">
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Create Profile</span>
+            <h1 class="font-headline text-3xl md:text-5xl font-black tracking-tighter uppercase mb-6">Create Profile</h1>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Create a new user profile.</p>
+        </div>
+        <div class="w-full md:w-auto text-center md:text-right mt-6 md:mt-0">
+             <div class="flex items-center justify-center md:justify-end gap-3 text-secondary mb-2">
+                <span class="material-symbols-outlined text-sm">person_add</span>
+                <span class="font-label text-[10px] font-bold uppercase tracking-widest">New Profile</span>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold">@TempData["Error"]</div>
+    }
+
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-surface-container-lowest p-12 border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.08)] relative overflow-hidden">
+             <!-- Corner Accent -->
+             <div class="absolute top-0 right-0 w-24 h-24 bg-secondary/5 rounded-bl-full"></div>
+
+             <form asp-action="Create" method="post" class="space-y-10 relative z-10">
+                <div asp-validation-summary="ModelOnly" class="p-4 bg-error-container/10 border-l-4 border-error text-error text-[10px] uppercase tracking-widest font-bold"></div>
+
+                <!-- Hidden fields -->
+                <input asp-for="Email" type="hidden" />
+                <input asp-for="UserId" type="hidden" />
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="space-y-2">
+                        <label asp-for="FirstName" class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block"></label>
+                        <input asp-for="FirstName" class="ghost-input w-full uppercase tracking-widest text-sm" placeholder="First Name" />
+                        <span asp-validation-for="FirstName" class="text-error text-[9px] uppercase tracking-tighter font-bold"></span>
+                    </div>
+                     <div class="space-y-2">
+                        <label asp-for="LastName" class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block"></label>
+                        <input asp-for="LastName" class="ghost-input w-full uppercase tracking-widest text-sm" placeholder="Last Name" />
+                        <span asp-validation-for="LastName" class="text-error text-[9px] uppercase tracking-tighter font-bold"></span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="Email" class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block"></label>
+                    <div class="ghost-input w-full lowercase tracking-tight text-sm opacity-60 bg-surface-container/30 py-4 px-6 border-outline-variant/20 italic">
+                        @Model.Email
+                    </div>
+                    <p class="font-body text-[8px] uppercase tracking-widest text-on-surface-variant opacity-60">Email tied to account.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="space-y-2">
+                        <label asp-for="PhoneNumber" class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block"></label>
+                        <input asp-for="PhoneNumber" class="ghost-input w-full uppercase tracking-widest text-sm" placeholder="Phone Number" />
+                        <span asp-validation-for="PhoneNumber" class="text-error text-[9px] uppercase tracking-tighter font-bold"></span>
+                    </div>
+                    <div class="space-y-2">
+                        <label asp-for="DriverLicenceNo" class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant block">Verification ID</label>
+                        <input asp-for="DriverLicenceNo" class="ghost-input w-full uppercase tracking-widest text-sm" placeholder="DL Number (Optional for Staff)" />
+                        <span asp-validation-for="DriverLicenceNo" class="text-error text-[9px] uppercase tracking-tighter font-bold"></span>
+                    </div>
+                </div>
+
+                <div class="pt-10 flex flex-col sm:flex-row gap-6">
+                    <a asp-action="Index" asp-controller="Home" class="flex-1 border border-on-surface/20 text-center py-5 font-label text-[10px] font-bold uppercase tracking-[0.2rem] hover:bg-on-surface hover:text-white transition-all">
+                        Exit
+                    </a>
+                    <button type="submit" class="flex-1 bg-black text-white py-5 font-label text-[10px] font-bold uppercase tracking-[0.2rem] hover:bg-secondary transition-colors shadow-2xl">
+                        Create
+                    </button>
+                </div>
+             </form>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

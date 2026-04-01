@@ -786,4 +786,3 @@ coverage*[.json, .xml, .info]
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 
 # Ionide (cross platform F# VS Code tools) working folder
-

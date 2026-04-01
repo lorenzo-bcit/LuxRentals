@@ -1,0 +1,49 @@
+@page
+@model RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Registration Confirmation";
+}
+
+<div class="min-h-[calc(100vh-88px)] pt-32 pb-24 flex items-center justify-center px-6 bg-surface">
+    <div class="w-full max-w-lg bg-surface-container-lowest p-12 md:p-16 shadow-[0_40px_60px_rgba(0,0,0,0.04)]">
+        <header class="mb-12">
+            <h1 class="font-headline text-5xl font-black tracking-tighter text-on-surface mb-2">@ViewData["Title"]</h1>
+            <p class="font-label text-xs uppercase tracking-[0.2em] text-outline">Please check your email to confirm your account.</p>
+        </header>
+
+        <div class="space-y-10">
+            @if (Model.DisplayConfirmAccountLink)
+            {
+                <div class="p-6 bg-tertiary-container text-on-tertiary-container border-l-4 border-tertiary">
+                    <p class="font-body text-sm leading-relaxed">
+                        This app does not currently have a real email sender registered. 
+                        In a production app, the link below would be sent via email to <strong>@Model.Email</strong>.
+                    </p>
+                    <div class="mt-8">
+                        <a id="confirm-link" href="@Model.EmailConfirmationUrl" 
+                           class="inline-block py-4 px-8 bg-on-tertiary-container text-tertiary-container font-headline text-sm font-bold tracking-tight hover:bg-black transition-colors duration-300">
+                            CONFIRM ACCOUNT NOW
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="py-8 border-t border-b border-outline-variant/10">
+                    <p class="font-body text-lg text-on-surface-variant leading-relaxed">
+                        A confirmation email has been sent to <strong class="text-on-surface">@Model.Email</strong>. 
+                        Please check your inbox and follow the instructions to complete your registration.
+                    </p>
+                </div>
+                
+                <div class="mt-8 flex flex-col space-y-4">
+                    <p class="font-label text-[10px] uppercase tracking-[0.1rem] text-outline">Didn't receive the email?</p>
+                    <a asp-page="./ResendEmailConfirmation" class="font-label text-[10px] uppercase tracking-[0.1rem] text-on-surface font-bold hover:text-tertiary transition-colors">
+                        Resend email confirmation
+                    </a>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

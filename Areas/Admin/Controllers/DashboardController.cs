@@ -7,12 +7,12 @@ namespace LuxRentals.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Authorize(Roles = "Admin")]
-public class AdminProfileController : Controller
+public class DashboardController : Controller
 {
     private readonly UserRepo _userRepo;
     private readonly RoleRepo _roleRepo;
 
-    public AdminProfileController(UserRepo userRepo, RoleRepo roleRepo)
+    public DashboardController(UserRepo userRepo, RoleRepo roleRepo)
     {
         _userRepo = userRepo;
         _roleRepo = roleRepo;

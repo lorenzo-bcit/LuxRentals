@@ -1,4 +1,4 @@
-﻿using LuxRentals.Repositories.Bookings;
+using LuxRentals.Repositories.Bookings;
 using LuxRentals.Repositories.Cars;
 using LuxRentals.Services.Payment;
 using LuxRentals.Utils;
@@ -191,6 +191,7 @@ namespace LuxRentals.Controllers.Booking
         }
 
         // Show cancellation info (no validation necessary)
+        [Authorize(Roles = "Customer,Admin,Employee")]
         [HttpGet]
         public async Task<IActionResult> Cancel(int id, int? returnCarId)
         {
@@ -260,6 +261,7 @@ namespace LuxRentals.Controllers.Booking
         }
 
         // Cancels booking
+        [Authorize(Roles = "Customer,Admin,Employee")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelConfirmed(int bookingId, int? returnCarId)
