@@ -8,14 +8,14 @@
     <!-- Header -->
     <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-12">
         <div class="max-w-xl">
-            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Personal Information</span>
-            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Client Dossier</h1>
-            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Comprehensive profile data and credentials for @Model.FirstName @Model.LastName.</p>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Profile</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Profile Details</h1>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">Profile details for @Model.FirstName @Model.LastName.</p>
         </div>
         <div class="text-right">
              <div class="flex items-center gap-3 text-secondary justify-end mb-2">
                 <span class="material-symbols-outlined text-sm">verified</span>
-                <span class="font-label text-[10px] font-bold uppercase tracking-widest">Verified Identity</span>
+                <span class="font-label text-[10px] font-bold uppercase tracking-widest">Verified</span>
             </div>
         </div>
     </div>
@@ -42,7 +42,7 @@
                      <span class="material-symbols-outlined text-5xl text-on-surface-variant">person</span>
                 </div>
                 <h2 class="font-headline text-2xl font-black uppercase tracking-tight mb-2">@Model.FirstName @Model.LastName</h2>
-                <span class="font-label text-[10px] uppercase tracking-[0.2rem] text-secondary font-bold block mb-8">Executive Client</span>
+                <span class="font-label text-[10px] uppercase tracking-[0.2rem] text-secondary font-bold block mb-8">Customer</span>
                 
                 <div class="pt-8 border-t border-outline-variant/20 flex flex-col gap-4">
                      @if (isAdmin)
@@ -58,7 +58,7 @@
                         </a>
                      }
                      <a asp-action="Edit" asp-route-id="@Model.PkCustomerId" class="block w-full bg-black text-white text-center py-4 font-label text-[10px] font-bold uppercase tracking-[0.2rem] hover:bg-secondary transition-colors shadow-2xl">
-                        Modify Profile
+                        Edit Profile
                     </a>
                 </div>
             </div>
@@ -69,7 +69,7 @@
             <div class="bg-surface-container-lowest p-12 border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.06)]">
                 <h3 class="font-label text-xs font-black uppercase tracking-[0.4rem] text-on-surface-variant mb-12 flex items-center gap-6">
                     <span class="w-12 h-px bg-on-surface/20"></span>
-                    Identity Specifications
+                    Details
                 </h3>
 
                 <div class="space-y-10">

@@ -37,8 +37,8 @@
     <!-- Page Title & Stats -->
     <div class="flex justify-between items-end mb-12 border-b border-outline-variant/20 pb-8">
         <div>
-            <span class="font-label text-[10px] tracking-[0.3rem] uppercase text-secondary mb-2 block">Premium Selection</span>
-            <h1 class="font-headline text-4xl md:text-5xl font-black tracking-tighter uppercase">Fleet Inventory</h1>
+            <span class="font-label text-[10px] tracking-[0.3rem] uppercase text-secondary mb-2 block">Selection</span>
+            <h1 class="font-headline text-4xl md:text-5xl font-black tracking-tighter uppercase">Vehicles</h1>
         </div>
         <div class="text-right">
             <span class="font-label text-[10px] tracking-widest uppercase text-on-surface-variant">Available Vehicles</span>
@@ -47,7 +47,7 @@
 
     <form method="get" asp-action="Index" autocomplete="off" class="flex flex-col lg:flex-row gap-16">
         <!-- Sidebar Filters -->
-        <aside class="w-full lg:w-72 flex-shrink-0 space-y-12">
+        <aside class="w-full lg:w-72 shrink-0 space-y-12">
 
             <!-- Dates & Sort -->
             <div class="space-y-6">
@@ -161,14 +161,14 @@
         </aside>
 
         <!-- Vehicle Grid -->
-        <div class="flex-grow">
+        <div class="grow">
             @if (Model.Cars.Count == 0)
             {
                 <div class="bg-surface-container-high p-12 text-center border border-outline-variant/20">
                     <span class="material-symbols-outlined text-6xl text-secondary mb-4">no_crash</span>
                     <h3 class="font-headline text-2xl font-bold mb-2">No Vehicles Found</h3>
                     <p class="font-label text-sm text-on-surface-variant max-w-md mx-auto">@Model.EmptyStateMessage</p>
-                    <a asp-action="Index" class="mt-8 bg-black text-white px-8 py-3 uppercase tracking-widest text-[10px] font-bold shadow-xl inline-block hover:bg-secondary transition-colors">Reset Criteria</a>
+                    <a asp-action="Index" class="mt-8 bg-black text-white px-8 py-3 uppercase tracking-widest text-[10px] font-bold shadow-xl inline-block hover:bg-secondary transition-colors">Reset Filters</a>
                 </div>
             }
             else
@@ -188,8 +188,8 @@
                                 </div>
                             </div>
                             <!-- Card Content - Grows to push button down -->
-                            <div class="p-8 flex flex-col flex-grow">
-                                <div class="mb-6 flex-grow">
+                            <div class="p-8 flex flex-col grow">
+                                <div class="mb-6 grow">
                                     <span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-1 block">@car.Subtitle</span>
                                     <h3 class="font-headline text-2xl font-bold tracking-tight">@car.Title</h3>
                                 </div>

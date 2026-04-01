@@ -7,14 +7,14 @@
     <!-- Header -->
     <div class="mb-16 border-b border-outline-variant/20 pb-12 flex flex-col md:flex-row justify-between items-end gap-12">
         <div class="max-w-xl">
-            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Enterprise Management</span>
-            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Customer Registry</h1>
-            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">A specialized ledger of verified executive clients and their validated credentials.</p>
+            <span class="font-label text-[10px] tracking-[0.4rem] uppercase text-secondary mb-2 block">Management</span>
+            <h1 class="font-headline text-5xl font-black tracking-tighter uppercase mb-6">Customers</h1>
+            <p class="font-body text-[10px] text-on-surface-variant uppercase tracking-widest leading-loose">List of all verified customers and their profiles.</p>
         </div>
         <div class="text-right">
              <div class="flex items-center gap-3 text-secondary justify-end mb-2">
                 <span class="material-symbols-outlined text-sm">person_check</span>
-                <span class="font-label text-[10px] font-bold uppercase tracking-widest">Client Dossiers Only</span>
+                <span class="font-label text-[10px] font-bold uppercase tracking-widest">Verified Profiles Only</span>
             </div>
         </div>
     </div>
@@ -32,9 +32,9 @@
         <table class="w-full text-left font-body text-xs border-collapse">
             <thead>
                 <tr class="border-b border-outline-variant/20 bg-surface-container-low/30 font-label text-[10px] font-black uppercase tracking-widest text-on-surface-variant">
-                    <th class="py-8 px-10">Client Identity</th>
+                    <th class="py-8 px-10">Customer Name</th>
                     <th class="py-8 px-10">Verification</th>
-                    <th class="py-8 px-10">Personal Information</th>
+                    <th class="py-8 px-10">Contact Info</th>
                     <th class="py-8 px-10 text-right">Actions</th>
                 </tr>
             </thead>
@@ -71,11 +71,11 @@
                             </td>
                             <td class="py-8 px-10 text-right">
                                 <div class="flex justify-end gap-4">
-                                    <a asp-action="Edit" asp-route-id="@customer.PkCustomerId" class="inline-flex items-center justify-center py-3 px-6 border border-on-surface/20 text-on-surface font-label text-[9px] font-bold uppercase tracking-widest hover:bg-on-surface hover:text-white transition-all" title="Modify dossier">
-                                        Modify
+                                    <a asp-action="Edit" asp-route-id="@customer.PkCustomerId" class="inline-flex items-center justify-center py-3 px-6 border border-on-surface/20 text-on-surface font-label text-[9px] font-bold uppercase tracking-widest hover:bg-on-surface hover:text-white transition-all" title="Edit Profile">
+                                        Edit
                                     </a>
-                                    <a asp-action="Details" asp-route-id="@customer.Email" class="inline-flex items-center justify-center py-3 px-6 bg-black text-white font-label text-[9px] font-bold uppercase tracking-widest hover:bg-secondary transition-all" title="View details">
-                                        Inspect
+                                    <a asp-action="Details" asp-route-id="@customer.Email" class="inline-flex items-center justify-center py-3 px-6 bg-black text-white font-label text-[9px] font-bold uppercase tracking-widest hover:bg-secondary transition-all" title="View Details">
+                                        Details
                                     </a>
                                 </div>
                             </td>
@@ -86,7 +86,7 @@
                 {
                     <tr>
                         <td colspan="4" class="py-24 text-center">
-                            <span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">No client dossiers identified in system.</span>
+                            <span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">No customers found.</span>
                         </td>
                     </tr>
                 }
