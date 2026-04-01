@@ -12,7 +12,7 @@ public class CarsController : Controller
     private const int DEFAULT_BOOKING_WINDOW_DAYS = 7;
     private const int MAX_SELECTABLE_SEATS = 10;
     private const int MAX_SELECTABLE_LUGGAGE = 10;
-    private const decimal MAX_SELECTABLE_RATE = 500m;
+    private const decimal MAX_SELECTABLE_RATE = 1000m;
 
     private readonly ICarService _carService;
 
