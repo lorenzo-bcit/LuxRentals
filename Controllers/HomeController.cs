@@ -21,4 +21,11 @@ public class HomeController : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+
+    [Route("Home/StatusCode")]
+    public IActionResult StatusCodePage(int code)
+    {
+        Response.StatusCode = code;
+        return View("StatusCode", code);
+    }
 }
