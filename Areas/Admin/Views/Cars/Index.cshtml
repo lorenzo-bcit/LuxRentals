@@ -18,9 +18,9 @@
                  <span class="font-headline text-2xl font-black italic">@Model.TotalCount Vehicles</span>
             </div>
             <div class="flex gap-4">
-                <a class="border border-on-surface/20 text-on-surface text-center py-4 px-8 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all" asp-area="Admin" asp-controller="Makes" asp-action="Index">Makes</a>
-                <a class="border border-on-surface/20 text-on-surface text-center py-4 px-8 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index">Classes</a>
-                <a class="bg-black text-white text-center py-4 px-10 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-2xl" asp-area="Admin" asp-controller="Cars" asp-action="Create">Add New</a>
+                <a class="flex items-center justify-center border border-on-surface/20 text-on-surface py-4 px-8 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all" asp-area="Admin" asp-controller="Makes" asp-action="Index">Makes</a>
+                <a class="flex items-center justify-center border border-on-surface/20 text-on-surface py-4 px-8 font-label text-[10px] font-bold uppercase tracking-widest hover:border-on-surface transition-all" asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index">Classes</a>
+                <a class="flex items-center justify-center bg-black text-white py-4 px-10 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-2xl" asp-area="Admin" asp-controller="Cars" asp-action="Create">Add New</a>
             </div>
         </div>
     </div>
@@ -42,7 +42,7 @@
              <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                  <div class="space-y-2">
                     <label asp-for="SearchTerm" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Search Identifier</label>
-                    <input asp-for="SearchTerm" class="ghost-input w-full uppercase tracking-widest text-xs" placeholder="PLATE, VIN, OR MODEL" />
+                    <input asp-for="SearchTerm" class="ghost-input w-full tracking-widest text-xs" placeholder="PLATE, VIN, OR MODEL" />
                  </div>
 
                  <div class="space-y-2">
@@ -74,7 +74,7 @@
                  </div>
 
                  <div class="lg:col-span-2 flex items-end gap-4 pt-4 lg:pt-0">
-                    <button type="submit" class="flex-grow bg-black text-white text-center py-4 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-xl">Apply Criteria</button>
+                    <button type="submit" class="flex-grow flex items-center justify-center bg-black text-white py-4 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-colors shadow-xl">Apply Criteria</button>
                     <a asp-action="Index" class="border border-on-surface p-4 flex items-center justify-center hover:bg-on-surface hover:text-white transition-all">
                         <span class="material-symbols-outlined text-sm">restart_alt</span>
                     </a>
