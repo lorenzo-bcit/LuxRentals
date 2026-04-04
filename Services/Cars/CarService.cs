@@ -439,7 +439,7 @@ public class CarService : ICarService
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogWarning(ex, "Car-related save operation failed: {Message}", successMessage);
+            _logger.LogWarning(ex, "Car-related save operation failed due to a database constraint.");
             return SaveResult.Fail(string.Empty, "Save failed due to a database constraint. Please refresh and try again.");
         }
     }
