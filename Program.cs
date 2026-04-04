@@ -44,7 +44,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 // Bind external service options from configuration.
 builder.Services.Configure<PaypalOptions>(
-    builder.Configuration.GetSection("PAYPAL")
+    builder.Configuration.GetSection("Paypal")
 );
 
 builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>();
