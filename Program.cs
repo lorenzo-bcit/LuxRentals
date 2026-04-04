@@ -18,6 +18,7 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load local .env values before reading connection strings or binding options.
 builder.Configuration.AddDotNetEnv();
 builder.Services.AddSession();
 
@@ -28,6 +29,7 @@ builder.Services.AddDbContext<LuxRentalsDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Identity uses confirmed email before sign-in and supports role-based authorization.
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LuxRentalsDbContext>();
@@ -40,21 +42,17 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.AllowedForNewUsers = true;
 });
 
-// Load .env into builder.Configuration
-builder.Configuration.AddDotNetEnv();
-
-// Bind PaypalOptions from configuration (.env variables)
+// Bind external service options from configuration.
 builder.Services.Configure<PaypalOptions>(
     builder.Configuration.GetSection("PAYPAL")
 );
 
-// Register PayPal service
 builder.Services.AddHttpClient<IPaymentService, PayPalPaymentService>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// Repositories
+// Repository registrations
 builder.Services.AddScoped<RoleRepo>();
 builder.Services.AddScoped<UserRepo>();
 builder.Services.AddScoped<UserRoleRepo>();
@@ -62,7 +60,7 @@ builder.Services.AddScoped<BookingRepo>();
 builder.Services.AddScoped<ProfileRepo>();
 builder.Services.AddScoped<ICarRepository, CarRepository>();
 
-// Services
+// Domain and infrastructure services
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<ICarImageStorage, CarImageStorage>();
 
@@ -77,7 +75,7 @@ builder.Services.AddHttpClient<IReCaptchaService, ReCaptchaService>(client =>
 });
 builder.Services.AddHostedService<BookingCleanupService>();
 
-// Configure email
+// Email settings are required at startup because Identity confirmation and reset flows depend on them.
 var emailOptions = builder.Configuration
     .GetSection("Email")
     .Get<EmailOptions>() ?? throw new InvalidOperationException("Email configuration missing");
@@ -102,6 +100,9 @@ var bootstrapOptions = app.Services.GetRequiredService<IOptions<BootstrapOptions
 var shouldApplyMigrations = app.Environment.IsDevelopment() || bootstrapOptions.AutoApplyMigrations;
 var shouldSeedDemoData = app.Environment.IsDevelopment() || bootstrapOptions.EnableDemoData;
 
+// Startup bootstrap runs in two layers:
+// 1. Optional environment/config-driven work such as migrations and demo fleet seeding.
+// 2. Always-on baseline seeding for statuses, lookups, and the first admin account.
 if (shouldApplyMigrations)
 {
     await app.ApplyPendingMigrationsAsync();
@@ -123,10 +124,12 @@ await app.EnsureBookingStatusSeededAsync();
 await app.EnsureCoreCarLookupsSeededAsync();
 await app.EnsureAdminSeededAsync();
 
+// Session is required for the booking -> checkout handoff.
 app.UseSession();
 
 app.UseStatusCodePagesWithReExecute("/Home/StatusCode", "?code={0}");
 
+// Standard ASP.NET Core middleware pipeline.
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
