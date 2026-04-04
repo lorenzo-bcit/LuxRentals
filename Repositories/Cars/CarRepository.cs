@@ -10,7 +10,9 @@ public class CarRepository : ICarRepository
     private readonly LuxRentalsDbContext _db;
     public CarRepository(LuxRentalsDbContext db) => _db = db;
 
+    // ------------------------------------------------------------
     // Cars
+    // ------------------------------------------------------------
     public Task<PagedList<Car>> SearchAsync(CarSearchCriteria criteria)
     {
         var cars = BuildBaseQuery();
@@ -168,6 +170,8 @@ public class CarRepository : ICarRepository
             .OrderBy(b => b.StartDateTime)
             .ToListAsync();
 
+    // "Active or upcoming" intentionally includes cars whose booking already started but has not yet
+    // ended. The filter keys off end date only so in-progress reservations still count as occupied.
     private IQueryable<Booking> BuildActiveOrUpcomingBookingsQuery()
     {
         var bookingToday = BookingClock.Today();
@@ -181,7 +185,9 @@ public class CarRepository : ICarRepository
 
     public void Remove(Car car) => _db.Cars.Remove(car);
 
+    // ------------------------------------------------------------
     // Lookup data
+    // ------------------------------------------------------------
     public Task<List<FuelType>> GetFuelTypesAsync() =>
         _db.FuelTypes
             .AsNoTracking()
@@ -209,7 +215,9 @@ public class CarRepository : ICarRepository
             .FirstOrDefaultAsync();
     }
 
+    // ------------------------------------------------------------
     // Makes
+    // ------------------------------------------------------------
     public Task<List<Make>> GetMakesAsync() =>
         _db.Makes
             .AsNoTracking()
@@ -236,7 +244,9 @@ public class CarRepository : ICarRepository
 
     public void RemoveMake(Make make) => _db.Makes.Remove(make);
 
+    // ------------------------------------------------------------
     // Models
+    // ------------------------------------------------------------
     public Task<List<Model>> GetModelsAsync(int? makeId = null)
     {
         var q = _db.Models
@@ -270,7 +280,9 @@ public class CarRepository : ICarRepository
 
     public void RemoveModel(Model model) => _db.Models.Remove(model);
 
+    // ------------------------------------------------------------
     // Vehicle classes
+    // ------------------------------------------------------------
     public Task<VehicleClass?> GetVehicleClassByIdAsync(int id) =>
         _db.VehicleClasses.FirstOrDefaultAsync(x => x.PkVehicleClassId == id);
 
