@@ -59,6 +59,14 @@ Default local URLs from `Properties/launchSettings.json`:
 - `http://localhost:5007`
 - `https://localhost:7025`
 
+## Hosted Demo
+
+- Public demo: `https://luxrentals.162-221-207-195.sslip.io/`
+- The hosted deployment is intended for public and customer-facing flows such as browsing, registration, sign-in, booking, and checkout.
+- The app is deployed as a Dockerized stack behind a Traefik reverse proxy and managed with Portainer.
+- GitHub Actions publishes the Docker image to GHCR, and Portainer pulls it for one-click updates.
+- Admin access is not documented in this README for the public deployment.
+
 ## Startup Behavior
 
 - In `Development`, pending EF Core migrations and demo fleet seeding run automatically.
