@@ -1,42 +1,46 @@
 # LuxRentals
 
-ASP.NET Core MVC car-rental application with:
+ASP.NET Core MVC luxury car-rental app with Identity, EF Core, SQL Server, reCAPTCHA, SMTP email confirmation, and PayPal checkout.
 
-- ASP.NET Core Identity authentication and roles
-- Entity Framework Core with SQL Server
-- Google reCAPTCHA on registration
-- PayPal checkout flow
-- Email confirmation for new accounts
+## Core Workflows
 
-## Prerequisites
+- Public users can browse a luxury fleet and filter by booking dates, make, vehicle class, fuel type, transmission, seats, luggage capacity, and daily rate.
+- Registration uses reCAPTCHA, creates both an Identity account and a linked `Customer` record, and assigns the new user to the `Customer` role.
+- Sign-in requires confirmed email.
+- Customers can maintain their profile, create bookings, complete checkout through PayPal, view their bookings, and cancel eligible bookings.
+- Admins can view the dashboard, manage fleet data, manage makes/models/vehicle classes, manage roles, and assign or remove user roles.
+- Admins can also review customer booking activity and cancel bookings on behalf of customers.
+
+## Important Rules
+
+- Booking dates are day-based. The app normalizes them to midnight UTC.
+- The booking calendar uses Vancouver local time via `Utils/BookingClock.cs`.
+- Earliest allowed pickup is tomorrow in the booking timezone.
+- Customers can only cancel more than 2 days before pickup; `Admin` bypasses this rule.
+- Public inventory only shows cars that are both `Available` (operationally) and free for the selected booking window.
+- Price is currently `dailyRate * numberOfDays`.
+- Booking checkout is validated on the server before capture: session order, customer, dates, and recalculated price must still match.
+
+## Configuration
+
+The app expects to load settings from a local `.env` file. Use the `.env.example` file in the repo root as the template.
+
+## Setup
+
+Prerequisites:
 
 - .NET 10 SDK
 - SQL Server
-- A `.env` file with valid secrets
+- Proper configuration via .env for database, external services, etc. (see `.env.example`)
 
-## Repository
+## Install
 
-GitHub remote configured in this repo:
-
-- `git@github.com:lorenzo-bcit/LuxRentals.git`
-
-## Secret Configuration
-
-The app loads secrets from a local `.env` file.
-
-Copy `.env.example` into `.env` in the project root and define proper variables.
-
-## Database Setup
-
-Development startup applies pending EF Core migrations automatically.
-
-If you want to create or update the database manually:
-
-```bash
-dotnet ef database update
-```
-
-## Run The App
+1. Get the project onto your machine by cloning the repository or downloading/copying the project folder.
+2. Open a terminal in the `LuxRentals` folder.
+3. Copy `.env.example` to `.env`.
+4. Edit `.env` and replace placeholders with real values.
+5. Make sure `ConnectionStrings__DefaultConnection` points to a reachable SQL Server database.
+6. Run:
 
 ```bash
 dotnet restore
@@ -44,36 +48,51 @@ dotnet build
 dotnet run
 ```
 
-Then open the local URL shown in the terminal.
+On first startup in `Development`, the app applies pending migrations automatically and seeds the required lookup data. If you are not running in `Development`, either enable `Bootstrap__AutoApplyMigrations=true` or run:
 
-## Identity And Roles
+```bash
+dotnet ef database update
+```
 
-- Registration requires email confirmation before sign-in.
+Default local URLs from `Properties/launchSettings.json`:
+
+- `http://localhost:5007`
+- `https://localhost:7025`
+
+## Startup Behavior
+
+- In `Development`, pending EF Core migrations and demo fleet seeding run automatically.
+- Outside `Development`, those only run when `Bootstrap:AutoApplyMigrations` or `Bootstrap:EnableDemoData` are enabled.
+- Booking statuses, fuel types, car statuses, and core lookup data are always seeded if missing.
+- Demo fleet data is optional outside `Development`.
+- The admin user is only seeded when both `Bootstrap:AdminEmail` and `Bootstrap:AdminPassword` are provided and no existing admin already exists.
+
+## Initial Identity Role Setup
+
 - New registrations are assigned the `Customer` role automatically.
-- Admin-only role management is available in the app.
+- On startup, the app ensures the `Admin` role exists.
+- On startup, the app also creates the first admin user if:
+  - `Bootstrap__AdminEmail` and `Bootstrap__AdminPassword` are set in `.env`
+  - there is not already a user in the `Admin` role
+- The seeded admin account is marked `EmailConfirmed = true`, so it can sign in immediately.
 
-### Default Admin Account
+Example first admin login:
 
-In `Development`, the app seeds one admin account on startup if no admin exists:
+- Email: value of `Bootstrap__AdminEmail`
+- Password: value of `Bootstrap__AdminPassword`
 
-- Email: `admin@example.com`
-- Password: `Admin123!`
+## Repo Layout
 
-This comes from `Data/Seeders/AdminSeeder.cs`.
-
-## Core User Flows
-
-- Public users can browse the landing page and vehicle inventory.
-- Customers can register, confirm email, log in, create bookings, pay with PayPal, and view/cancel bookings.
-- Admins can manage cars, roles, and user-role assignments.
-
-## Project Structure
-
-- `Program.cs`: service registration and app startup
-- `Data/`: EF Core context, migrations, and seeders
-- `Areas/Identity/`: login and registration pages
-- `Areas/Admin/`: admin car-management area
-- `Controllers/`: public MVC controllers
-- `Repositories/`: data-access logic
-- `Services/`: payment, email, captcha, and other services
-- `ViewModels/`: view models used by MVC/Razor pages
+- `Program.cs`: startup and configuration
+- `Data/`: EF Core context, migrations, seeders
+- `Areas/Identity/`: auth pages
+- `Areas/Admin/`: admin controllers and views
+- `Controllers/`: browse, booking, payment, profile flows
+- `Repositories/`: data access
+- `Services/`: payment, email, reCAPTCHA, cleanup, image storage
+- `Views/`: public MVC views
+- `ViewModels/`: view models for MVC and Razor Pages
+- `Utils/`: shared helper utilities
+- `Styles/`: source styles for Tailwind build input
+- `wwwroot/`: static assets, compiled CSS, JS, demo images, uploaded files
+- `Properties/`: local launch settings
