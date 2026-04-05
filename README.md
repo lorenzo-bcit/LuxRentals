@@ -73,6 +73,7 @@ Default local URLs from `Properties/launchSettings.json`:
 - Outside `Development`, those only run when `Bootstrap:AutoApplyMigrations` or `Bootstrap:EnableDemoData` are enabled.
 - Booking statuses, fuel types, car statuses, and core lookup data are always seeded if missing.
 - Demo fleet data is optional outside `Development`.
+- All demo car images used by the seeded demo fleet are sourced from `https://www.netcarshow.com/`.
 - The admin user is only seeded when both `Bootstrap:AdminEmail` and `Bootstrap:AdminPassword` are provided and no existing admin already exists.
 
 ## Initial Identity Role Setup
