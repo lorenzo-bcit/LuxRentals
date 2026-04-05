@@ -1,7 +1,6 @@
 @model LuxRentals.ViewModels.Cars.Admin.CarEditVm
 
 @{
-    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
     var hasBookings = Model.LockBookedCarFields;
     var lockedFieldsetState = hasBookings ? "disabled" : null;
 }
@@ -47,15 +46,6 @@
             <label asp-for="FkModelId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Manufacturer Model</label>
             <select asp-for="FkModelId" asp-items="Model.ModelOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
             <span asp-validation-for="FkModelId" class="text-error text-[9px] uppercase font-bold"></span>
-            @if (!hasBookings)
-            {
-                <div class="pt-2 flex items-center gap-2">
-                    <span class="text-[9px] text-on-surface-variant uppercase tracking-tighter italic">Archive missing?</span>
-                    <a asp-area="Admin" asp-controller="Makes" asp-action="Index" asp-route-returnUrl="@returnUrl" class="text-[9px] text-secondary font-bold uppercase tracking-widest hover:underline">Marques</a>
-                    <span class="text-[9px] text-on-surface-variant">/</span>
-                    <a asp-area="Admin" asp-controller="Models" asp-action="Index" asp-route-returnUrl="@returnUrl" class="text-[9px] text-secondary font-bold uppercase tracking-widest hover:underline">Models</a>
-                </div>
-            }
         </div>
 
         <div class="space-y-2">
@@ -68,12 +58,6 @@
             <label asp-for="FkVehicleClassId" class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant block">Asset Category</label>
             <select asp-for="FkVehicleClassId" asp-items="Model.VehicleClassOptions" class="ghost-input w-full uppercase tracking-widest text-xs cursor-pointer"></select>
             <span asp-validation-for="FkVehicleClassId" class="text-error text-[9px] uppercase font-bold"></span>
-            @if (!hasBookings)
-            {
-                <div class="pt-2">
-                    <a asp-area="Admin" asp-controller="VehicleClasses" asp-action="Index" asp-route-returnUrl="@returnUrl" class="text-[9px] text-secondary font-bold uppercase tracking-widest hover:underline italic">Segment missing? Register class here.</a>
-                </div>
-            }
         </div>
 
         <div class="space-y-2">
