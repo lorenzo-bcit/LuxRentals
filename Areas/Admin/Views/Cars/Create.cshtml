@@ -20,6 +20,15 @@
         </div>
     </div>
 
+    @if (TempData["StatusMessage"] is string statusMessage)
+    {
+        <div class="mb-12 p-6 bg-secondary-container/10 border-l-4 border-secondary text-secondary text-xs uppercase tracking-widest font-bold" role="alert">@statusMessage</div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="mb-12 p-6 bg-error-container/10 border-l-4 border-error text-error text-xs uppercase tracking-widest font-bold" role="alert">@errorMessage</div>
+    }
+
     <!-- Inventory Workspace -->
     <div class="bg-surface-container-lowest p-10 md:p-16 border border-outline-variant/10 shadow-[0_45px_100px_rgba(0,0,0,0.08)] relative overflow-hidden">
         <div class="absolute top-0 right-0 w-96 h-96 bg-secondary/5 rounded-bl-full transform translate-x-32 -translate-y-32"></div>
