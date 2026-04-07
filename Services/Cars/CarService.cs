@@ -12,11 +12,13 @@ public class CarService : ICarService
 
     private readonly ICarRepository _repo;
     private readonly ICarImageStorage _carImageStorage;
+    private readonly ILogger<CarService> _logger;
 
-    public CarService(ICarRepository repo, ICarImageStorage carImageStorage)
+    public CarService(ICarRepository repo, ICarImageStorage carImageStorage, ILogger<CarService> logger)
     {
         _repo = repo;
         _carImageStorage = carImageStorage;
+        _logger = logger;
     }
 
     public Task<PagedList<Car>> SearchAsync(CarSearchCriteria criteria) => _repo.SearchAsync(criteria);
@@ -42,7 +44,13 @@ public class CarService : ICarService
         {
             uploadedThumbnailPath = await _carImageStorage.SaveNewAsync(vm.ImageFile);
             if (uploadedThumbnailPath is null)
+            {
+                _logger.LogWarning(
+                    "Car creation aborted because image upload failed for VIN {Vin} and plate {Plate}.",
+                    vm.VinNumber,
+                    vm.LicencePlate);
                 return SaveResult.Fail(nameof(CarEditVm.ImageFile), IMAGE_UPLOAD_FAILED_MESSAGE);
+            }
 
             car.CarThumbnail = uploadedThumbnailPath;
         }
@@ -56,11 +64,16 @@ public class CarService : ICarService
         return result;
     }
 
+    // Once a car has active or upcoming bookings, edits must not change the terms or identity of
+    // those reservations. Only operational status is allowed to toggle between Available and Booking Hold.
     public async Task<SaveResult> UpdateAsync(int id, CarEditVm vm)
     {
         var existing = await _repo.GetByIdAsync(id);
         if (existing is null)
+        {
+            _logger.LogWarning("Attempted to update car {CarId}, but it was not found.", id);
             return SaveResult.Fail("", $"Car {id} was not found.");
+        }
 
         var errors = await ValidateAsync(vm, id);
 
@@ -72,6 +85,10 @@ public class CarService : ICarService
         {
             if (HasLockedFieldChanges(vm, existing))
             {
+                _logger.LogWarning(
+                    "Blocked update for car {CarId} ({Vin}) because locked fields changed while bookings are active or upcoming.",
+                    existing.PkCarId,
+                    existing.VinNumber);
                 return SaveResult.Fail(
                     string.Empty,
                     $"Car {existing.VinNumber} has active or upcoming bookings. Resolve those bookings before changing car details.");
@@ -92,6 +109,10 @@ public class CarService : ICarService
             uploadedThumbnailPath = await _carImageStorage.SaveNewAsync(vm.ImageFile);
             if (uploadedThumbnailPath is null)
             {
+                _logger.LogWarning(
+                    "Car update aborted because image upload failed for car {CarId} ({Vin}).",
+                    existing.PkCarId,
+                    existing.VinNumber);
                 existing.CarThumbnail = previousThumbnailPath;
                 return SaveResult.Fail(nameof(CarEditVm.ImageFile), IMAGE_UPLOAD_FAILED_MESSAGE);
             }
@@ -118,15 +139,25 @@ public class CarService : ICarService
         return result;
     }
 
+    // Cars with historical bookings are preserved for referential integrity. If history exists, the
+    // delete action decommissions the car by marking it Out of Service instead of removing the row.
     public async Task<SaveResult> DeleteAsync(int id)
     {
         var existing = await _repo.GetByIdAsync(id);
         if (existing is null)
+        {
+            _logger.LogWarning("Attempted to delete car {CarId}, but it was not found.", id);
             return SaveResult.Fail("", $"Car {id} was not found.");
+        }
 
         var activeOrUpcomingBookingCount = await _repo.CountActiveOrUpcomingBookingsAsync(id);
         if (activeOrUpcomingBookingCount > 0)
         {
+            _logger.LogWarning(
+                "Blocked delete for car {CarId} ({Vin}) because {BookingCount} active or upcoming bookings still exist.",
+                existing.PkCarId,
+                existing.VinNumber,
+                activeOrUpcomingBookingCount);
             return SaveResult.Fail(
                 string.Empty,
                 $"Car {existing.VinNumber} has active or upcoming bookings. Resolve them before deleting it.");
@@ -136,9 +167,19 @@ public class CarService : ICarService
         {
             var outOfServiceStatusId = await _repo.GetCarStatusIdByNameAsync(CarStatusNames.OUT_OF_SERVICE);
             if (outOfServiceStatusId is null)
+            {
+                _logger.LogError(
+                    "Car {CarId} ({Vin}) has booking history but the Out of Service status is missing.",
+                    existing.PkCarId,
+                    existing.VinNumber);
                 return SaveResult.Fail("", "Out of Service status is missing. Seed car statuses and try again.");
+            }
 
             existing.FkCarStatusId = outOfServiceStatusId.Value;
+            _logger.LogInformation(
+                "Car {CarId} ({Vin}) has booking history and will be marked Out of Service instead of deleted.",
+                existing.PkCarId,
+                existing.VinNumber);
 
             return await TrySaveAsync($"Car {existing.VinNumber} has booking history, so it was marked Out of Service instead of being deleted.");
         }
@@ -153,14 +194,18 @@ public class CarService : ICarService
         return result;
     }
 
+    // ------------------------------------------------------------
     // Lookup data
+    // ------------------------------------------------------------
     public Task<List<FuelType>> GetFuelTypesAsync() => _repo.GetFuelTypesAsync();
 
     public Task<List<VehicleClass>> GetVehicleClassesAsync() => _repo.GetVehicleClassesAsync();
 
     public Task<List<CarStatus>> GetCarStatusesAsync() => _repo.GetCarStatusesAsync();
 
+    // ------------------------------------------------------------
     // Makes
+    // ------------------------------------------------------------
     public async Task<IReadOnlyList<MakeListItemVm>> GetMakeListAsync()
     {
         var makes = await _repo.GetMakesAsync();
@@ -229,7 +274,9 @@ public class CarService : ICarService
         return await TrySaveAsync("Make deleted.");
     }
 
+    // ------------------------------------------------------------
     // Models
+    // ------------------------------------------------------------
     public Task<List<Model>> GetModelsAsync(int? makeId = null) => _repo.GetModelsAsync(makeId);
 
     public async Task<IReadOnlyList<ModelListItemVm>> GetModelListAsync()
@@ -318,7 +365,9 @@ public class CarService : ICarService
         return await TrySaveAsync("Model deleted.");
     }
 
+    // ------------------------------------------------------------
     // Vehicle classes
+    // ------------------------------------------------------------
     public async Task<IReadOnlyList<VehicleClassListItemVm>> GetVehicleClassListAsync()
     {
         var vehicleClasses = await _repo.GetVehicleClassesAsync();
@@ -377,15 +426,20 @@ public class CarService : ICarService
         return await TrySaveAsync("Vehicle class deleted.");
     }
 
+    // ------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------
     private async Task<SaveResult> TrySaveAsync(string successMessage)
     {
         try
         {
             await _repo.SaveChangesAsync();
+            _logger.LogInformation("{Message}", successMessage);
             return SaveResult.Ok(successMessage);
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException ex)
         {
+            _logger.LogWarning(ex, "Car-related save operation failed due to a database constraint.");
             return SaveResult.Fail(string.Empty, "Save failed due to a database constraint. Please refresh and try again.");
         }
     }
@@ -405,6 +459,11 @@ public class CarService : ICarService
         return errors;
     }
 
+    // Booked cars are allowed to flip between customer-visible availability states, but not into
+    // maintenance or other statuses that would contradict already-accepted reservations. Booking
+    // hold is useful because it temporarily removes the car from new public bookings without
+    // invalidating reservations that already exist for that vehicle. This prevents the situation
+    // where a car is booked far into the future, which would otherwise block admin edits.
     private async Task<SaveResult> ValidateBookedCarStatusChangeAsync(int newStatusId, Car existing)
     {
         if (newStatusId == existing.FkCarStatusId)
@@ -415,6 +474,10 @@ public class CarService : ICarService
 
         if (availableStatusId is null || bookingHoldStatusId is null)
         {
+            _logger.LogError(
+                "Status validation for car {CarId} ({Vin}) failed because required statuses are missing.",
+                existing.PkCarId,
+                existing.VinNumber);
             return SaveResult.Fail(
                 string.Empty,
                 "Required car statuses are missing. Seed car statuses and try again.");
@@ -427,11 +490,19 @@ public class CarService : ICarService
         if (isAllowedTransition)
             return SaveResult.Ok(string.Empty);
 
+        _logger.LogWarning(
+            "Blocked status change for car {CarId} ({Vin}) from status {CurrentStatusId} to {NewStatusId} while bookings are active or upcoming.",
+            existing.PkCarId,
+            existing.VinNumber,
+            existing.FkCarStatusId,
+            newStatusId);
         return SaveResult.Fail(
             nameof(CarEditVm.FkCarStatusId),
             "While a car has active or upcoming bookings, status can only switch between Available and Booking Hold.");
     }
 
+    // These fields affect the identity, pricing, or characteristics a customer booked against, so
+    // they are treated as locked once a reservation exists for the car.
     private static bool HasLockedFieldChanges(CarEditVm vm, Car car) =>
         vm.Year != car.Year ||
         !string.Equals(vm.Colour, car.Colour, StringComparison.Ordinal) ||

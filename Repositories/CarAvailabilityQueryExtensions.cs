@@ -5,6 +5,9 @@ namespace LuxRentals.Repositories;
 
 public static class CarAvailabilityQueryExtensions
 {
+    // Public "bookable" availability is stricter than "no overlapping booking". The car must also
+    // currently be in the Available status, and the booking overlap test uses a half-open window:
+    // [start, end), so adjacent bookings that touch at the boundary are allowed.
     public static IQueryable<Car> WhereBookableForWindow(
         this IQueryable<Car> cars,
         IQueryable<Booking> bookings,

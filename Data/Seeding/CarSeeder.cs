@@ -47,6 +47,8 @@ public static class CarSeeder
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var inserted = 0;
+        // Demo fleet seeding is intentionally idempotent. VIN and plate uniqueness are treated as the
+        // durable identity for a seeded car, so existing records are left untouched on later startups.
         foreach (var seed in demoCars)
         {
             if (existingVins.Contains(seed.VinNumber) || existingPlates.Contains(seed.LicencePlate))
@@ -59,6 +61,10 @@ public static class CarSeeder
                 !carStatusIds.TryGetValue(seed.CarStatus, out var carStatusId) ||
                 !modelIds.TryGetValue(modelKey, out var modelId))
             {
+                logger.LogWarning(
+                    "Skipping demo car seed for VIN {Vin} and plate {Plate} because one or more lookup records could not be resolved.",
+                    seed.VinNumber,
+                    seed.LicencePlate);
                 continue;
             }
 

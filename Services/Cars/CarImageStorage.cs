@@ -77,6 +77,8 @@ public class CarImageStorage : ICarImageStorage
         }
     }
 
+    // Deletes only files that resolve inside the car uploads directory so an arbitrary relative path
+    // cannot be used to remove other content under wwwroot.
     public Task DeleteAsync(string? relativePath)
     {
         try
